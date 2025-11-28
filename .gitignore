@@ -1,0 +1,55 @@
+# Node modules
+node_modules/
+web/node_modules/
+
+# Build outputs
+web/dist/
+web/static/dist/
+*.js.map
+
+# Environment and secrets
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Config directory (contains runtime settings)
+config/
+!config/settings.env.example
+
+# Backup storage (contains large backup files)
+backups/
+!backups/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker
+.dockerignore
+
+# Testing
+coverage/
+.nyc_output/
+
+# Temporary files
+tmp/
+temp/
