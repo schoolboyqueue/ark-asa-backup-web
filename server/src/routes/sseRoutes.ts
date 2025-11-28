@@ -247,6 +247,109 @@ sseRouter.get('/api/disk-space', async (_httpRequest: Request, httpResponse: Res
 });
 
 // ============================================================================
+// Unified SSE Stream (single connection for multiple event types)
+// ============================================================================
+
+/**
+ * Unified SSE stream that emits server status, backups, health, and disk space updates.
+ * @route GET /api/stream
+ */
+sseRouter.get('/api/stream', async (_httpRequest: Request, httpResponse: Response) => {
+  const sendEvent = initializeSSEStream(httpResponse);
+  sendEvent('connected', { message: 'Unified stream connected' });
+
+  let isActive = true;
+  const timers: NodeJS.Timeout[] = [];
+
+  const cleanup = (): void => {
+    isActive = false;
+    timers.forEach(clearInterval);
+    console.log('Unified stream client disconnected');
+  };
+
+  setupSSECleanup(httpResponse, cleanup);
+
+  const startPolling = (fn: () => void, intervalMs: number): void => {
+    fn();
+    const timer = setInterval(() => {
+      if (!isActive) {
+        clearInterval(timer);
+        return;
+      }
+      fn();
+    }, intervalMs);
+    timers.push(timer);
+  };
+
+  let previousStatus: string | null = null;
+  startPolling(async () => {
+    try {
+      const currentStatus = await getContainerStatus();
+      if (!currentStatus) {
+        sendEvent('server-status-error', {
+          ok: false,
+          error: `container '${ARK_SERVER_CONTAINER_NAME}' not found`,
+        });
+        return;
+      }
+      if (currentStatus !== previousStatus) {
+        sendEvent('server-status', { ok: true, status: currentStatus });
+        previousStatus = currentStatus;
+      }
+    } catch (statusError) {
+      sendEvent('server-status-error', { ok: false, error: String(statusError) });
+    }
+  }, 2000);
+
+  let previousBackupsJson: string | null = null;
+  startPolling(async () => {
+    try {
+      const backupFiles = await listAvailableBackups();
+      const backupsJson = JSON.stringify(backupFiles);
+      if (backupsJson !== previousBackupsJson) {
+        sendEvent('backups', backupFiles);
+        previousBackupsJson = backupsJson;
+      }
+    } catch (backupsError) {
+      sendEvent('backups-error', { ok: false, error: String(backupsError) });
+    }
+  }, 3000);
+
+  let previousHealthJson: string | null = null;
+  startPolling(async () => {
+    try {
+      const healthStatus = getBackupHealthStatus(
+        isSchedulerActive(),
+        getLastSuccessfulBackupTime(),
+        getLastFailedBackupTime(),
+        getLastBackupError()
+      );
+      const healthJson = JSON.stringify(healthStatus);
+      if (healthJson !== previousHealthJson) {
+        sendEvent('backup-health', healthStatus);
+        previousHealthJson = healthJson;
+      }
+    } catch (healthError) {
+      sendEvent('backup-health-error', { ok: false, error: String(healthError) });
+    }
+  }, 5000);
+
+  let previousDiskJson: string | null = null;
+  startPolling(async () => {
+    try {
+      const diskSpaceInfo = await retrieveDiskSpaceInfo();
+      const diskJson = JSON.stringify(diskSpaceInfo);
+      if (diskJson !== previousDiskJson) {
+        sendEvent('disk-space', diskSpaceInfo);
+        previousDiskJson = diskJson;
+      }
+    } catch (diskSpaceError) {
+      sendEvent('disk-space-error', { ok: false, error: String(diskSpaceError) });
+    }
+  }, 10000);
+});
+
+// ============================================================================
 // Restore Operation with SSE Progress
 // ============================================================================
 

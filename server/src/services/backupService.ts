@@ -59,14 +59,6 @@ export async function saveBackupMetadata(
 }
 
 /**
- * Legacy function name for backward compatibility.
- * @deprecated Use saveBackupMetadata instead.
- */
-export async function saveBackupNotes(backupFileName: string, notes: string): Promise<void> {
-  await saveBackupMetadata(backupFileName, notes, []);
-}
-
-/**
  * Loads backup notes from a JSON metadata file if it exists.
  *
  * @param {string} backupFileName - Name of the backup archive file
@@ -241,7 +233,7 @@ export async function createBackup(
 
   // Save notes if provided
   if (notes && notes.trim()) {
-    await saveBackupNotes(backupArchiveName, notes.trim());
+    await saveBackupMetadata(backupArchiveName, notes, []);
   }
 
   // Verify backup integrity

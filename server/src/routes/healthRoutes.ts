@@ -23,7 +23,9 @@ const healthRouter = Router();
  * @route GET /health
  */
 healthRouter.get('/health', (_httpRequest: Request, httpResponse: Response) => {
+  console.log('[GET /health] Request received');
   httpResponse.status(200).send('OK');
+  console.log('[GET /health] Response sent');
 });
 
 /**
@@ -32,6 +34,7 @@ healthRouter.get('/health', (_httpRequest: Request, httpResponse: Response) => {
  * @route GET /api/backup/health
  */
 healthRouter.get('/api/backup/health', (_httpRequest: Request, httpResponse: Response) => {
+  console.log('[GET /api/backup/health] Request received');
   const healthStatus = getBackupHealthStatus(
     isSchedulerActive(),
     getLastSuccessfulBackupTime(),
@@ -39,7 +42,9 @@ healthRouter.get('/api/backup/health', (_httpRequest: Request, httpResponse: Res
     getLastBackupError()
   );
 
+  console.log('[GET /api/backup/health] Health status:', healthStatus);
   httpResponse.json(healthStatus);
+  console.log('[GET /api/backup/health] Response sent');
 });
 
 export default healthRouter;

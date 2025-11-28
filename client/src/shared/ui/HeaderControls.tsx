@@ -78,7 +78,7 @@ export default function HeaderControls({
       />
 
       {/* Server Controls - Consolidated server management and settings */}
-      <ServerControls />
+      <ServerControls serverStatus={serverStatus} />
 
       {/* Theme Switcher - Keep existing 3-button group */}
       <ButtonGroup size="sm" variant="flat">

@@ -18,7 +18,6 @@ import {
 } from '@heroui/react';
 import { Cog6ToothIcon, PlayCircleIcon, StopCircleIcon } from '@heroicons/react/24/solid';
 import {
-  useServerRepository,
   useServerControl,
   useUpdateSettings,
   useSettingsRepository,
@@ -27,24 +26,27 @@ import {
   MIN_BACKUPS_TO_KEEP,
   MAX_BACKUPS_TO_KEEP,
 } from '..';
-import { useBackupsRepository } from '../../backups/repository/useBackupsRepository';
+import type { Server } from '../domain/server';
 
 interface ServerControlsProps {
   /** Popover open state (controlled from parent for now) */
   isOpen?: boolean;
   /** Popover open state change callback */
   onOpenChange?: (open: boolean) => void;
+  /** Current server status (passed from parent to avoid duplicate SSE connections) */
+  serverStatus: Server | null;
 }
 
-export default function ServerControls({ isOpen, onOpenChange }: ServerControlsProps) {
-  const { server } = useServerRepository();
+export default function ServerControls({
+  isOpen,
+  onOpenChange,
+  serverStatus,
+}: ServerControlsProps) {
   const settingsRepo = useSettingsRepository();
-  const backupsRepo = useBackupsRepository();
   const serverControl = useServerControl();
   const updateSettings = useUpdateSettings({
     onSettingsUpdated: (newSettings) => {
       settingsRepo.updateLocalSettings(newSettings);
-      backupsRepo.refreshBackups();
     },
   });
 
@@ -60,7 +62,7 @@ export default function ServerControls({ isOpen, onOpenChange }: ServerControlsP
     onOpenChange?.(false);
   };
 
-  const isServerRunning = server?.isRunning || false;
+  const isServerRunning = serverStatus?.isRunning || false;
 
   return (
     <Popover isOpen={isOpen} onOpenChange={onOpenChange} placement="bottom">

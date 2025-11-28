@@ -19,8 +19,16 @@ const settingsRouter = Router();
  * @route GET /api/settings
  */
 settingsRouter.get('/api/settings', async (_httpRequest: Request, httpResponse: Response) => {
-  const currentSettings = await loadBackupSettings();
-  httpResponse.json(currentSettings);
+  console.log('[GET /api/settings] Request received');
+  try {
+    const currentSettings = await loadBackupSettings();
+    console.log('[GET /api/settings] Settings loaded:', currentSettings);
+    httpResponse.json(currentSettings);
+    console.log('[GET /api/settings] Response sent successfully');
+  } catch (error) {
+    console.error('[GET /api/settings] Error:', error);
+    httpResponse.status(500).json({ ok: false, error: 'Failed to load settings' });
+  }
 });
 
 /**
@@ -29,18 +37,36 @@ settingsRouter.get('/api/settings', async (_httpRequest: Request, httpResponse: 
  * @route POST /api/settings
  */
 settingsRouter.post('/api/settings', async (httpRequest: Request, httpResponse: Response) => {
-  const { BACKUP_INTERVAL, MAX_BACKUPS, AUTO_SAFETY_BACKUP } = httpRequest.body;
+  console.log('[POST /api/settings] Request received:', httpRequest.body);
+  try {
+    const { BACKUP_INTERVAL, MAX_BACKUPS, AUTO_SAFETY_BACKUP } = httpRequest.body;
 
-  const newBackupInterval =
-    parseInt(BACKUP_INTERVAL, 10) || DEFAULT_BACKUP_SETTINGS.BACKUP_INTERVAL;
-  const newMaxBackups = parseInt(MAX_BACKUPS, 10) || DEFAULT_BACKUP_SETTINGS.MAX_BACKUPS;
-  const newAutoSafetyBackup = AUTO_SAFETY_BACKUP !== undefined ? Boolean(AUTO_SAFETY_BACKUP) : true;
+    const newBackupInterval =
+      parseInt(BACKUP_INTERVAL, 10) || DEFAULT_BACKUP_SETTINGS.BACKUP_INTERVAL;
+    const newMaxBackups = parseInt(MAX_BACKUPS, 10) || DEFAULT_BACKUP_SETTINGS.MAX_BACKUPS;
+    const newAutoSafetyBackup =
+      AUTO_SAFETY_BACKUP !== undefined ? Boolean(AUTO_SAFETY_BACKUP) : true;
 
-  await saveBackupSettings(newBackupInterval, newMaxBackups, newAutoSafetyBackup);
-  await pruneOldBackupArchives(newMaxBackups);
+    console.log('[POST /api/settings] Parsed settings:', {
+      newBackupInterval,
+      newMaxBackups,
+      newAutoSafetyBackup,
+    });
 
-  const updatedSettings = await loadBackupSettings();
-  httpResponse.json({ ok: true, settings: updatedSettings });
+    console.log('[POST /api/settings] Saving settings...');
+    await saveBackupSettings(newBackupInterval, newMaxBackups, newAutoSafetyBackup);
+    console.log('[POST /api/settings] Settings saved, pruning backups...');
+    await pruneOldBackupArchives(newMaxBackups);
+    console.log('[POST /api/settings] Backups pruned, loading updated settings...');
+
+    const updatedSettings = await loadBackupSettings();
+    console.log('[POST /api/settings] Updated settings loaded:', updatedSettings);
+    httpResponse.json({ ok: true, settings: updatedSettings });
+    console.log('[POST /api/settings] Response sent successfully');
+  } catch (error) {
+    console.error('[POST /api/settings] Error:', error);
+    httpResponse.status(500).json({ ok: false, error: 'Failed to update settings' });
+  }
 });
 
 export default settingsRouter;

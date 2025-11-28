@@ -33,6 +33,9 @@ config/
 backups/
 !backups/.gitkeep
 
+# ARK save files (local development data)
+save/
+
 # OS files
 .DS_Store
 Thumbs.db

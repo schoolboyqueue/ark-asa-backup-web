@@ -5,6 +5,12 @@
   "private": true,
   "scripts": {
     "prepare": "husky",
+    "build:client": "cd client && npm run build",
+    "build:server": "cd server && npm run build",
+    "build": "npm run build:client && npm run build:server",
+    "clean:client": "cd client && rm -rf dist",
+    "clean:server": "cd server && rm -rf dist",
+    "clean": "npm run clean:client && npm run clean:server",
     "lint:client": "cd client && npm run format:check && npx tsc --noEmit",
     "lint:server": "cd server && npm run format:check && npx tsc --noEmit",
     "lint:all": "npm run lint:client && npm run lint:server",
