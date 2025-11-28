@@ -1,0 +1,126 @@
+@import 'tailwindcss';
+@plugin './hero.ts';
+@source '../../node_modules/@heroui/theme/dist/**/*(js|ts|jsx|tsx)';
+@custom-variant dark (&:is(.dark *));
+
+body {
+  margin: 0;
+  font-family: 'Noto Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--heroui-default-100));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--heroui-default-300));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--heroui-default-400));
+}
+
+/* New backup row animation - pulse and highlight */
+@keyframes newBackupPulse {
+  0% {
+    background-color: rgba(14, 165, 233, 0.2);
+    transform: scale(1);
+  }
+  50% {
+    background-color: rgba(14, 165, 233, 0.3);
+    transform: scale(1.01);
+  }
+  100% {
+    background-color: rgba(14, 165, 233, 0.1);
+    transform: scale(1);
+  }
+}
+
+.new-backup-row {
+  animation: newBackupPulse 1.5s ease-in-out 2;
+  border-left: 3px solid #0ea5e9 !important;
+}
+
+/* Deleting backup row animation - fade and slide out */
+@keyframes deleteBackupFade {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateX(-10px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+}
+
+.deleting-backup-row {
+  animation: deleteBackupFade 0.5s ease-out forwards;
+  background-color: rgba(255, 77, 79, 0.1);
+}
+
+.deleting-backup-row td {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+/* Ping animations for health status indicator */
+@keyframes ping-danger {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes ping-warning {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes ping-success {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+.animate-ping-danger {
+  animation: ping-danger 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.animate-ping-warning {
+  animation: ping-warning 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.animate-ping-success {
+  animation: ping-success 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}

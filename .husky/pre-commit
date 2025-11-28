@@ -1,0 +1,2 @@
+# Run lint-staged for both client and server
+npx lint-staged

@@ -46,6 +46,30 @@ A modern, full-featured web application for automated backup management of ARK: 
 - **Container Integration**: Monitors and controls ARK server container
 - **Health Checks**: Continuous monitoring of server and scheduler status
 
+## Documentation
+
+This project uses a tiered documentation structure:
+
+- **[client/README.md](client/README.md)** - Frontend implementation details
+  - Clean Architecture principles and patterns
+  - Domain structure (backups, server, system, shared)
+  - React components and hooks
+  - Development setup and code standards
+
+- **[server/README.md](server/README.md)** - Backend implementation details
+  - Modular service architecture
+  - API endpoints and SSE streams
+  - Docker integration
+  - Development setup and code standards
+
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history
+  - Follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format
+  - Semantic versioning
+
+- **[CLAUDE.md](CLAUDE.md)** - Development guidelines for AI assistants
+  - Architecture patterns and principles
+  - Code standards and conventions
+
 ## Technology Stack
 
 ### Backend
@@ -64,7 +88,11 @@ A modern, full-featured web application for automated backup management of ARK: 
 - **UI Library**: Hero UI (NextUI fork) with Tailwind CSS
 - **Icons**: Heroicons (24px solid)
 - **Date/Time**: Day.js with relativeTime plugin
-- **State Management**: Custom React hooks for state isolation
+- **Architecture**: Clean Architecture with domain-driven design
+  - Feature-first organization (backups, server, system domains)
+  - Strict layer separation (Domain → Service → Adapter → Repository → UseCase → View)
+  - Business logic in pure, testable functions
+  - Framework-agnostic domain layer
 
 ### DevOps
 - **Container**: Multi-stage Docker build (builder → production)
@@ -132,64 +160,29 @@ Access the web interface at `http://localhost:8091`
 
 ## Architecture
 
-### Design Patterns
+### High-Level Overview
+
+**Frontend (React + TypeScript)**:
+- Clean Architecture with domain-driven design
+- Three domains: backups, server, system
+- Strict layer separation: Domain → Service → Adapter → Repository → UseCase → View
+- Real-time updates via Server-Sent Events (SSE)
+- See [client/README.md](client/README.md) for detailed architecture
+
+**Backend (Node.js + Express)**:
+- Modular service-oriented architecture
+- Routes → Services → Data layers
+- Background scheduler for automated backups
+- Docker integration for server control
+- See [server/README.md](server/README.md) for detailed architecture
+
+### Key Design Patterns
 - **Singleton**: Docker client for centralized container management
-- **Repository**: File system abstraction layer in backup service
+- **Repository**: State management and data access abstraction
 - **Observer**: SSE broadcast system for real-time updates
-- **Facade**: Simplified Docker API interactions in docker service
+- **Facade**: Simplified Docker API interactions
 - **Strategy**: Theme selection (light/dark/system)
 - **Service Layer**: Business logic separated from HTTP handling
-
-### Component Structure
-```
-client/src/
-├── App.tsx                    # Main application with theme management
-├── components/
-│   ├── BackupsList.tsx        # Backup table/cards with actions
-│   ├── BackupDetailsDrawer.tsx # Backup details and metadata management
-│   ├── HeaderControls.tsx     # System status + server controls
-│   ├── SystemStatus.tsx       # Health monitoring dashboard
-│   └── ServerControls.tsx     # Server start/stop + settings
-├── hooks/                     # Custom React hooks for state management
-│   ├── useBackupSort.ts       # Sorting logic
-│   ├── useBackupFilters.ts    # Search and date filtering
-│   ├── useBackupPagination.ts # Pagination with auto-reset
-│   ├── useRestoreProgress.ts  # SSE restore progress tracking
-│   ├── useBackupActions.ts    # CRUD operations with loading states
-│   └── useBackupMetadata.ts   # Metadata save operations
-├── services/
-│   ├── api.ts                 # HTTP client with SSE methods
-│   └── toast.ts               # Toast notification service
-└── types/
-    └── index.ts               # TypeScript interfaces
-```
-
-### Backend Structure (Modular)
-```
-src/
-├── server.ts                  # Application entry point (116 lines)
-│                              - Route registration
-│                              - Middleware configuration
-│                              - Graceful shutdown handling
-├── config/
-│   └── constants.ts           # Configuration constants and paths
-├── types/
-│   └── index.ts              # TypeScript interfaces
-├── services/                  # Business logic layer
-│   ├── backupService.ts       # Backup CRUD operations
-│   ├── settingsService.ts     # Settings management
-│   ├── dockerService.ts       # Docker container control
-│   ├── systemService.ts       # Disk space and health monitoring
-│   └── schedulerService.ts    # Background backup scheduler
-├── routes/                    # HTTP endpoint handlers
-│   ├── healthRoutes.ts        # Health check endpoints
-│   ├── settingsRoutes.ts      # Settings management API
-│   ├── backupRoutes.ts        # Backup CRUD endpoints
-│   ├── serverRoutes.ts        # Server control API
-│   └── sseRoutes.ts           # SSE streams and restore
-└── utils/
-    └── sseStream.ts           # SSE helper functions
-```
 
 ## API Endpoints
 
@@ -244,37 +237,17 @@ npm start
 
 ### Code Standards
 
-#### TypeScript/React Conventions
-- **Formatting**: Prettier with single quotes, 100-char line width, semicolons
-- **Type Safety**: Strict TypeScript with comprehensive annotations
-- **Documentation**: Google-style JSDoc for all files, functions, classes, interfaces
-  - `@fileoverview` for file-level documentation
-  - `@param`, `@returns`, `@throws`, `@async` for function documentation
-  - Document design patterns used (Singleton, Repository, Observer, etc.)
-- **Variable Naming**: Descriptive names only - NO single-character variables
-  - Good: `backupsList`, `isLoadingInitialData`, `backupIntervalSeconds`
-  - Bad: `x`, `i`, `res`, `req`, `e`
-- **Constants**: Extract magic numbers/strings to named constants
-- **SOLID Principles**:
-  - Single responsibility per component/function
-  - High cohesion, low coupling
-  - Design patterns documented where used
-- **Error Handling**: Comprehensive try/catch for async operations
-- **Path Handling**: Use Node.js `path` module for cross-platform compatibility
-- **React Conventions**:
-  - Functional components with hooks only
-  - Type all props with interfaces
-  - Extract helper functions outside components
-  - Use `async/await` consistently
+This project follows strict TypeScript and Clean Architecture standards:
 
-#### Backend Architecture
-- **Routes** (`routes/`) - HTTP endpoint handlers only, no business logic
-- **Services** (`services/`) - Business logic layer, reusable across routes
-- **Utilities** (`utils/`) - Shared helper functions (e.g., SSE stream setup)
-- **Types** (`types/`) - Centralized TypeScript interfaces
-- **Config** (`config/`) - Application constants and configuration
-- Follow Express Router pattern for all routes
-- Service functions should be pure and testable where possible
+- **Formatting**: Prettier with single quotes, 100-char line width, semicolons
+- **Type Safety**: Strict TypeScript, no `any` types
+- **Documentation**: Google-style JSDoc for all code
+- **Testing**: Service layer unit tests + user journey integration tests
+- **Variable Naming**: Descriptive names only - NO single-character variables
+
+For detailed code standards and patterns:
+- Frontend: See [client/README.md](client/README.md) - Clean Architecture layer rules
+- Backend: See [server/README.md](server/README.md) - Modular service patterns
 
 ### Build & Deploy
 
@@ -368,13 +341,22 @@ Check browser console for JavaScript errors. Common causes:
 Contributions are welcome! Please follow these guidelines:
 
 1. **Code Style**: Run `npm run format` before committing
-2. **Documentation**: Add Google-style JSDoc for all new code
-3. **Testing**: Manually test all changes (no automated tests yet)
-4. **Commits**: Use Conventional Commits format:
+2. **Documentation**:
+   - Add Google-style JSDoc for all new code
+   - Update relevant README files (project/server/client)
+   - Update CHANGELOG.md for notable changes
+3. **Architecture**: Follow Clean Architecture principles (see [client/README.md](client/README.md))
+4. **Testing**: Manually test all changes (no automated tests yet)
+5. **Commits**: Use Conventional Commits format:
    - `feat(scope): description` - New features
    - `fix(scope): description` - Bug fixes
    - `chore(scope): description` - Maintenance/updates
    - `docs: description` - Documentation only
+
+For detailed development guidelines:
+- Frontend development: [client/README.md](client/README.md)
+- Backend development: [server/README.md](server/README.md)
+- AI assistant guidelines: [CLAUDE.md](CLAUDE.md)
 
 ## License
 

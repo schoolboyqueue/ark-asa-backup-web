@@ -1,0 +1,24 @@
+{
+  "name": "ark-asa-backup-web",
+  "version": "3.0.0",
+  "description": "ARK: Survival Ascended Backup Manager - Monorepo Root",
+  "private": true,
+  "scripts": {
+    "prepare": "husky",
+    "lint:client": "cd client && npm run format:check && npx tsc --noEmit",
+    "lint:server": "cd server && npm run format:check && npx tsc --noEmit",
+    "lint:all": "npm run lint:client && npm run lint:server",
+    "format:client": "cd client && npm run format",
+    "format:server": "cd server && npm run format",
+    "format:all": "npm run format:client && npm run format:server"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.7.1"
+  },
+  "lint-staged": {
+    "client/src/**/*.{ts,tsx,js,jsx,json,css}": "prettier --write",
+    "server/src/**/*.{ts,js,json}": "prettier --write"
+  }
+}

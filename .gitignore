@@ -1,10 +1,11 @@
 # Node modules
 node_modules/
-web/node_modules/
+server/node_modules/
+client/node_modules/
 
 # Build outputs
-web/dist/
-web/static/dist/
+server/dist/
+client/dist/
 *.js.map
 
 # Environment and secrets

@@ -6,34 +6,48 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ARK: Survival Ascended Backup Manager - A modern web application for automated backup management of ARK: Survival Ascended dedicated servers. Built with TypeScript, React, Express, and Docker with real-time monitoring via Server-Sent Events (SSE).
 
+## 🔴 CRITICAL: Documentation Maintenance
+
+**MANDATORY RULE:** When making ANY code changes, you MUST update the relevant documentation files:
+
+1. **Code Changes Require Documentation Updates**:
+   - Architecture changes → Update `README.md`, `client/README.md`, `server/README.md`, and this file
+   - New features → Update `CHANGELOG.md` (under `[Unreleased]`)
+   - File/directory moves → Update all README files and this file
+   - API changes → Update `server/README.md` and `README.md`
+   - Component structure changes → Update `client/README.md`
+
+2. **Documentation Structure**:
+   - **`README.md`** (root) - High-level project overview, quick start, features
+   - **`client/README.md`** - Frontend implementation details, Clean Architecture guide
+   - **`server/README.md`** - Backend implementation details, API documentation
+   - **`CHANGELOG.md`** - Version history following Keep a Changelog format
+   - **`CLAUDE.md`** (this file) - Development guidelines for AI assistants
+
+3. **Before Completing Any Task**:
+   - ✅ Verify all documentation is synchronized with code changes
+   - ✅ Update CHANGELOG.md if the change is user-facing
+   - ✅ Test that all internal documentation links still work
+   - ✅ Run final build to ensure nothing is broken
+
+**Never skip documentation updates.** Out-of-sync documentation is worse than no documentation.
+
 ## Development Commands
 
-### Common Operations
+### Backend (Server)
 
 ```bash
-# Navigate to web directory
-cd web
+# Navigate to server directory
+cd server
 
 # Install dependencies
 npm install
 
-# Development (runs both frontend and backend)
+# Development (nodemon auto-restart)
 npm run dev
 
-# Development - Frontend only (Vite HMR on port 5173)
-npm run dev:client
-
-# Development - Backend only (nodemon auto-restart)
-npm run dev:server
-
-# Production build (builds both client and server)
+# Production build
 npm run build
-
-# Production build - Frontend only
-npm run build:frontend
-
-# Production build - Backend only
-npm run build:server
 
 # Start production server (requires build first)
 npm start
@@ -43,6 +57,44 @@ npm run format
 
 # Check formatting without changes
 npm run format:check
+```
+
+### Frontend (Client)
+
+```bash
+# Navigate to client directory
+cd client
+
+# Install dependencies
+npm install
+
+# Development (Vite HMR on port 5173)
+npm run dev
+
+# Production build
+npm run build
+
+# Preview production build
+npm run preview
+
+# Code formatting
+npm run format
+
+# Check formatting without changes
+npm run format:check
+```
+
+### Full Stack Development
+
+```bash
+# Terminal 1 - Start backend
+cd server && npm run dev
+
+# Terminal 2 - Start frontend (in another terminal)
+cd client && npm run dev
+
+# Access application at http://localhost:5173
+# API proxied to http://localhost:8080
 ```
 
 ### Docker Operations
@@ -61,60 +113,240 @@ docker compose stop ark-asa-backup-web
 curl http://localhost:8091/health
 ```
 
+## 🔴 CRITICAL: Code Quality & Linting Workflow
+
+**MANDATORY RULE:** You MUST run linting checks before AND after making ANY code changes.
+
+### Pre-Change Linting (REQUIRED)
+
+Before modifying any file, ALWAYS run:
+
+```bash
+# From project root - Check everything
+npm run lint:all
+
+# Or check specific parts
+npm run lint:client    # Client TypeScript + Prettier
+npm run lint:server    # Server TypeScript + Prettier
+```
+
+### Post-Change Linting (REQUIRED)
+
+After ANY code modification, IMMEDIATELY run:
+
+1. **Format the code:**
+```bash
+# Auto-fix formatting issues
+npm run format:all      # Format both client and server
+npm run format:client   # Format only client
+npm run format:server   # Format only server
+```
+
+2. **Verify type safety:**
+```bash
+# Check for TypeScript errors
+cd client && npx tsc --noEmit
+cd server && npx tsc --noEmit
+```
+
+3. **Final verification:**
+```bash
+# Ensure everything passes
+npm run lint:all
+```
+
+### Linting Tools Configured
+
+- **Prettier** - Code formatting (all .ts, .tsx, .js, .jsx, .json, .css files)
+- **TypeScript Compiler** - Type checking (strict mode enabled)
+- **Husky + lint-staged** - Pre-commit hooks (automatic formatting)
+
+### Pre-Commit Hooks (Automatic)
+
+Pre-commit hooks are configured to automatically:
+- ✅ Run Prettier on all staged files
+- ✅ Format code before commit
+- ✅ Prevent commits with formatting issues
+
+**Files modified by pre-commit hooks:**
+- `client/src/**/*.{ts,tsx,js,jsx,json,css}`
+- `server/src/**/*.{ts,js,json}`
+
+### Common Linting Issues and Fixes
+
+| Issue | Fix |
+|-------|-----|
+| Unused imports | Remove the import statement |
+| Unused variables | Prefix with `_` (e.g., `_unusedVar`) or remove |
+| Implicit `any` types | Add explicit type annotations |
+| snake_case properties | Use camelCase (domain layer) |
+| Readonly array issues | Spread to create mutable copy: `[...readonlyArray]` |
+| Promise return types | Make function `async` or return `Promise<void>` |
+
+### Workflow Integration Rules
+
+**When Writing Code:**
+1. ✅ Run `npm run lint:all` BEFORE starting
+2. ✅ Make your changes
+3. ✅ Run `npm run format:all` to auto-fix
+4. ✅ Run `npx tsc --noEmit` in both client and server
+5. ✅ Fix any remaining errors
+6. ✅ Run `npm run lint:all` again to verify
+7. ✅ Test the build: `cd client && npm run build && cd ../server && npm run build`
+
+**When Reading Files:**
+- Always note any linting issues you spot
+- Fix linting issues as part of your changes
+- Never leave code with linting errors
+
+**When Creating New Files:**
+- Run Prettier immediately after creation
+- Ensure proper TypeScript types from the start
+- Follow existing code patterns for consistency
+
+### Emergency: Fixing All Linting Issues
+
+If you encounter multiple linting issues:
+
+```bash
+# 1. Auto-fix all formatting
+npm run format:all
+
+# 2. Check TypeScript errors
+cd client && npx tsc --noEmit
+cd ../server && npx tsc --noEmit
+
+# 3. Fix errors systematically:
+#    - Unused imports first
+#    - Type annotations second
+#    - Property naming third
+#    - Type compatibility last
+
+# 4. Verify everything works
+npm run lint:all
+cd client && npm run build
+cd ../server && npm run build
+```
+
+**REMEMBER:** Linting is not optional. Clean, well-formatted, type-safe code is a requirement.
+
 ## Architecture
 
-### Modular Backend Design
+## Project Structure
+
+```
+ark-asa-backup-web/
+  server/                           # Backend Express API
+    src/
+      routes/                       # HTTP endpoints
+      services/                     # Business logic
+      config/                       # Configuration
+      types/                        # TypeScript types
+      utils/                        # Shared utilities
+      server.ts                     # Entry point
+    dist/                           # Built output
+    package.json                    # Backend dependencies
+    tsconfig.json
+
+  client/                           # Frontend React App
+    src/
+      backups/                      # Backups domain (Clean Architecture)
+        adapters/                   # API adapters
+        domain/                     # Domain models and types
+        hooks/                      # UI helper hooks (sort, filter, pagination)
+        repository/                 # State management
+        services/                   # Business logic
+        ui/                         # View components
+        useCases/                   # Orchestration layer
+      server/                       # Server control domain (Clean Architecture)
+        adapters/                   # API adapters
+        domain/                     # Domain models and types
+        repository/                 # State management
+        services/                   # Business logic
+        ui/                         # View components
+        useCases/                   # Orchestration layer
+      system/                       # System monitoring domain (Clean Architecture)
+        domain/                     # Domain models and types
+        repository/                 # State management
+        ui/                         # View components
+      shared/                       # Cross-domain components and utilities
+        services/                   # Shared services (toast)
+        ui/                         # Shared UI components (HeaderControls)
+      App.tsx                       # Application root
+      main.tsx                      # Entry point
+    dist/                           # Built output
+    package.json                    # Frontend dependencies
+    tsconfig.json
+    vite.config.ts
+
+  config/                           # Deployment configs
+  backups/                          # Data directory
+  Dockerfile                        # Multi-stage build
+  CLAUDE.md                         # This file
+  README.md
+```
+
+### Backend Architecture
 
 The backend was refactored from a 1,564-line monolith to a modular architecture with 93% reduction in file size. The architecture follows strict separation of concerns:
 
-**Routes Layer** (`src/routes/`) - HTTP endpoint handlers ONLY
+**Routes Layer** (`server/src/routes/`) - HTTP endpoint handlers ONLY
 - No business logic, only request/response handling
 - Validate inputs and delegate to services
 - Express Router pattern for all routes
 - Files: `healthRoutes.ts`, `settingsRoutes.ts`, `backupRoutes.ts`, `serverRoutes.ts`, `sseRoutes.ts`
 
-**Services Layer** (`src/services/`) - Business logic and data operations
+**Services Layer** (`server/src/services/`) - Business logic and data operations
 - Pure, testable functions where possible
 - Reusable across multiple routes
 - Handle all business rules and validations
 - Files: `backupService.ts`, `settingsService.ts`, `dockerService.ts`, `systemService.ts`, `schedulerService.ts`
 
-**Utilities Layer** (`src/utils/`) - Shared helper functions
+**Utilities Layer** (`server/src/utils/`) - Shared helper functions
 - Reusable utilities with no business logic
 - Example: SSE stream setup helpers
 
-**Config Layer** (`src/config/`) - Application constants
+**Config Layer** (`server/src/config/`) - Application constants
 - Centralized configuration values
 - Environment variables and defaults
 - Path configuration
 
-**Types Layer** (`src/types/`) - TypeScript interfaces
+**Types Layer** (`server/src/types/`) - TypeScript interfaces
 - Centralized type definitions shared across backend
 
 ### Frontend Architecture
 
-**Component Structure** (`client/src/components/`)
-- `App.tsx` - Main application with theme management
-- `HeaderControls.tsx` - System status + server controls (composition pattern)
-- `SystemStatus.tsx` - Health monitoring dashboard
-- `ServerControls.tsx` - Server start/stop + settings
-- `BackupsList.tsx` - Backup table/cards with actions
-- `BackupDetailsDrawer.tsx` - Backup details and metadata management
+The frontend follows **Clean Architecture** principles with complete domain-driven design:
 
-**Custom Hooks Pattern** (`client/src/hooks/`)
-State management extracted into custom hooks for reusability and separation of concerns:
-- `useBackupSort.ts` - Sorting logic
-- `useBackupFilters.ts` - Search and date filtering
-- `useBackupPagination.ts` - Pagination with auto-reset
-- `useRestoreProgress.ts` - SSE restore progress tracking
-- `useBackupActions.ts` - CRUD operations with loading states
-- `useBackupMetadata.ts` - Metadata save operations
+**Backups Domain** (`client/src/backups/`)
+- `domain/` - Backup models and types (Backup, CreateBackupDto, etc.)
+- `services/` - Business logic (validation, priority, formatting)
+- `adapters/` - API communication layer
+- `repository/` - State management with SSE updates
+- `useCases/` - Orchestration (useCreateBackup, useDeleteBackup, etc.)
+- `ui/` - View components (BackupsList, BackupDetailsDrawer)
+- `hooks/` - UI helpers (useBackupSort, useBackupFilters, useBackupPagination, useRestoreProgress)
 
-Custom hooks reduced useState calls by 67% and improved code organization.
+**Server Domain** (`client/src/server/`)
+- `domain/` - Server models (Server, BackupSettings)
+- `services/` - Settings validation
+- `adapters/` - API communication with backend transformation
+- `repository/` - State management with SSE updates
+- `useCases/` - Orchestration (useServerControl, useUpdateSettings)
+- `ui/` - View components (ServerControls)
 
-**Services** (`client/src/services/`)
-- `api.ts` - HTTP client with SSE connection methods
-- `toast.ts` - Toast notification service
+**System Domain** (`client/src/system/`)
+- `domain/` - System models (DiskSpace, BackupHealth)
+- `repository/` - State management with SSE updates
+- `ui/` - View components (SystemStatus)
+
+**Shared Layer** (`client/src/shared/`)
+- `services/toast.ts` - Cross-domain toast notifications
+- `ui/HeaderControls.tsx` - Composition of SystemStatus + ServerControls + theme switcher
+
+**Application Root**
+- `App.tsx` - Theme management and top-level composition
+- `main.tsx` - React entry point
 
 ## Clean Architecture Principles (Nik Sumeiko Style)
 
@@ -668,16 +900,683 @@ function BackupsList() {
 }
 ```
 
+### Real Implementation Examples (Production Code)
+
+This section documents the **actual Clean Architecture implementation** in this codebase, showing concrete examples from production features.
+
+#### Implemented Domains
+
+Two features have been fully refactored to Clean Architecture:
+
+1. **Backups Domain** (`client/src/backups/`)
+   - **Lines reduced**: 1,174 → 666 (43% reduction in view component)
+   - **Files created**: 12 files with strict layer separation
+   - **Business logic extracted**: 3 service files with pure functions
+
+2. **Server Domain** (`client/src/server/`)
+   - **Lines reduced**: 280 → 168 (40% reduction in view component)
+   - **Files created**: 8 files with strict layer separation
+   - **SSE integration**: Real-time server status with EventSource
+
+#### Actual Directory Structure
+
+```
+client/src/
+  backups/                                    # Backups domain
+    domain/
+      backup.ts                               # Domain types, DTOs, enums
+    services/
+      backupValidationService.ts              # Pure validation functions
+      backupPriorityService.ts                # Retention policy calculations
+      backupFormatService.ts                  # Date/size formatting (no dayjs)
+    adapters/
+      backupApiAdapter.ts                     # HTTP API + data transformation
+    repository/
+      useBackupsRepository.ts                 # SSE state management
+    useCases/
+      useCreateBackup.ts                      # Create backup orchestration
+      useDeleteBackup.ts                      # Delete backup orchestration
+      useBackupActions.ts                     # Restore/download actions
+      useUpdateBackupMetadata.ts              # Metadata updates
+    ui/
+      BackupsList.tsx                         # Pure view (666 lines, was 1,174)
+    index.ts                                  # Barrel exports
+
+  server/                                     # Server control domain
+    domain/
+      server.ts                               # Server status + settings types
+    services/
+      settingsValidationService.ts            # Settings business rules
+    adapters/
+      serverApiAdapter.ts                     # Server + settings API
+    repository/
+      useServerRepository.ts                  # SSE server status
+    useCases/
+      useServerControl.ts                     # Start/stop orchestration
+      useUpdateSettings.ts                    # Settings update orchestration
+    ui/
+      ServerControls.tsx                      # Pure view (168 lines, was 280)
+    index.ts                                  # Barrel exports
+```
+
+#### Real Domain Layer Example
+
+From `client/src/backups/domain/backup.ts`:
+
+```typescript
+/**
+ * Core domain model for a backup archive.
+ * Immutable by design with readonly properties.
+ */
+export interface Backup {
+  readonly name: string;
+  readonly sizeBytes: number;
+  readonly createdAt: number;
+  readonly notes?: string;
+  readonly tags?: ReadonlyArray<string>;
+  readonly verificationStatus: VerificationStatus;
+  readonly hasMetadata: boolean;
+  readonly isVerified: boolean;
+}
+
+export type VerificationStatus = 'verified' | 'failed' | 'pending' | 'unknown';
+
+export enum BackupPriority {
+  CRITICAL = 100,
+  HIGH = 75,
+  RECENT = 50,
+  NORMAL = 25,
+  LOW = 10,
+}
+
+/**
+ * DTO for creating a new backup.
+ */
+export interface CreateBackupDto {
+  readonly notes?: string;
+  readonly tags?: ReadonlyArray<string>;
+}
+```
+
+#### Real Service Layer Example
+
+From `client/src/backups/services/backupValidationService.ts` (pure functions, no React):
+
+```typescript
+import type { Backup } from '../domain/backup';
+
+export const MAX_NOTES_LENGTH = 500;
+export const MAX_TAGS_COUNT = 10;
+
+/**
+ * Validates backup notes according to business rules.
+ * Pure function - same input always produces same output.
+ */
+export function validateBackupNotes(notes: string): ValidationResult {
+  if (!notes || notes.trim().length === 0) {
+    return { isValid: true };
+  }
+
+  if (notes.length > MAX_NOTES_LENGTH) {
+    return {
+      isValid: false,
+      error: `Notes must be ${MAX_NOTES_LENGTH} characters or less`,
+    };
+  }
+
+  return { isValid: true };
+}
+
+/**
+ * Business rule: Can only restore when server is stopped.
+ */
+export function canRestoreBackup(
+  backup: Backup,
+  isServerRunning: boolean
+): ValidationResult {
+  if (isServerRunning) {
+    return {
+      isValid: false,
+      error: 'Server must be stopped before restoring backups',
+    };
+  }
+
+  if (!backup.isVerified) {
+    return {
+      isValid: false,
+      error: 'Only verified backups can be restored',
+    };
+  }
+
+  return { isValid: true };
+}
+
+// Easy to unit test - no mocking required!
+// expect(canRestoreBackup(backup, true).isValid).toBe(false);
+```
+
+#### Real Adapter Layer Example
+
+From `client/src/backups/adapters/backupApiAdapter.ts`:
+
+```typescript
+import type { Backup, CreateBackupDto, UpdateMetadataDto } from '../domain/backup';
+
+/**
+ * Adapter for backup API operations.
+ * Hides HTTP implementation and transforms API responses to domain models.
+ */
+export const backupApiAdapter = {
+  /**
+   * Fetch all backups from the server.
+   * Transforms API format to domain format.
+   */
+  async getBackups(): Promise<Backup[]> {
+    const response = await fetch('/api/backups');
+    if (!response.ok) {
+      throw new Error(`Failed to fetch backups: HTTP ${response.status}`);
+    }
+    const apiBackups: BackupMetadataApi[] = await response.json();
+    return apiBackups.map(transformApiBackupToDomain);
+  },
+
+  /**
+   * Create a new backup with optional notes and tags.
+   */
+  async createBackup(dto: CreateBackupDto): Promise<void> {
+    const response = await fetch('/api/backups/trigger', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        notes: dto.notes || '',
+        tags: dto.tags || [],
+      }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to create backup');
+    }
+  },
+
+  /**
+   * Delete a backup by name.
+   */
+  async deleteBackup(backupName: string): Promise<void> {
+    const response = await fetch('/api/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ backup_name: backupName }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete backup');
+    }
+  },
+};
+
+/**
+ * Transform API response format to domain model.
+ * Centralizes data transformation logic.
+ */
+function transformApiBackupToDomain(apiBackup: BackupMetadataApi): Backup {
+  return {
+    name: apiBackup.name,
+    sizeBytes: apiBackup.size_bytes,
+    createdAt: apiBackup.created_at,
+    notes: apiBackup.notes,
+    tags: apiBackup.tags,
+    verificationStatus: apiBackup.verification_status,
+    hasMetadata: apiBackup.has_metadata,
+    isVerified: apiBackup.verification_status === 'verified',
+  };
+}
+```
+
+#### Real Repository Layer Example (SSE)
+
+From `client/src/backups/repository/useBackupsRepository.ts` (SSE state management):
+
+```typescript
+import { useState, useEffect, useCallback, useRef } from 'react';
+import type { Backup } from '../domain/backup';
+
+/**
+ * Repository hook for backup state management.
+ * Subscribes to SSE for real-time updates.
+ */
+export function useBackupsRepository(): UseBackupsRepositoryReturn {
+  const [backups, setBackups] = useState<Backup[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const eventSourceRef = useRef<EventSource | null>(null);
+
+  const connectToBackupsStream = useCallback(() => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+    }
+
+    const eventSource = new EventSource('/api/backups/stream');
+    eventSourceRef.current = eventSource;
+
+    eventSource.addEventListener('connected', () => {
+      console.log('[BackupsRepository] SSE connected');
+      setError(null);
+    });
+
+    eventSource.addEventListener('backups', (messageEvent) => {
+      const apiBackups = JSON.parse(messageEvent.data);
+      const domainBackups = apiBackups.map(transformApiBackupToDomain);
+      const sortedBackups = sortBackupsByDate(domainBackups);
+      setBackups(sortedBackups);
+      setIsLoading(false);
+      setError(null);
+    });
+
+    eventSource.addEventListener('error', (messageEvent) => {
+      const data = JSON.parse((messageEvent as MessageEvent).data || '{}');
+      const errorMessage = data.error || 'Failed to load backups';
+      console.error('[BackupsRepository] SSE error:', errorMessage);
+      setError(errorMessage);
+      setIsLoading(false);
+    });
+
+    eventSource.onerror = () => {
+      console.error('[BackupsRepository] SSE connection error');
+      setError('Lost connection to server');
+      eventSource.close();
+    };
+  }, []);
+
+  // Connect on mount, cleanup on unmount
+  useEffect(() => {
+    connectToBackupsStream();
+
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+    };
+  }, [connectToBackupsStream]);
+
+  // Optimistic updates for mutations
+  const updateBackup = useCallback((updatedBackup: Backup) => {
+    setBackups((currentBackups) =>
+      currentBackups.map((backup) =>
+        backup.name === updatedBackup.name ? updatedBackup : backup
+      )
+    );
+  }, []);
+
+  const removeBackup = useCallback((backupName: string) => {
+    setBackups((currentBackups) =>
+      currentBackups.filter((backup) => backup.name !== backupName)
+    );
+  }, []);
+
+  return {
+    backups,
+    isLoading,
+    error,
+    refreshBackups: connectToBackupsStream,
+    updateBackup,
+    removeBackup,
+  };
+}
+```
+
+#### Real UseCase Layer Example
+
+From `client/src/backups/useCases/useDeleteBackup.ts` (orchestration):
+
+```typescript
+import { useState, useCallback } from 'react';
+import { backupApiAdapter } from '../adapters/backupApiAdapter';
+import { canDeleteBackup } from '../services/backupValidationService';
+import { toast } from '../../services/toast';
+import type { Backup } from '../domain/backup';
+
+/**
+ * UseCase hook for deleting backups.
+ * Orchestrates validation, API calls, and user feedback.
+ */
+export function useDeleteBackup(): UseDeleteBackupReturn {
+  const [deletingBackupName, setDeletingBackupName] = useState<string | null>(null);
+
+  const deleteBackup = useCallback(
+    async (backup: Backup, onSuccess?: () => void): Promise<void> => {
+      // 1. Validate using Service layer
+      const validation = canDeleteBackup(backup);
+      if (!validation.isValid) {
+        toast.error(validation.error || 'Cannot delete this backup');
+        return;
+      }
+
+      setDeletingBackupName(backup.name);
+
+      try {
+        // 2. Call Adapter to perform side-effect
+        await backupApiAdapter.deleteBackup(backup.name);
+
+        // 3. User feedback
+        toast.success(`Backup deleted successfully`);
+
+        // 4. Execute success callback (e.g., close modal)
+        onSuccess?.();
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Failed to delete backup';
+        console.error('Failed to delete backup:', error);
+        toast.error(errorMessage);
+        throw error;
+      } finally {
+        setDeletingBackupName(null);
+      }
+    },
+    []
+  );
+
+  const isDeleting = useCallback(
+    (backupName: string): boolean => {
+      return deletingBackupName === backupName;
+    },
+    [deletingBackupName]
+  );
+
+  return {
+    deletingBackupName,
+    isDeleting,
+    deleteBackup,
+    canDelete: canDeleteBackup,
+  };
+}
+```
+
+#### Real View Layer Example
+
+From `client/src/backups/ui/BackupsList.tsx` (pure view, 666 lines, reduced from 1,174):
+
+```typescript
+export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Element {
+  // REPOSITORY - Get data and real-time updates
+  const { backups, isLoading, error } = useBackupsRepository();
+
+  // USE CASES - Get orchestration logic and actions
+  const createBackup = useCreateBackup();
+  const deleteBackup = useDeleteBackup();
+  const backupActions = useBackupActions();
+  const updateMetadata = useUpdateBackupMetadata();
+
+  // LOCAL VIEW STATE - Modal visibility, animations, UI-only state
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [selectedBackupForDelete, setSelectedBackupForDelete] = useState<Backup | null>(null);
+  const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false);
+
+  // EVENT HANDLERS - Wire UI events to UseCase actions
+  const handleCreateBackup = async () => {
+    await createBackup.actions.handleSubmit();
+  };
+
+  const handleDeleteClick = (backup: Backup) => {
+    setSelectedBackupForDelete(backup);
+    setIsDeleteModalVisible(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedBackupForDelete) return;
+    await deleteBackup.deleteBackup(selectedBackupForDelete, () => {
+      setIsDeleteModalVisible(false);
+      setSelectedBackupForDelete(null);
+    });
+  };
+
+  const handleRestore = async (backup: Backup) => {
+    await backupActions.handleRestore(backup, serverStatus?.isRunning || false);
+  };
+
+  // RENDER - Pure JSX, no business logic
+  return (
+    <Card className="flex-1">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Backups</h2>
+          <Button
+            onPress={handleCreateBackup}
+            isLoading={createBackup.isCreating}
+            color="primary"
+          >
+            Create Backup
+          </Button>
+        </div>
+      </CardHeader>
+
+      <CardBody>
+        {error && <Alert color="danger">{error}</Alert>}
+
+        <Table aria-label="Backups table">
+          <TableHeader>
+            <TableColumn>NAME</TableColumn>
+            <TableColumn>SIZE</TableColumn>
+            <TableColumn>CREATED</TableColumn>
+            <TableColumn>ACTIONS</TableColumn>
+          </TableHeader>
+          <TableBody
+            items={backups}
+            isLoading={isLoading}
+            emptyContent="No backups found"
+          >
+            {(backup) => (
+              <TableRow key={backup.name}>
+                <TableCell>{backup.name}</TableCell>
+                <TableCell>{formatFileSize(backup.sizeBytes)}</TableCell>
+                <TableCell>{formatTimestamp(backup.createdAt)}</TableCell>
+                <TableCell>
+                  <ButtonGroup size="sm">
+                    <Button onPress={() => handleRestore(backup)}>Restore</Button>
+                    <Button onPress={() => handleDeleteClick(backup)}>Delete</Button>
+                  </ButtonGroup>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </CardBody>
+
+      {/* Delete confirmation modal */}
+      <Modal isOpen={isDeleteModalVisible} onClose={() => setIsDeleteModalVisible(false)}>
+        <ModalContent>
+          <ModalHeader>Confirm Delete</ModalHeader>
+          <ModalBody>
+            Are you sure you want to delete {selectedBackupForDelete?.name}?
+          </ModalBody>
+          <ModalFooter>
+            <Button onPress={() => setIsDeleteModalVisible(false)}>Cancel</Button>
+            <Button
+              color="danger"
+              onPress={handleConfirmDelete}
+              isLoading={deleteBackup.isDeleting(selectedBackupForDelete?.name || '')}
+            >
+              Delete
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </Card>
+  );
+}
+```
+
+#### Refactoring Results
+
+**Backups Feature:**
+- **Before**: 1,174 lines in single component with mixed concerns
+- **After**: 666 lines pure view + 11 layer files (1,982 total lines)
+- **Reduction**: 43% reduction in view component
+- **Benefits**:
+  - All business logic now testable without React
+  - SSE connection encapsulated in repository
+  - Validation rules extracted to pure functions
+  - API calls hidden behind adapter interface
+
+**Server Feature:**
+- **Before**: 280 lines in single component with validation and API calls
+- **After**: 168 lines pure view + 7 layer files
+- **Reduction**: 40% reduction in view component
+- **Benefits**:
+  - Settings validation is pure functions (easy to test)
+  - Server control orchestration separated from UI
+  - SSE server status managed in repository
+
+#### Guidelines for New Features
+
+When implementing new features in this codebase:
+
+1. **Create feature directory**: `client/src/<feature-name>/`
+
+2. **Start with Domain layer**:
+   ```typescript
+   // domain/<feature>.ts
+   export interface MyEntity { readonly id: string; /* ... */ }
+   export interface MyDto { /* ... */ }
+   export type MyStatus = 'active' | 'inactive';
+   ```
+
+3. **Extract business rules to Services**:
+   ```typescript
+   // services/myValidationService.ts
+   export function validateMyEntity(entity: MyEntity): ValidationResult {
+     // Pure function - no React, no IO
+   }
+   ```
+
+4. **Create Adapter for external systems**:
+   ```typescript
+   // adapters/myApiAdapter.ts
+   export const myApiAdapter = {
+     async getEntities(): Promise<MyEntity[]> { /* ... */ },
+   };
+   ```
+
+5. **Create Repository for state**:
+   ```typescript
+   // repository/useMyRepository.ts
+   export function useMyRepository() {
+     // SSE or React Query
+     const [entities, setEntities] = useState<MyEntity[]>([]);
+     // ...
+   }
+   ```
+
+6. **Create UseCases for orchestration**:
+   ```typescript
+   // useCases/useMyFeature.ts
+   export function useMyFeature() {
+     const { entities } = useMyRepository();
+     const handleAction = async () => {
+       const validation = validateMyEntity(/* ... */);
+       await myApiAdapter.performAction(/* ... */);
+       toast.success('Done!');
+     };
+     return { entities, handleAction };
+   }
+   ```
+
+7. **Create View components** (pure JSX):
+   ```typescript
+   // ui/MyFeature.tsx
+   export function MyFeature() {
+     const { entities, handleAction } = useMyFeature();
+     return <div>{/* Just render */}</div>;
+   }
+   ```
+
+8. **Export via barrel file**:
+   ```typescript
+   // index.ts
+   export type { MyEntity, MyDto } from './domain/myFeature';
+   export { validateMyEntity } from './services/myValidationService';
+   export { useMyFeature } from './useCases/useMyFeature';
+   // Don't export Adapter - internal implementation detail
+   ```
+
+#### Testing the Architecture
+
+**Service Layer Tests** (pure functions, no mocking needed):
+```typescript
+// services/__tests__/backupValidationService.test.ts
+import { validateBackupNotes, MAX_NOTES_LENGTH } from '../backupValidationService';
+
+describe('validateBackupNotes', () => {
+  it('accepts valid notes', () => {
+    const result = validateBackupNotes('Valid backup notes');
+    expect(result.isValid).toBe(true);
+    expect(result.error).toBeUndefined();
+  });
+
+  it('rejects notes that are too long', () => {
+    const longNotes = 'x'.repeat(MAX_NOTES_LENGTH + 1);
+    const result = validateBackupNotes(longNotes);
+    expect(result.isValid).toBe(false);
+    expect(result.error).toContain('500 characters');
+  });
+
+  it('accepts empty notes', () => {
+    const result = validateBackupNotes('');
+    expect(result.isValid).toBe(true);
+  });
+});
+```
+
+**UseCase Integration Tests** (test user journeys):
+```typescript
+// useCases/__tests__/useDeleteBackup.test.tsx
+import { renderHook, waitFor } from '@testing-library/react';
+import { useDeleteBackup } from '../useDeleteBackup';
+import { backupApiAdapter } from '../../adapters/backupApiAdapter';
+
+vi.mock('../../adapters/backupApiAdapter');
+
+describe('useDeleteBackup', () => {
+  it('validates before deletion', async () => {
+    const { result } = renderHook(() => useDeleteBackup());
+
+    const protectedBackup = {
+      name: 'important.tar.gz',
+      tags: ['important'],
+      /* ... */
+    };
+
+    await result.current.deleteBackup(protectedBackup);
+
+    // Should not call API for protected backups
+    expect(backupApiAdapter.deleteBackup).not.toHaveBeenCalled();
+  });
+
+  it('deletes valid backup and shows success message', async () => {
+    const { result } = renderHook(() => useDeleteBackup());
+    const normalBackup = { name: 'normal.tar.gz', tags: [], /* ... */ };
+
+    await result.current.deleteBackup(normalBackup);
+
+    await waitFor(() => {
+      expect(backupApiAdapter.deleteBackup).toHaveBeenCalledWith('normal.tar.gz');
+      // Verify toast.success was called
+    });
+  });
+});
+```
+
 ### Design Patterns Used
 
 Document design patterns in JSDoc comments when implementing:
 
 - **Singleton**: Docker client for centralized container management
-- **Repository**: File system abstraction in backup service
+- **Repository**: File system abstraction in backup service, SSE state management in frontend
 - **Observer**: SSE broadcast system for real-time updates
 - **Facade**: Simplified Docker API interactions in docker service
 - **Strategy**: Theme selection (light/dark/system)
-- **Service Layer**: Business logic separated from HTTP handling
+- **Service Layer**: Business logic separated from HTTP handling (both backend and frontend)
+- **Adapter**: External system integration with data transformation (frontend API layer)
+- **UseCase**: Orchestration pattern for complex user interactions (frontend)
 
 ### Real-Time Updates (SSE)
 
