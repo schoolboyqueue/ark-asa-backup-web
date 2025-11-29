@@ -57,3 +57,18 @@ export interface BackupHealthApi {
   last_error: string | null;
   error?: string;
 }
+
+/**
+ * Version information for client and server.
+ * Used to display application version in system status.
+ */
+export interface VersionInfo {
+  readonly serverVersion: string;
+}
+
+/**
+ * API response type for version info (snake_case from backend).
+ */
+export interface VersionInfoApi {
+  server_version: string;
+}

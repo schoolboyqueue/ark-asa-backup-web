@@ -8,7 +8,11 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import tar from 'tar';
 import { listAvailableBackups, createPreRestoreSafetyBackup } from '../services/backupService.js';
-import { retrieveDiskSpaceInfo, getBackupHealthStatus } from '../services/systemService.js';
+import {
+  retrieveDiskSpaceInfo,
+  getBackupHealthStatus,
+  getVersionInfo,
+} from '../services/systemService.js';
 import {
   isSchedulerActive,
   getLastSuccessfulBackupTime,
@@ -263,6 +267,9 @@ sseRouter.get('/api/disk-space', async (_httpRequest: Request, httpResponse: Res
 sseRouter.get('/api/stream', async (_httpRequest: Request, httpResponse: Response) => {
   const sendEvent = initializeSSEStream(httpResponse);
   sendEvent('connected', { message: 'Unified stream connected' });
+
+  // Send version info immediately on connection (static, doesn't need polling)
+  sendEvent('version', getVersionInfo());
 
   let isActive = true;
   const timers: NodeJS.Timeout[] = [];

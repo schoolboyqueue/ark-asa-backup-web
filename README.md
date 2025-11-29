@@ -11,6 +11,12 @@ A modern, full-featured web application for automated backup management of ARK: 
 - **Manual Backups**: Trigger on-demand backups with optional notes and tags
 - **Smart Retention**: Automatic pruning to maintain configured backup count
 - **Backup Metadata**: Add descriptive notes and tags to backups for easy organization
+- **ARK Save Info Extraction**: Automatic game metadata from backup archives
+  - Map name detection (all official ARK ASA maps)
+  - Player count from .arkprofile files
+  - Tribe count from .arktribe files
+  - Auto-save count detection
+  - Auto-suggested tags based on save data
 - **Tag-Based Search**: Filter backups by tags, notes, or name
 - **Safe Restore**: Enforces server shutdown before restore to prevent corruption
 - **Optional Safety Backups**: Auto-create pre-restore snapshots for rollback capability
@@ -22,12 +28,14 @@ A modern, full-featured web application for automated backup management of ARK: 
   - Backup list updates
   - Backup scheduler health
   - Disk space usage
+  - Version information
 - **System Health Dashboard**: Aggregate health monitoring with color-coded indicators
   - Server status (running/stopped)
   - Backup scheduler activity
   - Storage usage warnings (75% yellow, 90% red)
   - Last backup timestamp
   - Error tracking
+  - Client and server version display
 
 ### Modern Web Interface
 - **Responsive Design**: Optimized for mobile (iPhone), tablet (iPad), and desktop

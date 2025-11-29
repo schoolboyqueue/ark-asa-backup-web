@@ -14,7 +14,7 @@ import { SunIcon, MoonIcon, ComputerDesktopIcon } from '@heroicons/react/24/soli
 // Clean Architecture imports - organized by domain
 import SystemStatus from '../../system/ui/SystemStatus';
 import ServerControls from '../../server/ui/ServerControls';
-import type { DiskSpace, BackupHealth } from '../../system/domain/system';
+import type { DiskSpace, BackupHealth, VersionInfo } from '../../system/domain/system';
 import type { Server } from '../../server/domain/server';
 
 /**
@@ -30,6 +30,8 @@ interface HeaderControlsProps {
   diskSpace: DiskSpace | null;
   /** Backup health status or null if not yet loaded */
   backupHealth: BackupHealth | null;
+  /** Server version information or null if not yet loaded */
+  versionInfo: VersionInfo | null;
   /** Current theme mode */
   themeMode: 'light' | 'dark' | 'system';
   /** Callback to handle theme change */
@@ -55,6 +57,7 @@ export default function HeaderControls({
   serverLoading,
   diskSpace,
   backupHealth,
+  versionInfo,
   themeMode,
   onThemeChange,
 }: HeaderControlsProps): JSX.Element {
@@ -74,6 +77,7 @@ export default function HeaderControls({
         serverStatus={serverStatus}
         diskSpace={diskSpace}
         backupHealth={backupHealth}
+        versionInfo={versionInfo}
         loading={serverLoading}
       />
 

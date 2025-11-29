@@ -117,6 +117,16 @@ export interface DiskSpace {
 }
 
 /**
+ * Version information for the application.
+ * Used to display server and client version in system status.
+ * @interface VersionInfo
+ */
+export interface VersionInfo {
+  /** Server version from package.json */
+  server_version: string;
+}
+
+/**
  * Extracted information from ARK save files within a backup.
  * Provides game-specific metadata extracted from archive contents.
  * @interface SaveInfo

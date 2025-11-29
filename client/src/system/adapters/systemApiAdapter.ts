@@ -3,7 +3,14 @@
  * Clean Architecture: Adapter Layer
  */
 
-import type { DiskSpace, BackupHealth, DiskSpaceApi, BackupHealthApi } from '../domain/system';
+import type {
+  DiskSpace,
+  BackupHealth,
+  VersionInfo,
+  DiskSpaceApi,
+  BackupHealthApi,
+  VersionInfoApi,
+} from '../domain/system';
 
 /**
  * Transform API disk space response to domain model.
@@ -30,6 +37,15 @@ function transformApiBackupHealthToDomain(api: BackupHealthApi): BackupHealth {
     lastFailedBackup: api.last_failed_backup,
     lastError: api.last_error,
     error: api.error,
+  };
+}
+
+/**
+ * Transform API version info response to domain model.
+ */
+function transformApiVersionInfoToDomain(api: VersionInfoApi): VersionInfo {
+  return {
+    serverVersion: api.server_version,
   };
 }
 
@@ -64,4 +80,8 @@ export const systemApiAdapter = {
 };
 
 // Export transformation functions for use in repository
-export { transformApiDiskSpaceToDomain, transformApiBackupHealthToDomain };
+export {
+  transformApiDiskSpaceToDomain,
+  transformApiBackupHealthToDomain,
+  transformApiVersionInfoToDomain,
+};

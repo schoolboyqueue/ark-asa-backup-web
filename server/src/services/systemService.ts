@@ -1,11 +1,19 @@
 /**
  * @fileoverview System utilities service for ARK ASA Backup Manager.
- * Handles disk space monitoring and backup health status checks.
+ * Handles disk space monitoring, backup health status checks, and version info.
  */
 
 import { promises as fs } from 'fs';
-import type { DiskSpace, BackupHealthStatus } from '../types/index.js';
+import { createRequire } from 'module';
+import type { DiskSpace, BackupHealthStatus, VersionInfo } from '../types/index.js';
 import { BACKUP_STORAGE_DIRECTORY } from '../config/constants.js';
+
+// Use createRequire to import package.json in ES modules
+const require = createRequire(import.meta.url);
+const packageJson = require('../../package.json');
+
+// Cache the version to avoid repeated file reads
+const SERVER_VERSION: string = packageJson.version || 'unknown';
 
 // ============================================================================
 // Disk Space Monitoring
@@ -74,5 +82,21 @@ export function getBackupHealthStatus(
     last_successful_backup: lastSuccessfulBackup,
     last_failed_backup: lastFailedBackup,
     last_error: lastError,
+  };
+}
+
+// ============================================================================
+// Version Information
+// ============================================================================
+
+/**
+ * Retrieves application version information.
+ * Returns the server version from package.json.
+ *
+ * @returns {VersionInfo} Version information object
+ */
+export function getVersionInfo(): VersionInfo {
+  return {
+    server_version: SERVER_VERSION,
   };
 }

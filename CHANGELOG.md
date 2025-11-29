@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Version Display** - Client and server version shown in System Status popover
+  - Client version injected at build time via Vite
+  - Server version sent via SSE on connection
+  - Displayed in new "Version" section of System Status
+- **ARK Save Info Extraction** - Game metadata extracted from backup archives
+  - Map name detection (supports all official ARK ASA maps)
+  - Player count from .arkprofile files
+  - Tribe count from .arktribe files
+  - Auto-save count detection
+  - Auto-suggested tags based on save data
+
 ### Changed
 - Documentation structure reorganized into project/server/client READMEs
 

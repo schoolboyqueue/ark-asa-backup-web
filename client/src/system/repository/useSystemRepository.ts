@@ -9,10 +9,18 @@
  */
 
 import { useState, useCallback } from 'react';
-import type { DiskSpace, BackupHealth, DiskSpaceApi, BackupHealthApi } from '../domain/system';
+import type {
+  DiskSpace,
+  BackupHealth,
+  VersionInfo,
+  DiskSpaceApi,
+  BackupHealthApi,
+  VersionInfoApi,
+} from '../domain/system';
 import {
   transformApiDiskSpaceToDomain,
   transformApiBackupHealthToDomain,
+  transformApiVersionInfoToDomain,
 } from '../adapters/systemApiAdapter';
 import { useUnifiedSSE } from '../../shared/api/useUnifiedSSE';
 
@@ -24,6 +32,8 @@ export interface UseSystemRepositoryReturn {
   diskSpace: DiskSpace | null;
   /** Current backup health state */
   backupHealth: BackupHealth | null;
+  /** Server version information */
+  versionInfo: VersionInfo | null;
   /** Whether initial load is in progress */
   isLoading: boolean;
   /** Error message if failed to load */
@@ -39,6 +49,7 @@ export interface UseSystemRepositoryReturn {
 export function useSystemRepository(): UseSystemRepositoryReturn {
   const [diskSpace, setDiskSpace] = useState<DiskSpace | null>(null);
   const [backupHealth, setBackupHealth] = useState<BackupHealth | null>(null);
+  const [versionInfo, setVersionInfo] = useState<VersionInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -68,8 +79,14 @@ export function useSystemRepository(): UseSystemRepositoryReturn {
     setIsLoading(false);
   }, []);
 
+  const handleVersionUpdate = useCallback((apiData: VersionInfoApi) => {
+    const domainData = transformApiVersionInfoToDomain(apiData);
+    setVersionInfo(domainData);
+  }, []);
+
   useUnifiedSSE<DiskSpaceApi>('disk-space', handleDiskSpaceUpdate);
   useUnifiedSSE<BackupHealthApi>('backup-health', handleBackupHealthUpdate);
+  useUnifiedSSE<VersionInfoApi>('version', handleVersionUpdate);
   useUnifiedSSE<{ ok: boolean; error?: string }>('disk-space-error', handleDiskSpaceError);
   useUnifiedSSE<{ ok: boolean; error?: string }>('backup-health-error', handleBackupHealthError);
 
@@ -80,6 +97,7 @@ export function useSystemRepository(): UseSystemRepositoryReturn {
   return {
     diskSpace,
     backupHealth,
+    versionInfo,
     isLoading,
     error,
     refreshSystem,

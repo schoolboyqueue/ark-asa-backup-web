@@ -18,9 +18,12 @@ import {
   ClockIcon,
 } from '@heroicons/react/24/solid';
 // Clean Architecture: Domain type imports
-import type { DiskSpace, BackupHealth } from '../domain/system';
+import type { DiskSpace, BackupHealth, VersionInfo } from '../domain/system';
 import type { Server } from '../../server/domain/server';
 import { formatRelativeTime } from '../../backups';
+
+/** Client version injected by Vite at build time */
+const CLIENT_VERSION = __APP_VERSION__;
 
 /**
  * Props interface for the SystemStatus component.
@@ -33,6 +36,8 @@ interface SystemStatusProps {
   diskSpace: DiskSpace | null;
   /** Backup health status or null if not yet loaded */
   backupHealth: BackupHealth | null;
+  /** Server version information or null if not yet loaded */
+  versionInfo: VersionInfo | null;
   /** Whether the component is currently loading data */
   loading: boolean;
 }
@@ -53,6 +58,7 @@ export default function SystemStatus({
   serverStatus,
   diskSpace,
   backupHealth,
+  versionInfo,
   loading,
 }: SystemStatusProps): JSX.Element {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
@@ -243,6 +249,21 @@ export default function SystemStatus({
           </div>
         </div>
       )}
+
+      {/* Version Information */}
+      <div className="space-y-2 border-t border-divider pt-3">
+        <span className="text-xs font-semibold text-default-500">Version</span>
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-default-400">Client</span>
+          <span className="text-xs font-mono text-default-600">v{CLIENT_VERSION}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-default-400">Server</span>
+          <span className="text-xs font-mono text-default-600">
+            {versionInfo ? `v${versionInfo.serverVersion}` : '...'}
+          </span>
+        </div>
+      </div>
     </div>
   );
 

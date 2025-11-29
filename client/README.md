@@ -233,12 +233,12 @@ export function CreateBackupForm() {
 
 ### System Domain
 
-**Purpose:** System health monitoring
+**Purpose:** System health and version monitoring
 
 **Layers:**
-- `domain/` - DiskSpace, BackupHealth
+- `domain/` - DiskSpace, BackupHealth, VersionInfo
 - `repository/` - useSystemRepository (state + SSE)
-- `ui/` - SystemStatus
+- `ui/` - SystemStatus (displays health metrics and version info)
 
 ### Shared Layer
 
@@ -512,6 +512,7 @@ useEffect(() => {
 - `status` - Server status changed
 - `health` - Scheduler health updated
 - `diskspace` - Storage usage updated
+- `version` - Server version info (sent once on connection)
 
 ## Theme System
 

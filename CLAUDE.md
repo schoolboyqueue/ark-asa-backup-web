@@ -336,9 +336,9 @@ The frontend follows **Clean Architecture** principles with complete domain-driv
 - `ui/` - View components (ServerControls)
 
 **System Domain** (`client/src/system/`)
-- `domain/` - System models (DiskSpace, BackupHealth)
+- `domain/` - System models (DiskSpace, BackupHealth, VersionInfo)
 - `repository/` - State management with SSE updates
-- `ui/` - View components (SystemStatus)
+- `ui/` - View components (SystemStatus with health metrics and version display)
 
 **Shared Layer** (`client/src/shared/`)
 - `services/toast.ts` - Cross-domain toast notifications
@@ -1583,15 +1583,25 @@ Document design patterns in JSDoc comments when implementing:
 The application uses Server-Sent Events (SSE) instead of polling for all real-time updates:
 
 **SSE Streams Available:**
-- `/api/backups/stream` - Backup list updates
-- `/api/server/status/stream` - ARK server status changes
-- `/api/disk-space/stream` - Storage usage updates
-- `/api/backup/health/stream` - Backup scheduler health
+- `/api/stream` - Unified SSE stream (recommended - all events in one connection)
+- `/api/backups/stream` - Backup list updates (legacy)
+- `/api/server/status/stream` - ARK server status changes (legacy)
+- `/api/disk-space/stream` - Storage usage updates (legacy)
+- `/api/backup/health/stream` - Backup scheduler health (legacy)
 - `/api/restore` (POST) - Restore progress tracking
+
+**SSE Event Types (Unified Stream):**
+- `connected` - Connection established
+- `backups` - Backup list updated
+- `status` - Server status changed
+- `health` - Scheduler health updated
+- `diskspace` - Storage usage updated
+- `version` - Server version info (sent once on connection)
+- `error` - Error occurred
 
 **SSE Implementation:**
 - Backend: Use `setupSSEStream` helper from `utils/sseStream.ts`
-- Frontend: Use `api.subscribeToBackups()`, `api.subscribeToServerStatus()`, etc.
+- Frontend: Use `useUnifiedSSE` hook from `shared/hooks/useUnifiedSSE.ts`
 - Always implement proper cleanup on unmount
 - Handle connection errors and reconnection
 

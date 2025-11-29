@@ -79,6 +79,7 @@ function AppContent({
             serverLoading={serverRepo.isLoading}
             diskSpace={systemRepo.diskSpace}
             backupHealth={systemRepo.backupHealth}
+            versionInfo={systemRepo.versionInfo}
             themeMode={themeMode}
             onThemeChange={onThemeChange}
           />

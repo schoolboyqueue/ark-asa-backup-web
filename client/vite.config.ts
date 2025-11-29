@@ -1,10 +1,18 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/postcss';
-import path from 'path';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+
+// Read version from package.json at build time
+const packageJson = JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf-8'));
+const CLIENT_VERSION = packageJson.version || 'unknown';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(CLIENT_VERSION),
+  },
   css: {
     postcss: {
       plugins: [tailwindcss()],

@@ -103,8 +103,11 @@ GET    /api/disk-space           - Get storage usage
 GET    /api/disk-space/stream    - SSE: Storage updates
 GET    /api/backup/health        - Get scheduler health
 GET    /api/backup/health/stream - SSE: Health updates
+GET    /api/stream               - SSE: Unified stream (all events)
 GET    /health                   - Service health check
 ```
+
+The unified `/api/stream` endpoint sends all event types (backups, status, health, diskspace, version) through a single connection, reducing client-side complexity.
 
 ## Development
 
@@ -297,6 +300,7 @@ router.get('/api/stream', (req, res) => {
 - `status` - Server status changed
 - `health` - Scheduler health updated
 - `diskspace` - Storage usage updated
+- `version` - Server version info (sent once on connection)
 - `error` - Error occurred
 
 ## File Operations
