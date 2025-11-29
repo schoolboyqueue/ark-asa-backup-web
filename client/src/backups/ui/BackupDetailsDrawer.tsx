@@ -4,7 +4,7 @@
  * Uses Hero UI Modal configured as a right-sliding drawer for better UX.
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Drawer,
   DrawerContent,
@@ -34,6 +34,8 @@ import NumberFlow from '@number-flow/react';
 import type { Server } from '../../server/domain/server';
 import type { Backup } from '../domain/backup';
 import { parseFileSize, formatTimestamp, formatRelativeTime } from '..';
+import { backupApiAdapter } from '../adapters/backupApiAdapter';
+import { toast } from '../../shared/services/toast';
 
 /**
  * Props interface for BackupDetailsDrawer component.
@@ -117,7 +119,26 @@ export default function BackupDetailsDrawer({
   const [editedTags, setEditedTags] = useState<string[]>([]);
   const [newTagInput, setNewTagInput] = useState<string>('');
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [copiedToClipboard, setCopiedToClipboard] = useState<boolean>(false);
+  const [animatedSizeValue, setAnimatedSizeValue] = useState<number>(0);
+
+  // Animate the file size when drawer opens
+  useEffect(() => {
+    if (isOpen && backup) {
+      // Reset to 0 first, then animate to actual value
+      setAnimatedSizeValue(0);
+      const timeoutId = setTimeout(() => {
+        setAnimatedSizeValue(parseFileSize(backup.sizeBytes).value);
+      }, 50);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isOpen, backup?.name]);
+
+  // Update animated size when backup size changes while drawer is open
+  useEffect(() => {
+    if (isOpen && backup) {
+      setAnimatedSizeValue(parseFileSize(backup.sizeBytes).value);
+    }
+  }, [backup?.sizeBytes]);
 
   if (!backup) {
     return <></>;
@@ -159,11 +180,11 @@ export default function BackupDetailsDrawer({
 
   const handleCopyName = async (): Promise<void> => {
     try {
-      await navigator.clipboard.writeText(backup.name);
-      setCopiedToClipboard(true);
-      setTimeout(() => setCopiedToClipboard(false), 2000);
+      await backupApiAdapter.copyToClipboard(backup.name);
+      toast.success('Backup name copied to clipboard');
     } catch (clipboardError) {
       console.error('Failed to copy to clipboard:', clipboardError);
+      toast.error('Failed to copy to clipboard');
     }
   };
 
@@ -249,8 +270,8 @@ export default function BackupDetailsDrawer({
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-default-500">Size:</span>
-                      <span className="font-mono">
-                        <NumberFlow value={parsedSize.value} /> {parsedSize.unit}
+                      <span className="font-mono tabular-nums">
+                        <NumberFlow value={animatedSizeValue} suffix={` ${parsedSize.unit}`} />
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -471,16 +492,10 @@ export default function BackupDetailsDrawer({
                     <Button
                       fullWidth
                       variant="flat"
-                      startContent={
-                        copiedToClipboard ? (
-                          <CheckIcon className="w-4 h-4 text-success" />
-                        ) : (
-                          <ClipboardDocumentIcon className="w-4 h-4" />
-                        )
-                      }
+                      startContent={<ClipboardDocumentIcon className="w-4 h-4" />}
                       onPress={handleCopyName}
                     >
-                      {copiedToClipboard ? 'Copied!' : 'Copy Name'}
+                      Copy Name
                     </Button>
 
                     {/* Delete Button */}

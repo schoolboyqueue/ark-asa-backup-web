@@ -3,6 +3,80 @@
 @source '../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
 @custom-variant dark (&:is(.dark *));
 
+/* Custom animations using Tailwind v4 @theme */
+@theme {
+  /* Ping animations for health status indicator */
+  --animate-ping-danger: ping-danger 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+  @keyframes ping-danger {
+    0% {
+      transform: scale(1);
+      opacity: 0.75;
+    }
+    100% {
+      transform: scale(2.5);
+      opacity: 0;
+    }
+  }
+
+  --animate-ping-warning: ping-warning 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  @keyframes ping-warning {
+    0% {
+      transform: scale(1);
+      opacity: 0.75;
+    }
+    100% {
+      transform: scale(2.5);
+      opacity: 0;
+    }
+  }
+
+  --animate-ping-success: ping-success 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  @keyframes ping-success {
+    0% {
+      transform: scale(1);
+      opacity: 0.75;
+    }
+    100% {
+      transform: scale(2.5);
+      opacity: 0;
+    }
+  }
+
+  /* New backup row pulse animation */
+  --animate-newBackupPulse: newBackupPulse 1.5s ease-in-out 2;
+  @keyframes newBackupPulse {
+    0% {
+      background-color: rgba(14, 165, 233, 0.2);
+      transform: scale(1);
+    }
+    50% {
+      background-color: rgba(14, 165, 233, 0.3);
+      transform: scale(1.01);
+    }
+    100% {
+      background-color: rgba(14, 165, 233, 0.1);
+      transform: scale(1);
+    }
+  }
+
+  /* Deleting backup row fade animation */
+  --animate-deleteBackupFade: deleteBackupFade 0.5s ease-out forwards;
+  @keyframes deleteBackupFade {
+    0% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    50% {
+      opacity: 0.5;
+      transform: translateX(-10px);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+  }
+}
+
 body {
   margin: 0;
   font-family: 'Noto Sans', sans-serif;
@@ -33,94 +107,29 @@ body {
   background: hsl(var(--heroui-default-400));
 }
 
-/* New backup row animation - pulse and highlight */
-@keyframes newBackupPulse {
-  0% {
-    background-color: rgba(14, 165, 233, 0.2);
-    transform: scale(1);
-  }
-  50% {
-    background-color: rgba(14, 165, 233, 0.3);
-    transform: scale(1.01);
-  }
-  100% {
-    background-color: rgba(14, 165, 233, 0.1);
-    transform: scale(1);
-  }
+/* NumberFlow alignment fix for small font sizes (Safari/browser bug)
+ * See: https://github.com/barvian/number-flow/issues/84
+ */
+number-flow-react::part(left),
+number-flow-react::part(right),
+number-flow-react::part(left)::after,
+number-flow-react::part(right)::after,
+number-flow-react::part(symbol) {
+  padding: calc(var(--number-flow-mask-height, 0.25em) / 2) 0;
 }
 
+/* New backup row - additional styles beyond animation */
 .new-backup-row {
-  animation: newBackupPulse 1.5s ease-in-out 2;
+  @apply animate-newBackupPulse;
   border-left: 3px solid #0ea5e9 !important;
 }
 
-/* Deleting backup row animation - fade and slide out */
-@keyframes deleteBackupFade {
-  0% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  50% {
-    opacity: 0.5;
-    transform: translateX(-10px);
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-}
-
+/* Deleting backup row - additional styles beyond animation */
 .deleting-backup-row {
-  animation: deleteBackupFade 0.5s ease-out forwards;
+  @apply animate-deleteBackupFade;
   background-color: rgba(255, 77, 79, 0.1);
 }
 
 .deleting-backup-row td {
   color: rgba(0, 0, 0, 0.3);
-}
-
-/* Ping animations for health status indicator */
-@keyframes ping-danger {
-  0% {
-    transform: scale(1);
-    opacity: 0.75;
-  }
-  100% {
-    transform: scale(2.5);
-    opacity: 0;
-  }
-}
-
-@keyframes ping-warning {
-  0% {
-    transform: scale(1);
-    opacity: 0.75;
-  }
-  100% {
-    transform: scale(2.5);
-    opacity: 0;
-  }
-}
-
-@keyframes ping-success {
-  0% {
-    transform: scale(1);
-    opacity: 0.75;
-  }
-  100% {
-    transform: scale(2.5);
-    opacity: 0;
-  }
-}
-
-.animate-ping-danger {
-  animation: ping-danger 1s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
-.animate-ping-warning {
-  animation: ping-warning 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
-.animate-ping-success {
-  animation: ping-success 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }

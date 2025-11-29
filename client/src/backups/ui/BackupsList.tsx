@@ -47,7 +47,6 @@ import {
   TrashIcon,
   PlusCircleIcon,
   ClipboardDocumentIcon,
-  CheckIcon,
   ChevronUpIcon,
   ChevronDownIcon,
   MagnifyingGlassIcon,
@@ -121,10 +120,17 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
   const [isRestoreModalVisible, setIsRestoreModalVisible] = useState(false);
   const [selectedBackupForDelete, setSelectedBackupForDelete] = useState<Backup | null>(null);
   const [selectedBackupForRestore, setSelectedBackupForRestore] = useState<Backup | null>(null);
-  const [selectedBackupForDetails, setSelectedBackupForDetails] = useState<Backup | null>(null);
+  const [selectedBackupNameForDetails, setSelectedBackupNameForDetails] = useState<string | null>(
+    null
+  );
   const [isDetailsDrawerOpen, setIsDetailsDrawerOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
+
+  // Derive fresh backup data from the live backups array (for real-time updates in drawer)
+  const selectedBackupForDetails = selectedBackupNameForDetails
+    ? backups.find((backup) => backup.name === selectedBackupNameForDetails) || null
+    : null;
 
   // ========================================================================
   // EVENT HANDLERS - Wire UI events to UseCase actions
@@ -167,13 +173,13 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
   };
 
   const handleOpenDetails = (backup: Backup) => {
-    setSelectedBackupForDetails(backup);
+    setSelectedBackupNameForDetails(backup.name);
     setIsDetailsDrawerOpen(true);
   };
 
   const handleCloseDetails = () => {
     setIsDetailsDrawerOpen(false);
-    setTimeout(() => setSelectedBackupForDetails(null), 300);
+    setTimeout(() => setSelectedBackupNameForDetails(null), 300);
   };
 
   const handleClearFilters = () => {
@@ -395,33 +401,26 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
                       <div className="flex items-center gap-2">
                         {renderVerificationIcon(item)}
                         <span className="font-semibold hover:text-primary">{item.name}</span>
-                        <div
-                          onClick={(e: React.MouseEvent) => {
-                            e.stopPropagation();
-                          }}
-                        >
+                        <Tooltip content="Copy name">
                           <Button
                             isIconOnly
                             size="sm"
                             variant="light"
                             onPress={() => backupActions.copyBackupName(item)}
+                            onClick={(clickEvent: React.MouseEvent) => clickEvent.stopPropagation()}
                           >
-                            {backupActions.copiedBackupName === item.name ? (
-                              <CheckIcon className="h-4 w-4 text-success" />
-                            ) : (
-                              <ClipboardDocumentIcon className="h-4 w-4" />
-                            )}
+                            <ClipboardDocumentIcon className="h-4 w-4" />
                           </Button>
-                        </div>
+                        </Tooltip>
                       </div>
                     </TableCell>
                     <TableCell>
                       {(() => {
                         const parsed = parseFileSize(item.sizeBytes);
                         return (
-                          <>
-                            <NumberFlow value={parsed.value} /> {parsed.unit}
-                          </>
+                          <span className="font-mono tabular-nums">
+                            <NumberFlow value={parsed.value} suffix={` ${parsed.unit}`} />
+                          </span>
                         );
                       })()}
                     </TableCell>

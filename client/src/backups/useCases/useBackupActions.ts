@@ -6,16 +6,13 @@
  * - Orchestrates non-CRUD backup operations
  * - Calls Adapter for side effects
  * - Manages loading states
- * - Provides user feedback
+ * - Provides user feedback via toast notifications
  */
 
 import { useState, useCallback } from 'react';
 import { backupApiAdapter } from '../adapters/backupApiAdapter';
 import { toast } from '../../shared/services/toast';
 import type { Backup } from '../domain/backup';
-
-/** Delay for clipboard success indicator */
-const CLIPBOARD_INDICATOR_DELAY_MS = 2000;
 
 /** Delay for verify loading state */
 const VERIFY_LOADING_DELAY_MS = 1000;
@@ -30,9 +27,6 @@ export interface UseBackupActionsReturn {
   /** Name of backup currently being verified */
   verifyingBackupName: string | null;
 
-  /** Name of backup whose name was recently copied */
-  copiedBackupName: string | null;
-
   /** Downloads a backup to user's device */
   downloadBackup: (backup: Backup) => Promise<void>;
 
@@ -46,6 +40,7 @@ export interface UseBackupActionsReturn {
 /**
  * UseCase hook for backup actions (download, verify, copy).
  * Manages loading states and user feedback for each operation.
+ * Uses toast notifications for clipboard feedback.
  *
  * @returns {UseBackupActionsReturn} Action methods and loading states
  *
@@ -55,7 +50,6 @@ export interface UseBackupActionsReturn {
  *   const {
  *     downloadingBackupName,
  *     verifyingBackupName,
- *     copiedBackupName,
  *     downloadBackup,
  *     verifyBackup,
  *     copyBackupName,
@@ -76,7 +70,7 @@ export interface UseBackupActionsReturn {
  *         Verify
  *       </Button>
  *       <Button onPress={() => copyBackupName(backup)}>
- *         {copiedBackupName === backup.name ? 'Copied!' : 'Copy Name'}
+ *         Copy Name
  *       </Button>
  *     </>
  *   );
@@ -86,7 +80,6 @@ export interface UseBackupActionsReturn {
 export function useBackupActions(): UseBackupActionsReturn {
   const [downloadingBackupName, setDownloadingBackupName] = useState<string | null>(null);
   const [verifyingBackupName, setVerifyingBackupName] = useState<string | null>(null);
-  const [copiedBackupName, setCopiedBackupName] = useState<string | null>(null);
 
   /**
    * Downloads a backup archive to user's device.
@@ -143,21 +136,15 @@ export function useBackupActions(): UseBackupActionsReturn {
   }, []);
 
   /**
-   * Copies backup name to clipboard with visual feedback.
+   * Copies backup name to clipboard with toast feedback.
    */
   const copyBackupName = useCallback(async (backup: Backup): Promise<void> => {
     try {
       // Call Adapter to copy to clipboard
       await backupApiAdapter.copyToClipboard(backup.name);
 
-      // Success feedback
-      setCopiedBackupName(backup.name);
+      // Success feedback via toast
       toast.success('Backup name copied to clipboard');
-
-      // Clear indicator after delay
-      setTimeout(() => {
-        setCopiedBackupName(null);
-      }, CLIPBOARD_INDICATOR_DELAY_MS);
     } catch (error) {
       console.error('Failed to copy to clipboard:', error);
       toast.error('Failed to copy to clipboard');
@@ -168,7 +155,6 @@ export function useBackupActions(): UseBackupActionsReturn {
   return {
     downloadingBackupName,
     verifyingBackupName,
-    copiedBackupName,
     downloadBackup,
     verifyBackup,
     copyBackupName,
