@@ -33,7 +33,7 @@ import NumberFlow from '@number-flow/react';
 // Clean Architecture: Domain type imports
 import type { Server } from '../../server/domain/server';
 import type { Backup } from '../domain/backup';
-import { parseFileSize, formatTimestamp, formatRelativeTime } from '..';
+import { parseFileSize, formatTimestamp, formatRelativeTime, useRelativeTimeRefresh } from '..';
 import { backupApiAdapter } from '../adapters/backupApiAdapter';
 import { toast } from '../../shared/services/toast';
 
@@ -120,6 +120,9 @@ export default function BackupDetailsDrawer({
   const [newTagInput, setNewTagInput] = useState<string>('');
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [animatedSizeValue, setAnimatedSizeValue] = useState<number>(0);
+
+  // Refresh relative times every 30 seconds (triggers re-render)
+  useRelativeTimeRefresh();
 
   // Animate the file size when drawer opens
   useEffect(() => {

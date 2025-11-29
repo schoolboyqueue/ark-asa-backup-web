@@ -64,6 +64,7 @@ import {
   useDeleteBackup,
   useBackupActions,
   useUpdateBackupMetadata,
+  useRelativeTimeRefresh,
   parseFileSize,
   formatTimestamp,
   formatRelativeTime,
@@ -112,6 +113,9 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
   const filters = useBackupFilters(sort.sortedBackups);
   const pagination = useBackupPagination(filters.filteredBackups, 10);
   const restoreProgress = useRestoreProgress();
+
+  // Refresh relative times every 30 seconds (triggers re-render)
+  useRelativeTimeRefresh();
 
   // ========================================================================
   // LOCAL VIEW STATE - Modal visibility, animations, selections

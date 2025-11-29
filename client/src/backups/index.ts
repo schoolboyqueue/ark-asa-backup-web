@@ -77,3 +77,8 @@ export type { UseBackupActionsReturn } from './useCases/useBackupActions';
 
 export { useUpdateBackupMetadata } from './useCases/useUpdateBackupMetadata';
 export type { UseUpdateBackupMetadataReturn } from './useCases/useUpdateBackupMetadata';
+
+// ============================================================================
+// UI Helper Hooks
+// ============================================================================
+export { useRelativeTimeRefresh } from './hooks/useRelativeTimeRefresh';
