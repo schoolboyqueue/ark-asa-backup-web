@@ -8,9 +8,21 @@
  */
 
 import { useState, useCallback } from 'react';
-import type { Backup } from '../domain/backup';
+import type { Backup, SaveInfo } from '../domain/backup';
 import { useUnifiedSSE } from '../../shared/api/useUnifiedSSE';
 import { backupApiAdapter } from '../adapters/backupApiAdapter';
+
+/** API SaveInfo type (snake_case) */
+interface SaveInfoApi {
+  map_name: string;
+  map_display_name: string;
+  player_count: number;
+  tribe_count: number;
+  auto_save_count: number;
+  main_save_size_bytes: number;
+  total_file_count: number;
+  suggested_tags: string[];
+}
 
 interface BackupMetadataApi {
   name: string;
@@ -22,6 +34,23 @@ interface BackupMetadataApi {
   verification_time?: number;
   verified_file_count?: number;
   verification_error?: string;
+  save_info?: SaveInfoApi;
+}
+
+/**
+ * Transforms API SaveInfo (snake_case) to domain SaveInfo (camelCase).
+ */
+function transformApiSaveInfo(apiSaveInfo: SaveInfoApi): SaveInfo {
+  return {
+    mapName: apiSaveInfo.map_name,
+    mapDisplayName: apiSaveInfo.map_display_name,
+    playerCount: apiSaveInfo.player_count,
+    tribeCount: apiSaveInfo.tribe_count,
+    autoSaveCount: apiSaveInfo.auto_save_count,
+    mainSaveSizeBytes: apiSaveInfo.main_save_size_bytes,
+    totalFileCount: apiSaveInfo.total_file_count,
+    suggestedTags: apiSaveInfo.suggested_tags,
+  };
 }
 
 function transformApiBackup(api: BackupMetadataApi): Backup {
@@ -35,6 +64,7 @@ function transformApiBackup(api: BackupMetadataApi): Backup {
     verificationTime: api.verification_time,
     verifiedFileCount: api.verified_file_count,
     verificationError: api.verification_error,
+    saveInfo: api.save_info ? transformApiSaveInfo(api.save_info) : undefined,
   };
 }
 

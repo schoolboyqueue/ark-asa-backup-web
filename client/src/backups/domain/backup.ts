@@ -10,6 +10,36 @@
  */
 
 /**
+ * Extracted information from ARK save files within a backup.
+ * Provides game-specific metadata for display and auto-tagging.
+ */
+export interface SaveInfo {
+  /** Map name extracted from directory structure (e.g., "TheIsland_WP") */
+  readonly mapName: string;
+
+  /** Human-readable map name (e.g., "The Island") */
+  readonly mapDisplayName: string;
+
+  /** Number of player profiles (.arkprofile files) */
+  readonly playerCount: number;
+
+  /** Number of tribes (.arktribe files) */
+  readonly tribeCount: number;
+
+  /** Number of auto-save snapshots */
+  readonly autoSaveCount: number;
+
+  /** Size of main save file in bytes */
+  readonly mainSaveSizeBytes: number;
+
+  /** Total number of files in the backup */
+  readonly totalFileCount: number;
+
+  /** Automatically suggested tags based on extracted data */
+  readonly suggestedTags: ReadonlyArray<string>;
+}
+
+/**
  * Core backup entity representing a backup archive.
  * Immutable value object containing all backup metadata and status.
  */
@@ -40,6 +70,9 @@ export interface Backup {
 
   /** Error message if verification failed */
   readonly verificationError?: string;
+
+  /** Extracted ARK save information (map, players, tribes, etc.) */
+  readonly saveInfo?: SaveInfo;
 }
 
 /**

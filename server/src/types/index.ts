@@ -43,6 +43,8 @@ export interface BackupMetadata {
   verified_file_count?: number;
   /** Error message if verification failed */
   verification_error?: string;
+  /** Extracted ARK save information (map, players, tribes, etc.) */
+  save_info?: SaveInfo;
 }
 
 /**
@@ -112,4 +114,28 @@ export interface DiskSpace {
   used_percent: number;
   /** Error message if disk space check failed */
   error?: string;
+}
+
+/**
+ * Extracted information from ARK save files within a backup.
+ * Provides game-specific metadata extracted from archive contents.
+ * @interface SaveInfo
+ */
+export interface SaveInfo {
+  /** Map name extracted from directory structure (e.g., "TheIsland_WP", "Ragnarok") */
+  map_name: string;
+  /** Human-readable map name (e.g., "The Island", "Ragnarok") */
+  map_display_name: string;
+  /** Number of player profiles (.arkprofile files) */
+  player_count: number;
+  /** Number of tribes (.arktribe files) */
+  tribe_count: number;
+  /** Number of auto-save snapshots (timestamped .ark files) */
+  auto_save_count: number;
+  /** Size of main save file in bytes */
+  main_save_size_bytes: number;
+  /** Total number of files in the backup */
+  total_file_count: number;
+  /** Automatically suggested tags based on extracted data */
+  suggested_tags: string[];
 }

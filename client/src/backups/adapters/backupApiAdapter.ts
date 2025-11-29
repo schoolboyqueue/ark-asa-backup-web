@@ -12,6 +12,7 @@
 
 import type {
   Backup,
+  SaveInfo,
   CreateBackupDto,
   UpdateBackupMetadataDto,
   VerificationResult,
@@ -22,6 +23,18 @@ interface ApiResponse<T = unknown> {
   ok: boolean;
   error?: string;
   data?: T;
+}
+
+/** API SaveInfo type (snake_case) */
+interface SaveInfoApi {
+  map_name: string;
+  map_display_name: string;
+  player_count: number;
+  tribe_count: number;
+  auto_save_count: number;
+  main_save_size_bytes: number;
+  total_file_count: number;
+  suggested_tags: string[];
 }
 
 /** Legacy BackupMetadata from API (snake_case) */
@@ -35,6 +48,26 @@ interface BackupMetadataApi {
   verification_time?: number;
   verified_file_count?: number;
   verification_error?: string;
+  save_info?: SaveInfoApi;
+}
+
+/**
+ * Transforms API SaveInfo (snake_case) to domain SaveInfo (camelCase).
+ *
+ * @param {SaveInfoApi} apiSaveInfo - SaveInfo from API response
+ * @returns {SaveInfo} Domain SaveInfo model
+ */
+function transformApiSaveInfoToDomain(apiSaveInfo: SaveInfoApi): SaveInfo {
+  return {
+    mapName: apiSaveInfo.map_name,
+    mapDisplayName: apiSaveInfo.map_display_name,
+    playerCount: apiSaveInfo.player_count,
+    tribeCount: apiSaveInfo.tribe_count,
+    autoSaveCount: apiSaveInfo.auto_save_count,
+    mainSaveSizeBytes: apiSaveInfo.main_save_size_bytes,
+    totalFileCount: apiSaveInfo.total_file_count,
+    suggestedTags: apiSaveInfo.suggested_tags,
+  };
 }
 
 /**
@@ -55,6 +88,7 @@ function transformApiBackupToDomain(apiBackup: BackupMetadataApi): Backup {
     verificationTime: apiBackup.verification_time,
     verifiedFileCount: apiBackup.verified_file_count,
     verificationError: apiBackup.verification_error,
+    saveInfo: apiBackup.save_info ? transformApiSaveInfoToDomain(apiBackup.save_info) : undefined,
   };
 }
 

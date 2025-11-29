@@ -11,7 +11,9 @@ import type {
   BackupFileEntry,
   BackupSettings,
   VerificationResult,
+  SaveInfo,
 } from '../types/index.js';
+import { extractSaveInfo } from './saveInfoService.js';
 import {
   BACKUP_STORAGE_DIRECTORY,
   ARK_SAVE_DIRECTORY,
@@ -24,19 +26,21 @@ import {
 // ============================================================================
 
 /**
- * Saves backup metadata (notes and tags) to a .meta.json file.
- * Creates or updates the metadata file with user-provided information.
+ * Saves backup metadata (notes, tags, and save info) to a .meta.json file.
+ * Creates or updates the metadata file with user-provided and extracted information.
  *
  * @param {string} backupFileName - Name of the backup archive file
  * @param {string} notes - User-provided notes for the backup
  * @param {string[]} tags - Array of tags for categorizing the backup
+ * @param {SaveInfo} [saveInfo] - Optional extracted save information
  * @returns {Promise<void>}
  * @async
  */
 export async function saveBackupMetadata(
   backupFileName: string,
   notes: string,
-  tags: string[]
+  tags: string[],
+  saveInfo?: SaveInfo
 ): Promise<void> {
   const metadataFilePath = path.join(BACKUP_STORAGE_DIRECTORY, `${backupFileName}.meta.json`);
 
@@ -45,6 +49,7 @@ export async function saveBackupMetadata(
     created_at: Math.floor(Date.now() / 1000),
     notes: notes || undefined,
     tags: tags.length > 0 ? tags : undefined,
+    save_info: saveInfo || undefined,
   };
 
   await fs.writeFile(metadataFilePath, JSON.stringify(backupMetadata, null, 2), 'utf-8');
@@ -231,15 +236,17 @@ export async function createBackup(
 
   console.log(`Backup created successfully: ${backupArchiveName}`);
 
-  // Save notes if provided
-  if (notes && notes.trim()) {
-    await saveBackupMetadata(backupArchiveName, notes, []);
-  }
-
   // Verify backup integrity
   console.log(`Verifying backup integrity: ${backupArchiveName}`);
   const verificationResult = await verifyBackupIntegrity(backupArchiveName);
   await saveVerificationResult(backupArchiveName, verificationResult);
+
+  // Extract save information from the backup archive
+  console.log(`Extracting save info: ${backupArchiveName}`);
+  const saveInfo = await extractSaveInfo(backupArchiveName);
+
+  // Always save metadata (with or without notes) to store save_info
+  await saveBackupMetadata(backupArchiveName, notes || '', [], saveInfo || undefined);
 
   return backupArchiveName;
 }
@@ -336,17 +343,23 @@ export async function listAvailableBackups(): Promise<BackupMetadata[]> {
         const fileStatistics = await fs.stat(backupFilePath);
         const verificationResult = await loadVerificationResult(backupFileName);
 
-        // Load metadata (notes and tags)
+        // Load metadata (notes, tags, and save_info)
         const metadataFilePath = path.join(BACKUP_STORAGE_DIRECTORY, `${backupFileName}.meta.json`);
         let backupNotes: string | undefined;
         let backupTags: string[] | undefined;
+        let backupSaveInfo: SaveInfo | undefined;
         try {
           const metadataContent = await fs.readFile(metadataFilePath, 'utf-8');
-          const metadata = JSON.parse(metadataContent) as { notes?: string; tags?: string[] };
+          const metadata = JSON.parse(metadataContent) as {
+            notes?: string;
+            tags?: string[];
+            save_info?: SaveInfo;
+          };
           backupNotes = metadata.notes;
           backupTags = metadata.tags;
+          backupSaveInfo = metadata.save_info;
         } catch (metadataLoadError) {
-          // Metadata file doesn't exist or is invalid - this is normal for backups without notes/tags
+          // Metadata file doesn't exist or is invalid - this is normal for backups without metadata
         }
 
         const backupMetadata: BackupMetadata = {
@@ -355,6 +368,7 @@ export async function listAvailableBackups(): Promise<BackupMetadata[]> {
           mtime: fileStatistics.mtimeMs / 1000, // Convert milliseconds to seconds
           notes: backupNotes,
           tags: backupTags,
+          save_info: backupSaveInfo,
         };
 
         // Add verification data if available

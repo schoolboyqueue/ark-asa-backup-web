@@ -15,6 +15,7 @@
 // ============================================================================
 export type {
   Backup,
+  SaveInfo,
   VerificationStatus,
   CreateBackupDto,
   UpdateBackupMetadataDto,

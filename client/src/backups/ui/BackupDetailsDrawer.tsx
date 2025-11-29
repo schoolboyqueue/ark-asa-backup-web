@@ -27,6 +27,11 @@ import {
   CheckIcon,
   ClipboardDocumentIcon,
   TagIcon,
+  MapIcon,
+  UserGroupIcon,
+  UsersIcon,
+  DocumentDuplicateIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/solid';
 import NumberFlow from '@number-flow/react';
 
@@ -298,6 +303,118 @@ export default function BackupDetailsDrawer({
                     )}
                   </div>
                 </div>
+
+                {/* Save Info Section - Only show if save info exists */}
+                {backup.saveInfo && (
+                  <>
+                    <Divider />
+                    <div>
+                      <h4 className="text-sm font-semibold mb-2">ARK Save Data</h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between items-center">
+                          <span className="text-default-500 flex items-center gap-1.5">
+                            <MapIcon className="w-4 h-4" />
+                            Map:
+                          </span>
+                          <Chip size="sm" variant="flat" color="primary">
+                            {backup.saveInfo.mapDisplayName}
+                          </Chip>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-default-500 flex items-center gap-1.5">
+                            <UserGroupIcon className="w-4 h-4" />
+                            Players:
+                          </span>
+                          <span className="font-mono tabular-nums">
+                            {backup.saveInfo.playerCount}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-default-500 flex items-center gap-1.5">
+                            <UsersIcon className="w-4 h-4" />
+                            Tribes:
+                          </span>
+                          <span className="font-mono tabular-nums">
+                            {backup.saveInfo.tribeCount}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-default-500 flex items-center gap-1.5">
+                            <DocumentDuplicateIcon className="w-4 h-4" />
+                            Auto-saves:
+                          </span>
+                          <span className="font-mono tabular-nums">
+                            {backup.saveInfo.autoSaveCount}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-default-500">Total Files:</span>
+                          <span className="font-mono tabular-nums">
+                            {backup.saveInfo.totalFileCount}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Suggested Tags */}
+                      {backup.saveInfo.suggestedTags.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-default-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs text-default-500 flex items-center gap-1">
+                              <SparklesIcon className="w-3 h-3" />
+                              Suggested Tags
+                            </span>
+                            {isEditingNotes && (
+                              <Button
+                                size="sm"
+                                variant="flat"
+                                color="secondary"
+                                onPress={() => {
+                                  const newTags = [...editedTags];
+                                  for (const suggestedTag of backup.saveInfo?.suggestedTags || []) {
+                                    if (!newTags.includes(suggestedTag)) {
+                                      newTags.push(suggestedTag);
+                                    }
+                                  }
+                                  setEditedTags(newTags);
+                                }}
+                              >
+                                Apply All
+                              </Button>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {backup.saveInfo.suggestedTags.map((suggestedTag) => {
+                              const isAlreadyAdded = isEditingNotes
+                                ? editedTags.includes(suggestedTag)
+                                : backup.tags?.includes(suggestedTag);
+                              return (
+                                <Chip
+                                  key={suggestedTag}
+                                  size="sm"
+                                  variant={isAlreadyAdded ? 'flat' : 'bordered'}
+                                  color={isAlreadyAdded ? 'success' : 'default'}
+                                  className={
+                                    !isAlreadyAdded && isEditingNotes
+                                      ? 'cursor-pointer hover:bg-default-100'
+                                      : ''
+                                  }
+                                  onClick={() => {
+                                    if (isEditingNotes && !isAlreadyAdded) {
+                                      setEditedTags([...editedTags, suggestedTag]);
+                                    }
+                                  }}
+                                >
+                                  {isAlreadyAdded ? '✓ ' : '+ '}
+                                  {suggestedTag}
+                                </Chip>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
 
                 <Divider />
 
