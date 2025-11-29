@@ -42,30 +42,36 @@ export function useSystemRepository(): UseSystemRepositoryReturn {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useUnifiedSSE<DiskSpaceApi>('disk-space', (apiData) => {
+  // Stable callback references to prevent SSE listener re-registration on every render
+  const handleDiskSpaceUpdate = useCallback((apiData: DiskSpaceApi) => {
     const domainData = transformApiDiskSpaceToDomain(apiData);
     setDiskSpace(domainData);
     setIsLoading(false);
     setError(null);
-  });
+  }, []);
 
-  useUnifiedSSE<BackupHealthApi>('backup-health', (apiData) => {
+  const handleBackupHealthUpdate = useCallback((apiData: BackupHealthApi) => {
     const domainData = transformApiBackupHealthToDomain(apiData);
     setBackupHealth(domainData);
     setIsLoading(false);
-  });
+  }, []);
 
-  useUnifiedSSE<{ ok: boolean; error?: string }>('disk-space-error', (data) => {
+  const handleDiskSpaceError = useCallback((data: { ok: boolean; error?: string }) => {
     const errorMessage = data.error || 'Failed to load disk space';
     setError(errorMessage);
     setIsLoading(false);
-  });
+  }, []);
 
-  useUnifiedSSE<{ ok: boolean; error?: string }>('backup-health-error', (data) => {
+  const handleBackupHealthError = useCallback((data: { ok: boolean; error?: string }) => {
     const errorMessage = data.error || 'Failed to load backup health';
     setError(errorMessage);
     setIsLoading(false);
-  });
+  }, []);
+
+  useUnifiedSSE<DiskSpaceApi>('disk-space', handleDiskSpaceUpdate);
+  useUnifiedSSE<BackupHealthApi>('backup-health', handleBackupHealthUpdate);
+  useUnifiedSSE<{ ok: boolean; error?: string }>('disk-space-error', handleDiskSpaceError);
+  useUnifiedSSE<{ ok: boolean; error?: string }>('backup-health-error', handleBackupHealthError);
 
   const refreshSystem = useCallback(() => {
     setIsLoading(true);

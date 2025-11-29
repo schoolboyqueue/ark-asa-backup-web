@@ -29,9 +29,9 @@ pids
 config/
 !config/settings.env.example
 
-# Backup storage (contains large backup files)
-backups/
-!backups/.gitkeep
+# Backup storage (contains large backup files - top level only)
+/backups/
+!/backups/.gitkeep
 
 # ARK save files (local development data)
 save/

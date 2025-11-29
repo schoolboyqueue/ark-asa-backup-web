@@ -36,20 +36,24 @@ export function useServerRepository(): UseServerRepositoryReturn {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useUnifiedSSE<{ ok: boolean; status: string }>('server-status', (data) => {
+  // Stable callback references to prevent SSE listener re-registration on every render
+  const handleServerStatusUpdate = useCallback((data: { ok: boolean; status: string }) => {
     if (data.ok && data.status) {
       const status = data.status as Server['status'];
       setServer({ status, isRunning: status === 'running' });
       setIsLoading(false);
       setError(null);
     }
-  });
+  }, []);
 
-  useUnifiedSSE<{ ok: boolean; error?: string }>('server-status-error', (data) => {
+  const handleServerStatusError = useCallback((data: { ok: boolean; error?: string }) => {
     const errorMessage = data.error || 'Failed to load server status';
     setError(errorMessage);
     setIsLoading(false);
-  });
+  }, []);
+
+  useUnifiedSSE<{ ok: boolean; status: string }>('server-status', handleServerStatusUpdate);
+  useUnifiedSSE<{ ok: boolean; error?: string }>('server-status-error', handleServerStatusError);
 
   const refreshServer = useCallback(() => {
     setIsLoading(true);
