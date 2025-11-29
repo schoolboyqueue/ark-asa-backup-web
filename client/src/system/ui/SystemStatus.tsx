@@ -64,12 +64,13 @@ export default function SystemStatus({
    * @returns {'danger' | 'warning' | 'success'} Health status color
    */
   const getHealthColor = (): 'danger' | 'warning' | 'success' => {
-    // Critical conditions (red)
-    if (serverStatus && serverStatus.status !== 'running') return 'danger';
+    // Critical conditions (red) - server stopped or dead
+    if (serverStatus && ['exited', 'dead', 'paused'].includes(serverStatus.status)) return 'danger';
     if (backupHealth && !backupHealth.schedulerActive) return 'danger';
     if (diskSpace && diskSpace.usedPercent > 90) return 'danger';
 
-    // Warning conditions (yellow)
+    // Warning conditions (yellow) - transitional states or high disk usage
+    if (serverStatus && serverStatus.isTransitioning) return 'warning';
     if (diskSpace && diskSpace.usedPercent > 75) return 'warning';
 
     // All healthy (green)
@@ -101,6 +102,24 @@ export default function SystemStatus({
           >
             Running
           </Chip>
+        );
+
+      case 'starting':
+        return (
+          <div className="animate-pulse">
+            <Chip color="warning" variant="flat" size="sm" className="font-semibold">
+              Starting...
+            </Chip>
+          </div>
+        );
+
+      case 'stopping':
+        return (
+          <div className="animate-pulse">
+            <Chip color="warning" variant="flat" size="sm" className="font-semibold">
+              Stopping...
+            </Chip>
+          </div>
         );
 
       case 'restarting':

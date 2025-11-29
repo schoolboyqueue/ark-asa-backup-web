@@ -12,6 +12,8 @@ export type {
   SettingsValidationResult,
 } from './domain/server';
 
+export { isTransitionalStatus, createServerFromStatus } from './domain/server';
+
 // Services
 export {
   validateBackupInterval,

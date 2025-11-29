@@ -7,6 +7,7 @@
 
 /**
  * Server status representing the current state of the ARK container.
+ * Includes both Docker container states and application-level transitional states.
  */
 export type ServerStatus =
   | 'running'
@@ -15,7 +16,9 @@ export type ServerStatus =
   | 'restarting'
   | 'removing'
   | 'dead'
-  | 'created';
+  | 'created'
+  | 'starting' // Application state: container start initiated, waiting for running
+  | 'stopping'; // Application state: container stop initiated, waiting for exit
 
 /**
  * Server state with metadata.
@@ -26,6 +29,35 @@ export interface Server {
 
   /** Whether the server is running (helper property) */
   readonly isRunning: boolean;
+
+  /** Whether the server is in a transitional state (starting or stopping) */
+  readonly isTransitioning: boolean;
+
+  /** Whether the server is starting */
+  readonly isStarting: boolean;
+
+  /** Whether the server is stopping */
+  readonly isStopping: boolean;
+}
+
+/**
+ * Helper to determine if a status is a transitional state.
+ */
+export function isTransitionalStatus(status: ServerStatus): boolean {
+  return status === 'starting' || status === 'stopping';
+}
+
+/**
+ * Creates a Server object from a status string.
+ */
+export function createServerFromStatus(status: ServerStatus): Server {
+  return {
+    status,
+    isRunning: status === 'running',
+    isTransitioning: isTransitionalStatus(status),
+    isStarting: status === 'starting',
+    isStopping: status === 'stopping',
+  };
 }
 
 /**

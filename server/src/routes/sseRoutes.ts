@@ -16,6 +16,7 @@ import {
   getLastBackupError,
 } from '../services/schedulerService.js';
 import { getContainerStatus } from '../services/dockerService.js';
+import { getEffectiveServerStatus } from '../services/serverStateService.js';
 import { loadBackupSettings } from '../services/settingsService.js';
 import { initializeSSEStream, setupSSECleanup } from '../utils/sseStream.js';
 import {
@@ -32,7 +33,8 @@ const sseRouter = Router();
 
 /**
  * Server-Sent Events stream for real-time server status updates.
- * Polls Docker API every 2 seconds and sends updates when status changes.
+ * Polls Docker API every 500ms and sends updates when status changes.
+ * Includes transitional states (starting/stopping) for better UX.
  * @route GET /api/server/status/stream
  */
 sseRouter.get(
@@ -48,30 +50,34 @@ sseRouter.get(
 
     /**
      * Polls server status and sends updates when changes occur.
+     * Uses faster polling (500ms) to catch transitional states.
      */
     const pollServerStatus = async (): Promise<void> => {
       while (isStreamActive) {
         try {
-          const currentStatus = await getContainerStatus();
+          const dockerStatus = await getContainerStatus();
 
-          if (!currentStatus) {
+          if (!dockerStatus) {
             sendEvent('error', {
               ok: false,
               error: `container '${ARK_SERVER_CONTAINER_NAME}' not found`,
             });
-            await new Promise((resolvePromise) => setTimeout(resolvePromise, 2000));
+            await new Promise((resolvePromise) => setTimeout(resolvePromise, 500));
             continue;
           }
 
-          if (currentStatus !== previousStatus) {
-            sendEvent('status', { ok: true, status: currentStatus });
-            previousStatus = currentStatus;
+          // Get effective status (includes transitional states like 'starting'/'stopping')
+          const effectiveStatus = getEffectiveServerStatus(dockerStatus);
+
+          if (effectiveStatus !== previousStatus) {
+            sendEvent('status', { ok: true, status: effectiveStatus });
+            previousStatus = effectiveStatus;
           }
 
-          await new Promise((resolvePromise) => setTimeout(resolvePromise, 2000));
+          await new Promise((resolvePromise) => setTimeout(resolvePromise, 500));
         } catch (statusError) {
           sendEvent('error', { ok: false, error: String(statusError) });
-          await new Promise((resolvePromise) => setTimeout(resolvePromise, 2000));
+          await new Promise((resolvePromise) => setTimeout(resolvePromise, 500));
         }
       }
     };
@@ -284,22 +290,24 @@ sseRouter.get('/api/stream', async (_httpRequest: Request, httpResponse: Respons
   let previousStatus: string | null = null;
   startPolling(async () => {
     try {
-      const currentStatus = await getContainerStatus();
-      if (!currentStatus) {
+      const dockerStatus = await getContainerStatus();
+      if (!dockerStatus) {
         sendEvent('server-status-error', {
           ok: false,
           error: `container '${ARK_SERVER_CONTAINER_NAME}' not found`,
         });
         return;
       }
-      if (currentStatus !== previousStatus) {
-        sendEvent('server-status', { ok: true, status: currentStatus });
-        previousStatus = currentStatus;
+      // Get effective status (includes transitional states like 'starting'/'stopping')
+      const effectiveStatus = getEffectiveServerStatus(dockerStatus);
+      if (effectiveStatus !== previousStatus) {
+        sendEvent('server-status', { ok: true, status: effectiveStatus });
+        previousStatus = effectiveStatus;
       }
     } catch (statusError) {
       sendEvent('server-status-error', { ok: false, error: String(statusError) });
     }
-  }, 2000);
+  }, 500); // Fast polling for transitional states
 
   let previousBackupsJson: string | null = null;
   startPolling(async () => {

@@ -8,7 +8,8 @@
  * - Isolates domain from API implementation details
  */
 
-import type { Server, BackupSettings, UpdateSettingsDto } from '../domain/server';
+import type { Server, ServerStatus, BackupSettings, UpdateSettingsDto } from '../domain/server';
+import { createServerFromStatus } from '../domain/server';
 
 /**
  * Backend API response envelope.
@@ -41,13 +42,11 @@ interface BackupSettingsApi {
 
 /**
  * Transforms API server status to domain model.
+ * Uses createServerFromStatus factory function for consistent Server creation.
  */
 function transformApiServerToDomain(api: ServerStatusApi): Server {
-  const status = api.status as Server['status'];
-  return {
-    status,
-    isRunning: status === 'running',
-  };
+  const status = api.status as ServerStatus;
+  return createServerFromStatus(status);
 }
 
 /**

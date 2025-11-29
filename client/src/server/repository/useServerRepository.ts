@@ -9,7 +9,8 @@
  */
 
 import { useState, useCallback } from 'react';
-import type { Server } from '../domain/server';
+import type { Server, ServerStatus } from '../domain/server';
+import { createServerFromStatus } from '../domain/server';
 import { useUnifiedSSE } from '../../shared/api/useUnifiedSSE';
 
 /**
@@ -39,8 +40,8 @@ export function useServerRepository(): UseServerRepositoryReturn {
   // Stable callback references to prevent SSE listener re-registration on every render
   const handleServerStatusUpdate = useCallback((data: { ok: boolean; status: string }) => {
     if (data.ok && data.status) {
-      const status = data.status as Server['status'];
-      setServer({ status, isRunning: status === 'running' });
+      const status = data.status as ServerStatus;
+      setServer(createServerFromStatus(status));
       setIsLoading(false);
       setError(null);
     }

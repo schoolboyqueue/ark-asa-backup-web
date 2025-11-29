@@ -63,6 +63,10 @@ export default function ServerControls({
   };
 
   const isServerRunning = serverStatus?.isRunning || false;
+  // Use SSE transitional states for loading indicators (persists through actual startup/shutdown)
+  const isServerStarting = serverStatus?.isStarting || serverControl.isStarting;
+  const isServerStopping = serverStatus?.isStopping || serverControl.isStopping;
+  const isTransitioning = isServerStarting || isServerStopping;
 
   return (
     <Popover isOpen={isOpen} onOpenChange={onOpenChange} placement="bottom">
@@ -82,22 +86,22 @@ export default function ServerControls({
               <Button
                 color="primary"
                 variant="flat"
-                isDisabled={isServerRunning}
-                isLoading={serverControl.isStarting}
+                isDisabled={isServerRunning || isTransitioning}
+                isLoading={isServerStarting}
                 onPress={serverControl.startServer}
-                startContent={<PlayCircleIcon className="h-4 w-4" />}
+                startContent={!isServerStarting && <PlayCircleIcon className="h-4 w-4" />}
               >
-                Start
+                {isServerStarting ? 'Starting...' : 'Start'}
               </Button>
               <Button
                 color="danger"
                 variant="flat"
-                isDisabled={!isServerRunning}
-                isLoading={serverControl.isStopping}
+                isDisabled={!isServerRunning || isTransitioning}
+                isLoading={isServerStopping}
                 onPress={serverControl.stopServer}
-                startContent={<StopCircleIcon className="h-4 w-4" />}
+                startContent={!isServerStopping && <StopCircleIcon className="h-4 w-4" />}
               >
-                Stop
+                {isServerStopping ? 'Stopping...' : 'Stop'}
               </Button>
             </ButtonGroup>
           </div>
