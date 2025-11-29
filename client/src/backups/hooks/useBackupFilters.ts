@@ -8,8 +8,25 @@
  */
 
 import { useState, useMemo, useCallback } from 'react';
-import dayjs from 'dayjs';
 import type { Backup } from '../domain/backup';
+
+/**
+ * Converts a date string (YYYY-MM-DD) to Unix timestamp at start of day.
+ */
+function dateToStartOfDayUnix(dateString: string): number {
+  const date = new Date(dateString);
+  date.setHours(0, 0, 0, 0);
+  return Math.floor(date.getTime() / 1000);
+}
+
+/**
+ * Converts a date string (YYYY-MM-DD) to Unix timestamp at end of day.
+ */
+function dateToEndOfDayUnix(dateString: string): number {
+  const date = new Date(dateString);
+  date.setHours(23, 59, 59, 999);
+  return Math.floor(date.getTime() / 1000);
+}
 
 /**
  * Return type for useBackupFilters hook.
@@ -111,9 +128,9 @@ export function useBackupFilters(backups: Backup[]): UseBackupFiltersReturn {
 
     // Apply date range filter
     if (dateRangeStart || dateRangeEnd) {
-      const startTimestamp = dateRangeStart ? dayjs(dateRangeStart).startOf('day').unix() : 0;
+      const startTimestamp = dateRangeStart ? dateToStartOfDayUnix(dateRangeStart) : 0;
       const endTimestamp = dateRangeEnd
-        ? dayjs(dateRangeEnd).endOf('day').unix()
+        ? dateToEndOfDayUnix(dateRangeEnd)
         : Number.MAX_SAFE_INTEGER;
 
       filtered = filtered.filter((backup) => {

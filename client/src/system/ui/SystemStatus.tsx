@@ -17,11 +17,10 @@ import {
   ExclamationCircleIcon,
   ClockIcon,
 } from '@heroicons/react/24/solid';
-import dayjs from 'dayjs';
-
 // Clean Architecture: Domain type imports
 import type { DiskSpace, BackupHealth } from '../domain/system';
 import type { Server } from '../../server/domain/server';
+import { formatRelativeTime } from '../../backups';
 
 /**
  * Props interface for the SystemStatus component.
@@ -177,7 +176,7 @@ export default function SystemStatus({
                 color="default"
                 startContent={<ClockIcon className="h-3 w-3" />}
               >
-                {dayjs(backupHealth.lastSuccessfulBackup * 1000).fromNow()}
+                {formatRelativeTime(backupHealth.lastSuccessfulBackup)}
               </Chip>
             </div>
           )}

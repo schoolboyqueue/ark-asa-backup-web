@@ -49,12 +49,13 @@ export {
 
 export {
   formatFileSize,
+  parseFileSize,
   formatTimestamp,
   formatRelativeTime,
-  formatTags,
-  truncateText,
   getBackupShortName,
 } from './services/backupFormatService';
+
+export type { ParsedFileSize, FileSizeUnit } from './services/backupFormatService';
 
 // ============================================================================
 // Repository Layer - State management

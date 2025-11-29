@@ -56,6 +56,7 @@ import {
   ArrowDownTrayIcon,
   ShieldCheckIcon,
 } from '@heroicons/react/24/solid';
+import NumberFlow from '@number-flow/react';
 
 // Clean Architecture imports - organized by layer
 import {
@@ -64,7 +65,7 @@ import {
   useDeleteBackup,
   useBackupActions,
   useUpdateBackupMetadata,
-  formatFileSize,
+  parseFileSize,
   formatTimestamp,
   formatRelativeTime,
 } from '..';
@@ -264,9 +265,11 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
               </Button>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-default-500">Total:</span>
-                <span className="text-xl font-bold" style={{ color: PRIMARY_COLOR }}>
-                  {backups.length}
-                </span>
+                <NumberFlow
+                  value={backups.length}
+                  className="text-xl font-bold"
+                  style={{ color: PRIMARY_COLOR }}
+                />
               </div>
             </div>
           </div>
@@ -412,7 +415,16 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>{formatFileSize(item.sizeBytes)}</TableCell>
+                    <TableCell>
+                      {(() => {
+                        const parsed = parseFileSize(item.sizeBytes);
+                        return (
+                          <>
+                            <NumberFlow value={parsed.value} /> {parsed.unit}
+                          </>
+                        );
+                      })()}
+                    </TableCell>
                     <TableCell>
                       <div className="flex flex-col">
                         <span>{formatTimestamp(item.createdAt)}</span>

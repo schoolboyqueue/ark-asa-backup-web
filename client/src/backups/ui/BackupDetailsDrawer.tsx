@@ -28,14 +28,12 @@ import {
   ClipboardDocumentIcon,
   TagIcon,
 } from '@heroicons/react/24/solid';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
+import NumberFlow from '@number-flow/react';
 
 // Clean Architecture: Domain type imports
 import type { Server } from '../../server/domain/server';
 import type { Backup } from '../domain/backup';
-
-dayjs.extend(relativeTime);
+import { parseFileSize, formatTimestamp, formatRelativeTime } from '..';
 
 /**
  * Props interface for BackupDetailsDrawer component.
@@ -69,12 +67,6 @@ interface BackupDetailsDrawerProps {
   /** Whether the backup is currently being verified */
   isVerifying?: boolean;
 }
-
-/** Bytes per megabyte conversion factor */
-const BYTES_PER_MEGABYTE = 1024 * 1024;
-
-/** Unix timestamp to milliseconds multiplier */
-const UNIX_TIMESTAMP_TO_MS = 1000;
 
 /** Standard predefined tags for quick selection */
 const STANDARD_TAGS = [
@@ -193,11 +185,9 @@ export default function BackupDetailsDrawer({
     await onVerify(backup.name);
   };
 
-  const formattedSize = (backup.sizeBytes / BYTES_PER_MEGABYTE).toFixed(2);
-  const formattedDate = dayjs(backup.createdAt * UNIX_TIMESTAMP_TO_MS).format(
-    'MMM D, YYYY h:mm:ss A'
-  );
-  const relativeDate = dayjs(backup.createdAt * UNIX_TIMESTAMP_TO_MS).fromNow();
+  const parsedSize = parseFileSize(backup.sizeBytes);
+  const formattedDate = formatTimestamp(backup.createdAt);
+  const relativeDate = formatRelativeTime(backup.createdAt);
 
   const isServerRunning = serverStatus?.status === 'running';
   const canRestore = !isServerRunning && !isRestoring;
@@ -259,7 +249,9 @@ export default function BackupDetailsDrawer({
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-default-500">Size:</span>
-                      <span className="font-mono">{formattedSize} MB</span>
+                      <span className="font-mono">
+                        <NumberFlow value={parsedSize.value} /> {parsedSize.unit}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-default-500">Created:</span>
@@ -276,7 +268,7 @@ export default function BackupDetailsDrawer({
                       <div className="flex justify-between">
                         <span className="text-default-500">Last Verified:</span>
                         <span className="text-xs text-default-400">
-                          {dayjs(backup.verificationTime * UNIX_TIMESTAMP_TO_MS).fromNow()}
+                          {formatRelativeTime(backup.verificationTime)}
                         </span>
                       </div>
                     )}

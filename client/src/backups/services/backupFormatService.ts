@@ -1,79 +1,94 @@
 /**
- * @fileoverview Backup formatting and display business logic.
- * Pure functions for formatting backup data for human-readable display.
- * Contains presentation rules for dates, sizes, and other backup metadata.
+ * @fileoverview Backup formatting and display utilities.
+ * Uses native browser APIs (Intl) and lightweight libraries for formatting.
  *
  * Clean Architecture: Service Layer
  * - Pure functions only (no side effects)
- * - No framework dependencies (no dayjs, use native Date)
- * - Reusable formatting logic
+ * - Leverages native Intl APIs for i18n-ready formatting
+ * - Uses pretty-bytes for file size formatting
  */
 
-/** Bytes per kilobyte */
-const BYTES_PER_KB = 1024;
+import prettyBytes from 'pretty-bytes';
 
-/** Bytes per megabyte */
-const BYTES_PER_MB = 1024 * 1024;
+// ============================================================================
+// File Size Formatting
+// ============================================================================
 
-/** Bytes per gigabyte */
-const BYTES_PER_GB = 1024 * 1024 * 1024;
+/**
+ * Formats byte size to human-readable string.
+ * Uses pretty-bytes library for consistent, locale-aware formatting.
+ *
+ * @param sizeInBytes - Size in bytes
+ * @returns Formatted size string (e.g., "123 MB")
+ *
+ * @example
+ * formatFileSize(1024) // "1.02 kB"
+ * formatFileSize(1048576) // "1.05 MB"
+ */
+export function formatFileSize(sizeInBytes: number): string {
+  return prettyBytes(sizeInBytes);
+}
+
+/**
+ * File size unit for animated display.
+ */
+export type FileSizeUnit = 'B' | 'kB' | 'MB' | 'GB' | 'TB';
+
+/**
+ * Parsed file size with numeric value and unit separated.
+ * Useful for animated number displays (e.g., NumberFlow).
+ */
+export interface ParsedFileSize {
+  /** Numeric value (e.g., 123.45) */
+  value: number;
+  /** Unit string (e.g., "MB") */
+  unit: FileSizeUnit;
+}
+
+/**
+ * Parses byte size into numeric value and unit for animated display.
+ * Uses pretty-bytes internally then extracts components.
+ *
+ * @param sizeInBytes - Size in bytes
+ * @returns Parsed size with value and unit
+ *
+ * @example
+ * parseFileSize(1048576) // { value: 1.05, unit: "MB" }
+ */
+export function parseFileSize(sizeInBytes: number): ParsedFileSize {
+  const formatted = prettyBytes(sizeInBytes);
+  const match = formatted.match(/^([\d.]+)\s*(.+)$/);
+
+  if (match) {
+    return {
+      value: parseFloat(match[1]),
+      unit: match[2] as FileSizeUnit,
+    };
+  }
+
+  // Fallback for edge cases
+  return { value: sizeInBytes, unit: 'B' };
+}
+
+// ============================================================================
+// Date/Time Formatting
+// ============================================================================
 
 /** Unix timestamp to milliseconds multiplier */
 const UNIX_TO_MS = 1000;
 
-/** Milliseconds per second */
-const MS_PER_SECOND = 1000;
-
-/** Milliseconds per minute */
-const MS_PER_MINUTE = 60 * 1000;
-
-/** Milliseconds per hour */
-const MS_PER_HOUR = 60 * 60 * 1000;
-
-/** Milliseconds per day */
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
-
-/**
- * Formats byte size to human-readable string with appropriate unit.
- * Automatically selects KB, MB, or GB based on size.
- *
- * @param {number} sizeInBytes - Size in bytes
- * @returns {string} Formatted size string (e.g., "123.45 MB")
- *
- * @example
- * formatFileSize(1024) // "1.00 KB"
- * formatFileSize(1048576) // "1.00 MB"
- * formatFileSize(1073741824) // "1.00 GB"
- */
-export function formatFileSize(sizeInBytes: number): string {
-  if (sizeInBytes >= BYTES_PER_GB) {
-    return `${(sizeInBytes / BYTES_PER_GB).toFixed(2)} GB`;
-  }
-
-  if (sizeInBytes >= BYTES_PER_MB) {
-    return `${(sizeInBytes / BYTES_PER_MB).toFixed(2)} MB`;
-  }
-
-  if (sizeInBytes >= BYTES_PER_KB) {
-    return `${(sizeInBytes / BYTES_PER_KB).toFixed(2)} KB`;
-  }
-
-  return `${sizeInBytes} B`;
-}
-
 /**
  * Formats Unix timestamp to human-readable date string.
+ * Uses native Intl.DateTimeFormat for locale-aware formatting.
  *
- * @param {number} unixTimestamp - Unix timestamp in seconds
- * @returns {string} Formatted date string (e.g., "Jan 1, 2024 12:00:00 PM")
+ * @param unixTimestamp - Unix timestamp in seconds
+ * @returns Formatted date string (e.g., "Jan 1, 2024, 12:00:00 PM")
  *
  * @example
- * formatTimestamp(1704110400) // "Jan 1, 2024 12:00:00 PM"
+ * formatTimestamp(1704110400) // "Jan 1, 2024, 12:00:00 PM"
  */
 export function formatTimestamp(unixTimestamp: number): string {
-  const date = new Date(unixTimestamp * UNIX_TO_MS);
-
-  const options: Intl.DateTimeFormatOptions = {
+  return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -81,118 +96,62 @@ export function formatTimestamp(unixTimestamp: number): string {
     minute: '2-digit',
     second: '2-digit',
     hour12: true,
-  };
-
-  return date.toLocaleString('en-US', options);
+  }).format(new Date(unixTimestamp * UNIX_TO_MS));
 }
 
+/** RelativeTimeFormat instance (created once, reused) */
+const relativeTimeFormatter = new Intl.RelativeTimeFormat('en', {
+  numeric: 'auto',
+});
+
+/** Time unit thresholds in milliseconds */
+const TIME_UNITS: Array<{ unit: Intl.RelativeTimeFormatUnit; ms: number }> = [
+  { unit: 'year', ms: 365 * 24 * 60 * 60 * 1000 },
+  { unit: 'month', ms: 30 * 24 * 60 * 60 * 1000 },
+  { unit: 'day', ms: 24 * 60 * 60 * 1000 },
+  { unit: 'hour', ms: 60 * 60 * 1000 },
+  { unit: 'minute', ms: 60 * 1000 },
+  { unit: 'second', ms: 1000 },
+];
+
 /**
- * Formats Unix timestamp to relative time string (e.g., "2 hours ago").
- * Provides human-friendly time descriptions.
+ * Formats Unix timestamp to relative time string.
+ * Uses native Intl.RelativeTimeFormat for natural language output.
  *
- * @param {number} unixTimestamp - Unix timestamp in seconds
- * @returns {string} Relative time string
+ * @param unixTimestamp - Unix timestamp in seconds
+ * @returns Relative time string (e.g., "5 minutes ago", "in 2 hours", "yesterday")
  *
  * @example
  * formatRelativeTime(Date.now() / 1000 - 3600) // "1 hour ago"
- * formatRelativeTime(Date.now() / 1000 + 3600) // "in 1 hour"
+ * formatRelativeTime(Date.now() / 1000 - 86400) // "yesterday"
  */
 export function formatRelativeTime(unixTimestamp: number): string {
-  const nowMs = Date.now();
-  const timestampMs = unixTimestamp * UNIX_TO_MS;
-  const diffMs = nowMs - timestampMs;
-  const absDiffMs = Math.abs(diffMs);
+  const diffMs = Date.now() - unixTimestamp * UNIX_TO_MS;
 
-  const isFuture = diffMs < 0;
-
-  // Seconds
-  if (absDiffMs < MS_PER_MINUTE) {
-    const seconds = Math.floor(absDiffMs / MS_PER_SECOND);
-    return isFuture ? `in ${seconds}s` : `${seconds}s ago`;
+  for (const { unit, ms } of TIME_UNITS) {
+    if (Math.abs(diffMs) >= ms || unit === 'second') {
+      const value = Math.round(diffMs / ms);
+      return relativeTimeFormatter.format(-value, unit);
+    }
   }
 
-  // Minutes
-  if (absDiffMs < MS_PER_HOUR) {
-    const minutes = Math.floor(absDiffMs / MS_PER_MINUTE);
-    return isFuture ? `in ${minutes}m` : `${minutes}m ago`;
-  }
-
-  // Hours
-  if (absDiffMs < MS_PER_DAY) {
-    const hours = Math.floor(absDiffMs / MS_PER_HOUR);
-    return isFuture ? `in ${hours}h` : `${hours}h ago`;
-  }
-
-  // Days
-  const days = Math.floor(absDiffMs / MS_PER_DAY);
-  if (days < 30) {
-    return isFuture ? `in ${days}d` : `${days}d ago`;
-  }
-
-  // Months (approximate)
-  const months = Math.floor(days / 30);
-  if (months < 12) {
-    return isFuture ? `in ${months}mo` : `${months}mo ago`;
-  }
-
-  // Years (approximate)
-  const years = Math.floor(days / 365);
-  return isFuture ? `in ${years}y` : `${years}y ago`;
+  return 'just now';
 }
 
-/**
- * Formats an array of tags into a comma-separated string.
- *
- * @param {ReadonlyArray<string>} tags - Tags to format
- * @returns {string} Comma-separated tag list
- *
- * @example
- * formatTags(['pre-boss', 'milestone']) // "pre-boss, milestone"
- */
-export function formatTags(tags: ReadonlyArray<string>): string {
-  if (!tags || tags.length === 0) {
-    return '';
-  }
-
-  return tags.join(', ');
-}
-
-/**
- * Truncates text to a maximum length with ellipsis.
- *
- * @param {string} text - Text to truncate
- * @param {number} maxLength - Maximum length before truncation
- * @returns {string} Truncated text with ellipsis if needed
- *
- * @example
- * truncateText('This is a very long backup note', 20)
- * // Returns: "This is a very lon..."
- */
-export function truncateText(text: string, maxLength: number): string {
-  if (!text || text.length <= maxLength) {
-    return text;
-  }
-
-  return text.substring(0, maxLength - 3) + '...';
-}
+// ============================================================================
+// String Utilities
+// ============================================================================
 
 /**
  * Extracts a short backup identifier from the full backup name.
- * Useful for displaying compact backup references.
+ * Domain-specific utility for displaying compact backup references.
  *
- * @param {string} backupName - Full backup filename
- * @returns {string} Short identifier
+ * @param backupName - Full backup filename
+ * @returns Short identifier without prefix and extension
  *
  * @example
- * getBackupShortName('saves-2024-01-15_120000.tar.gz')
- * // Returns: "2024-01-15_120000"
+ * getBackupShortName('saves-2024-01-15_120000.tar.gz') // "2024-01-15_120000"
  */
 export function getBackupShortName(backupName: string): string {
-  // Remove .tar.gz extension
-  const withoutExtension = backupName.replace(/\.tar\.gz$/, '');
-
-  // Remove 'saves-' prefix if present
-  const withoutPrefix = withoutExtension.replace(/^saves-/, '');
-
-  return withoutPrefix;
+  return backupName.replace(/\.tar\.gz$/, '').replace(/^saves-/, '');
 }
