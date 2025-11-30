@@ -7,8 +7,8 @@
     "build": "tsc",
     "dev": "nodemon --watch src --exec 'npm run build && node dist/server.js'",
     "start": "node dist/server.js",
-    "format": "prettier --write \"src/**/*.{ts,js,json}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,js,json}\""
+    "format": "prettier --ignore-path ../.prettierignore --write \"src/**/*.{ts,js,json}\"",
+    "format:check": "prettier --ignore-path ../.prettierignore --check \"src/**/*.{ts,js,json}\""
   },
   "devDependencies": {
     "@types/dockerode": "^3.3.47",

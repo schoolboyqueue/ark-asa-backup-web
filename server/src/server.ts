@@ -15,6 +15,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { HTTP_SERVER_PORT } from './config/constants.js';
+import { Logger } from './utils/logger.js';
 
 // ES Module __dirname equivalent for server.ts location
 const currentFilePath = fileURLToPath(import.meta.url);
@@ -79,8 +80,8 @@ expressApplication.get('*', (_httpRequest, httpResponse) => {
 // ============================================================================
 
 const httpServer = expressApplication.listen(HTTP_SERVER_PORT, () => {
-  console.log(`ARK ASA Backup Manager listening on port ${HTTP_SERVER_PORT}`);
-  console.log(`Web interface: http://localhost:${HTTP_SERVER_PORT}`);
+  Logger.info(`ARK ASA Backup Manager listening on port ${HTTP_SERVER_PORT}`);
+  Logger.info(`Web interface: http://localhost:${HTTP_SERVER_PORT}`);
 });
 
 // ============================================================================
@@ -99,20 +100,20 @@ runBackupSchedulerLoop();
  * Stops scheduler and closes HTTP server cleanly.
  */
 const handleGracefulShutdown = (signalName: string): void => {
-  console.log(`\nReceived ${signalName} signal. Starting graceful shutdown...`);
+  Logger.info(`\nReceived ${signalName} signal. Starting graceful shutdown...`);
 
   // Stop backup scheduler
   stopScheduler();
 
   // Close HTTP server
   httpServer.close(() => {
-    console.log('HTTP server closed');
+    Logger.info('HTTP server closed');
     process.exit(0);
   });
 
   // Force exit if graceful shutdown takes too long
   setTimeout(() => {
-    console.error('Graceful shutdown timeout exceeded. Forcing exit...');
+    Logger.error('Graceful shutdown timeout exceeded. Forcing exit...');
     process.exit(1);
   }, 10000);
 };

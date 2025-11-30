@@ -12,6 +12,7 @@ import {
   MINIMUM_BACKUP_INTERVAL_SECONDS,
   MINIMUM_BACKUP_RETENTION_COUNT,
 } from '../config/constants.js';
+import { Logger } from '../utils/logger.js';
 
 /**
  * Loads backup configuration from disk with validation and fallback.
@@ -61,7 +62,7 @@ export async function loadBackupSettings(): Promise<BackupSettings> {
     }
   } catch (error) {
     // Configuration file doesn't exist or is unreadable - use defaults
-    console.warn('Failed to load configuration settings, using defaults:', error);
+    Logger.warn('Failed to load configuration settings, using defaults:', error);
   }
 
   return configurationSettings;

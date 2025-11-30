@@ -20,6 +20,7 @@ import {
   PROCESS_USER_ID,
   PROCESS_GROUP_ID,
 } from '../config/constants.js';
+import { Logger } from '../utils/logger.js';
 
 // ============================================================================
 // Notes Management
@@ -57,10 +58,10 @@ export async function saveBackupMetadata(
   try {
     await fs.chown(metadataFilePath, PROCESS_USER_ID, PROCESS_GROUP_ID);
   } catch (chownError) {
-    console.warn('Failed to change metadata file ownership:', chownError);
+    Logger.warn('Failed to change metadata file ownership:', chownError);
   }
 
-  console.log(`Backup metadata saved: ${backupFileName}`);
+  Logger.info(`Backup metadata saved: ${backupFileName}`);
 }
 
 /**
@@ -109,10 +110,10 @@ export async function saveVerificationResult(
     try {
       await fs.chown(verificationFilePath, PROCESS_USER_ID, PROCESS_GROUP_ID);
     } catch (chownError) {
-      console.warn('Failed to change verification file ownership:', chownError);
+      Logger.warn('Failed to change verification file ownership:', chownError);
     }
   } catch (saveError) {
-    console.error(`Failed to save verification result for ${backupFileName}:`, saveError);
+    Logger.error(`Failed to save verification result for ${backupFileName}:`, saveError);
   }
 }
 
@@ -171,7 +172,7 @@ export async function verifyBackupIntegrity(backupFileName: string): Promise<Ver
       verification_time: verificationTime,
     };
 
-    console.log(`Backup verified successfully: ${backupFileName} (${fileCount} files)`);
+    Logger.info(`Backup verified successfully: ${backupFileName} (${fileCount} files)`);
     return verificationResult;
   } catch (verificationError) {
     // Verification failed - archive is corrupted or unreadable
@@ -185,7 +186,7 @@ export async function verifyBackupIntegrity(backupFileName: string): Promise<Ver
       error: errorMessage,
     };
 
-    console.error(`Backup verification failed for ${backupFileName}:`, errorMessage);
+    Logger.error(`Backup verification failed for ${backupFileName}:`, errorMessage);
     return verificationResult;
   }
 }
@@ -231,18 +232,18 @@ export async function createBackup(
   try {
     await fs.chown(backupArchiveFullPath, PROCESS_USER_ID, PROCESS_GROUP_ID);
   } catch (chownError) {
-    console.warn('Failed to change backup file ownership:', chownError);
+    Logger.warn('Failed to change backup file ownership:', chownError);
   }
 
-  console.log(`Backup created successfully: ${backupArchiveName}`);
+  Logger.info(`Backup created successfully: ${backupArchiveName}`);
 
   // Verify backup integrity
-  console.log(`Verifying backup integrity: ${backupArchiveName}`);
+  Logger.info(`Verifying backup integrity: ${backupArchiveName}`);
   const verificationResult = await verifyBackupIntegrity(backupArchiveName);
   await saveVerificationResult(backupArchiveName, verificationResult);
 
   // Extract save information from the backup archive
-  console.log(`Extracting save info: ${backupArchiveName}`);
+  Logger.info(`Extracting save info: ${backupArchiveName}`);
   const saveInfo = await extractSaveInfo(backupArchiveName);
 
   // Always save metadata (with or without notes) to store save_info
@@ -290,7 +291,7 @@ export async function pruneOldBackupArchives(maximumBackupsToRetain: number): Pr
         try {
           // Delete the backup archive
           await fs.unlink(oldBackup.path);
-          console.log(`Pruned old backup archive: ${oldBackup.name}`);
+          Logger.info(`Pruned old backup archive: ${oldBackup.name}`);
 
           // Delete associated metadata files if they exist
           const metadataFilePath = path.join(
@@ -314,12 +315,12 @@ export async function pruneOldBackupArchives(maximumBackupsToRetain: number): Pr
             // Verification file may not exist - this is fine
           }
         } catch (deleteError) {
-          console.warn(`Failed to delete backup ${oldBackup.name}:`, deleteError);
+          Logger.warn(`Failed to delete backup ${oldBackup.name}:`, deleteError);
         }
       }
     }
   } catch (pruneError) {
-    console.error('Failed to prune old backups:', pruneError);
+    Logger.error('Failed to prune old backups:', pruneError);
   }
 }
 
@@ -390,7 +391,7 @@ export async function listAvailableBackups(): Promise<BackupMetadata[]> {
 
     return backupsWithMetadata;
   } catch (listError) {
-    console.error('Failed to list backups:', listError);
+    Logger.error('Failed to list backups:', listError);
     throw listError;
   }
 }
@@ -464,9 +465,9 @@ export async function createPreRestoreSafetyBackup(): Promise<string> {
   try {
     await fs.chown(safetyBackupPath, PROCESS_USER_ID, PROCESS_GROUP_ID);
   } catch (chownError) {
-    console.warn('Failed to change safety backup file ownership:', chownError);
+    Logger.warn('Failed to change safety backup file ownership:', chownError);
   }
 
-  console.log(`Safety backup created: ${safetyBackupName}`);
+  Logger.info(`Safety backup created: ${safetyBackupName}`);
   return safetyBackupName;
 }

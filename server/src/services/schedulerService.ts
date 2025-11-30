@@ -9,6 +9,7 @@ import type { BackupSettings } from '../types/index.js';
 import { loadBackupSettings } from './settingsService.js';
 import { createBackup, pruneOldBackupArchives } from './backupService.js';
 import { MINIMUM_LOOP_WAIT_MILLISECONDS } from '../config/constants.js';
+import { Logger } from '../utils/logger.js';
 
 // ============================================================================
 // Scheduler State Management
@@ -72,7 +73,7 @@ export function getLastBackupError(): string | null {
  */
 export function stopScheduler(): void {
   isBackupLoopActive = false;
-  console.log('Backup scheduler loop stopping...');
+  Logger.info('Backup scheduler loop stopping...');
 }
 
 // ============================================================================
@@ -106,7 +107,7 @@ export async function executeBackupAndPrune(
     // Remove old backups exceeding retention limit
     await pruneOldBackupArchives(maximumBackupsToRetain);
   } catch (backupError) {
-    console.error('Backup operation failed:', backupError);
+    Logger.error('Backup operation failed:', backupError);
 
     // Update health tracking - failed backup
     lastFailedBackupTime = Math.floor(Date.now() / 1000);
@@ -130,7 +131,7 @@ export async function executeBackupAndPrune(
  */
 export async function runBackupSchedulerLoop(): Promise<void> {
   isBackupLoopActive = true;
-  console.log('Backup scheduler loop started');
+  Logger.info('Backup scheduler loop started');
 
   while (isBackupLoopActive) {
     try {
@@ -141,10 +142,10 @@ export async function runBackupSchedulerLoop(): Promise<void> {
         nextBackupIntervalSeconds * 1000
       );
 
-      console.log(`Next backup scheduled in ${waitTimeMilliseconds / 1000} seconds`);
+      Logger.info(`Next backup scheduled in ${waitTimeMilliseconds / 1000} seconds`);
       await new Promise((resolvePromise) => setTimeout(resolvePromise, waitTimeMilliseconds));
     } catch (loopError) {
-      console.error('Backup scheduler loop error:', loopError);
+      Logger.error('Backup scheduler loop error:', loopError);
       // Wait before retrying to avoid rapid failure loops
       await new Promise((resolvePromise) =>
         setTimeout(resolvePromise, MINIMUM_LOOP_WAIT_MILLISECONDS)
@@ -152,5 +153,5 @@ export async function runBackupSchedulerLoop(): Promise<void> {
     }
   }
 
-  console.log('Backup scheduler loop stopped');
+  Logger.info('Backup scheduler loop stopped');
 }

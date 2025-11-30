@@ -9,6 +9,8 @@
  * by tracking when operations are in progress and broadcasting transitional states.
  */
 
+import { Logger } from '../utils/logger.js';
+
 /**
  * Application-level server states that supplement Docker container states.
  */
@@ -37,7 +39,7 @@ const TRANSITIONAL_STATE_TIMEOUT_MS = 5 * 60 * 1000;
 export function setServerStarting(): void {
   currentTransitionalState = 'starting';
   transitionalStateSetAt = Date.now();
-  console.log('[ServerState] State set to: starting');
+  Logger.info('[ServerState] State set to: starting');
 }
 
 /**
@@ -47,7 +49,7 @@ export function setServerStarting(): void {
 export function setServerStopping(): void {
   currentTransitionalState = 'stopping';
   transitionalStateSetAt = Date.now();
-  console.log('[ServerState] State set to: stopping');
+  Logger.info('[ServerState] State set to: stopping');
 }
 
 /**
@@ -59,7 +61,7 @@ export function clearTransitionalState(): void {
   currentTransitionalState = null;
   transitionalStateSetAt = null;
   if (previousState) {
-    console.log(`[ServerState] Cleared transitional state (was: ${previousState})`);
+    Logger.info(`[ServerState] Cleared transitional state (was: ${previousState})`);
   }
 }
 
@@ -72,7 +74,7 @@ export function getTransitionalState(): TransitionalState {
   if (currentTransitionalState && transitionalStateSetAt) {
     const elapsed = Date.now() - transitionalStateSetAt;
     if (elapsed > TRANSITIONAL_STATE_TIMEOUT_MS) {
-      console.warn(
+      Logger.warn(
         `[ServerState] Transitional state '${currentTransitionalState}' timed out after ${Math.round(elapsed / 1000)}s`
       );
       clearTransitionalState();

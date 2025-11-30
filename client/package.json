@@ -7,8 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css}\"",
+    "format": "prettier --ignore-path ../.prettierignore --write \"src/**/*.{ts,tsx,js,jsx,json,css}\"",
+    "format:check": "prettier --ignore-path ../.prettierignore --check \"src/**/*.{ts,tsx,js,jsx,json,css}\"",
     "prepare": "husky"
   },
   "devDependencies": {

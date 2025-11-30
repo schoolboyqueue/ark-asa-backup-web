@@ -1,11 +1,11 @@
 # Build outputs
-dist/
-static/dist/
-node_modules/
+**/dist/
+**/static/dist/
+**/node_modules/
 
 # Generated files
-*.d.ts
-*.d.ts.map
+**/*.d.ts
+**/*.d.ts.map
 
 # Package files
 package-lock.json

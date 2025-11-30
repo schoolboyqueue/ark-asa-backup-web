@@ -28,6 +28,7 @@ import {
   ARK_SAVE_DIRECTORY,
   ARK_SERVER_CONTAINER_NAME,
 } from '../config/constants.js';
+import { Logger } from '../utils/logger.js';
 
 const sseRouter = Router();
 
@@ -88,7 +89,7 @@ sseRouter.get(
 
     setupSSECleanup(httpResponse, () => {
       isStreamActive = false;
-      console.log('Server status stream client disconnected');
+      Logger.info('Server status stream client disconnected');
     });
 
     pollServerStatus();
@@ -133,7 +134,7 @@ sseRouter.get('/api/backups/stream', async (_httpRequest: Request, httpResponse:
 
   setupSSECleanup(httpResponse, () => {
     isStreamActive = false;
-    console.log('Backups stream client disconnected');
+    Logger.info('Backups stream client disconnected');
   });
 
   pollBackupsList();
@@ -184,7 +185,7 @@ sseRouter.get(
 
     setupSSECleanup(httpResponse, () => {
       isStreamActive = false;
-      console.log('Backup health stream client disconnected');
+      Logger.info('Backup health stream client disconnected');
     });
 
     pollBackupHealth();
@@ -229,7 +230,7 @@ sseRouter.get('/api/disk-space/stream', async (_httpRequest: Request, httpRespon
 
   setupSSECleanup(httpResponse, () => {
     isStreamActive = false;
-    console.log('Disk space stream client disconnected');
+    Logger.info('Disk space stream client disconnected');
   });
 
   pollDiskSpace();
@@ -249,7 +250,7 @@ sseRouter.get('/api/disk-space', async (_httpRequest: Request, httpResponse: Res
     const diskSpaceInfo = await retrieveDiskSpaceInfo();
     httpResponse.json(diskSpaceInfo);
   } catch (diskSpaceError) {
-    console.error('Failed to retrieve disk space:', diskSpaceError);
+    Logger.error('Failed to retrieve disk space:', diskSpaceError);
     httpResponse
       .status(500)
       .json({ ok: false, error: `disk space retrieval failed: ${diskSpaceError}` });
@@ -277,7 +278,7 @@ sseRouter.get('/api/stream', async (_httpRequest: Request, httpResponse: Respons
   const cleanup = (): void => {
     isActive = false;
     timers.forEach(clearInterval);
-    console.log('Unified stream client disconnected');
+    Logger.info('Unified stream client disconnected');
   };
 
   setupSSECleanup(httpResponse, cleanup);

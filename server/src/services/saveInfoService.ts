@@ -10,6 +10,7 @@ import path from 'path';
 import tar from 'tar';
 import type { SaveInfo } from '../types/index.js';
 import { BACKUP_STORAGE_DIRECTORY } from '../config/constants.js';
+import { Logger } from '../utils/logger.js';
 
 // ============================================================================
 // Map Name Mappings
@@ -238,7 +239,7 @@ export async function extractSaveInfo(backupFileName: string): Promise<SaveInfo 
       suggested_tags: suggestedTags,
     };
 
-    console.log(`[SaveInfo] Extracted from ${backupFileName}:`, {
+    Logger.info(`[SaveInfo] Extracted from ${backupFileName}:`, {
       map: saveInfo.map_display_name,
       players: playerCount,
       tribes: tribeCount,
@@ -246,7 +247,7 @@ export async function extractSaveInfo(backupFileName: string): Promise<SaveInfo 
 
     return saveInfo;
   } catch (extractionError) {
-    console.error(`[SaveInfo] Failed to extract from ${backupFileName}:`, extractionError);
+    Logger.error(`[SaveInfo] Failed to extract from ${backupFileName}:`, extractionError);
     return null;
   }
 }
@@ -352,7 +353,7 @@ export async function extractSaveInfoFromDirectory(
       suggested_tags: suggestedTags,
     };
   } catch (error) {
-    console.error('[SaveInfo] Failed to extract from directory:', error);
+    Logger.error('[SaveInfo] Failed to extract from directory:', error);
     return null;
   }
 }

@@ -12,6 +12,7 @@ import {
   getEffectiveServerStatus,
 } from '../services/serverStateService.js';
 import { ARK_SERVER_CONTAINER_NAME } from '../config/constants.js';
+import { Logger } from '../utils/logger.js';
 
 const serverRouter = Router();
 
@@ -25,13 +26,13 @@ const serverRouter = Router();
  * @route GET /api/server/status
  */
 serverRouter.get('/api/server/status', async (_httpRequest: Request, httpResponse: Response) => {
-  console.log('[GET /api/server/status] Request received');
+  Logger.info('[GET /api/server/status] Request received');
   try {
     const containerStatus = await getContainerStatus();
-    console.log('[GET /api/server/status] Container status:', containerStatus);
+    Logger.info('[GET /api/server/status] Container status:', containerStatus);
 
     if (!containerStatus) {
-      console.log('[GET /api/server/status] Container not found');
+      Logger.info('[GET /api/server/status] Container not found');
       httpResponse.status(404).json({
         ok: false,
         error: `container '${ARK_SERVER_CONTAINER_NAME}' not found`,
@@ -42,9 +43,9 @@ serverRouter.get('/api/server/status', async (_httpRequest: Request, httpRespons
     // Apply transitional state if applicable
     const effectiveStatus = getEffectiveServerStatus(containerStatus);
     httpResponse.json({ ok: true, status: effectiveStatus });
-    console.log('[GET /api/server/status] Response sent successfully:', effectiveStatus);
+    Logger.info('[GET /api/server/status] Response sent successfully:', effectiveStatus);
   } catch (statusError) {
-    console.error('[GET /api/server/status] Error:', statusError);
+    Logger.error('[GET /api/server/status] Error:', statusError);
     httpResponse.status(500).json({ ok: false, error: String(statusError) });
   }
 });
@@ -55,26 +56,26 @@ serverRouter.get('/api/server/status', async (_httpRequest: Request, httpRespons
  * @route POST /api/server/start
  */
 serverRouter.post('/api/server/start', async (_httpRequest: Request, httpResponse: Response) => {
-  console.log('[POST /api/server/start] Request received');
+  Logger.info('[POST /api/server/start] Request received');
 
   // Set transitional state BEFORE starting - SSE will pick this up immediately
   setServerStarting();
 
   try {
-    console.log('[POST /api/server/start] Starting container...');
+    Logger.info('[POST /api/server/start] Starting container...');
     const containerStatus = await startContainer();
-    console.log('[POST /api/server/start] Container started:', containerStatus);
+    Logger.info('[POST /api/server/start] Container started:', containerStatus);
 
     // Clear transitional state now that operation is complete
     clearTransitionalState();
 
     httpResponse.json({ ok: true, status: containerStatus });
-    console.log('[POST /api/server/start] Response sent successfully');
+    Logger.info('[POST /api/server/start] Response sent successfully');
   } catch (startError) {
     // Clear transitional state on error
     clearTransitionalState();
 
-    console.error('[POST /api/server/start] Error:', startError);
+    Logger.error('[POST /api/server/start] Error:', startError);
     if ((startError as Error).message.includes('not found')) {
       httpResponse.status(404).json({
         ok: false,
@@ -92,26 +93,26 @@ serverRouter.post('/api/server/start', async (_httpRequest: Request, httpRespons
  * @route POST /api/server/stop
  */
 serverRouter.post('/api/server/stop', async (_httpRequest: Request, httpResponse: Response) => {
-  console.log('[POST /api/server/stop] Request received');
+  Logger.info('[POST /api/server/stop] Request received');
 
   // Set transitional state BEFORE stopping - SSE will pick this up immediately
   setServerStopping();
 
   try {
-    console.log('[POST /api/server/stop] Stopping container...');
+    Logger.info('[POST /api/server/stop] Stopping container...');
     const containerStatus = await stopContainer();
-    console.log('[POST /api/server/stop] Container stopped:', containerStatus);
+    Logger.info('[POST /api/server/stop] Container stopped:', containerStatus);
 
     // Clear transitional state now that operation is complete
     clearTransitionalState();
 
     httpResponse.json({ ok: true, status: containerStatus });
-    console.log('[POST /api/server/stop] Response sent successfully');
+    Logger.info('[POST /api/server/stop] Response sent successfully');
   } catch (stopError) {
     // Clear transitional state on error
     clearTransitionalState();
 
-    console.error('[POST /api/server/stop] Error:', stopError);
+    Logger.error('[POST /api/server/stop] Error:', stopError);
     if ((stopError as Error).message.includes('not found')) {
       httpResponse.status(404).json({
         ok: false,

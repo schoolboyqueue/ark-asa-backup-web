@@ -17,6 +17,7 @@ import {
 import { executeBackupAndPrune } from '../services/schedulerService.js';
 import { loadBackupSettings } from '../services/settingsService.js';
 import { BACKUP_STORAGE_DIRECTORY } from '../config/constants.js';
+import { Logger } from '../utils/logger.js';
 
 const backupRouter = Router();
 
@@ -40,24 +41,24 @@ backupRouter.get('/api/backups', async (_httpRequest: Request, httpResponse: Res
  * @route POST /api/backups/trigger
  */
 backupRouter.post('/api/backups/trigger', async (httpRequest: Request, httpResponse: Response) => {
-  console.log('[POST /api/backups/trigger] Request received:', httpRequest.body);
+  Logger.info('[POST /api/backups/trigger] Request received:', httpRequest.body);
   try {
     const { notes } = httpRequest.body;
-    console.log('[POST /api/backups/trigger] Loading settings...');
+    Logger.info('[POST /api/backups/trigger] Loading settings...');
     const currentSettings = await loadBackupSettings();
-    console.log('[POST /api/backups/trigger] Settings loaded, executing backup...');
+    Logger.info('[POST /api/backups/trigger] Settings loaded, executing backup...');
     await executeBackupAndPrune(currentSettings, notes);
-    console.log('[POST /api/backups/trigger] Backup executed, listing backups...');
+    Logger.info('[POST /api/backups/trigger] Backup executed, listing backups...');
     const updatedBackupsList = await listAvailableBackups();
-    console.log(
+    Logger.info(
       '[POST /api/backups/trigger] Backups listed (' +
         updatedBackupsList.length +
         '), sending response...'
     );
     httpResponse.json({ ok: true, backups: updatedBackupsList });
-    console.log('[POST /api/backups/trigger] Response sent successfully');
+    Logger.info('[POST /api/backups/trigger] Response sent successfully');
   } catch (backupError) {
-    console.error('[POST /api/backups/trigger] Manual backup trigger failed:', backupError);
+    Logger.error('[POST /api/backups/trigger] Manual backup trigger failed:', backupError);
     httpResponse.status(500).json({ ok: false, error: `backup failed: ${backupError}` });
   }
 });
@@ -72,33 +73,33 @@ backupRouter.post('/api/backups/trigger', async (httpRequest: Request, httpRespo
  * @route PUT /api/backups/notes
  */
 backupRouter.put('/api/backups/notes', async (httpRequest: Request, httpResponse: Response) => {
-  console.log('[PUT /api/backups/notes] Request received:', httpRequest.body);
+  Logger.info('[PUT /api/backups/notes] Request received:', httpRequest.body);
   try {
     const { backup_name, notes, tags } = httpRequest.body;
 
     if (!backup_name) {
-      console.log('[PUT /api/backups/notes] Missing backup_name');
+      Logger.info('[PUT /api/backups/notes] Missing backup_name');
       httpResponse.status(400).json({ ok: false, error: 'backup_name is required' });
       return;
     }
 
     // Verify backup exists
     const backupFilePath = path.join(BACKUP_STORAGE_DIRECTORY, backup_name);
-    console.log('[PUT /api/backups/notes] Checking backup exists:', backupFilePath);
+    Logger.info('[PUT /api/backups/notes] Checking backup exists:', backupFilePath);
     try {
       await fs.access(backupFilePath);
     } catch (accessError) {
-      console.log('[PUT /api/backups/notes] Backup not found');
+      Logger.info('[PUT /api/backups/notes] Backup not found');
       httpResponse.status(404).json({ ok: false, error: 'Backup not found' });
       return;
     }
 
     // Save or remove metadata
     if ((notes !== undefined && notes.trim()) || (tags !== undefined && tags.length > 0)) {
-      console.log('[PUT /api/backups/notes] Saving metadata');
+      Logger.info('[PUT /api/backups/notes] Saving metadata');
       await saveBackupMetadata(backup_name, notes?.trim() || '', tags || []);
     } else {
-      console.log('[PUT /api/backups/notes] Removing metadata (empty notes/tags)');
+      Logger.info('[PUT /api/backups/notes] Removing metadata (empty notes/tags)');
       // Remove metadata file if both notes and tags are empty
       const metadataFilePath = path.join(BACKUP_STORAGE_DIRECTORY, `${backup_name}.meta.json`);
       try {
@@ -109,9 +110,9 @@ backupRouter.put('/api/backups/notes', async (httpRequest: Request, httpResponse
     }
 
     httpResponse.json({ ok: true });
-    console.log('[PUT /api/backups/notes] Response sent successfully');
+    Logger.info('[PUT /api/backups/notes] Response sent successfully');
   } catch (updateError) {
-    console.error('[PUT /api/backups/notes] Error:', updateError);
+    Logger.error('[PUT /api/backups/notes] Error:', updateError);
     httpResponse
       .status(500)
       .json({ ok: false, error: `Failed to update metadata: ${updateError}` });
@@ -126,33 +127,33 @@ backupRouter.put('/api/backups/notes', async (httpRequest: Request, httpResponse
 backupRouter.post(
   '/api/backups/:backupName/verify',
   async (httpRequest: Request, httpResponse: Response) => {
-    console.log('[POST /api/backups/:backupName/verify] Request received:', httpRequest.params);
+    Logger.info('[POST /api/backups/:backupName/verify] Request received:', httpRequest.params);
     try {
       const backupNameToVerify = httpRequest.params.backupName;
 
       if (!backupNameToVerify) {
-        console.log('[POST /api/backups/:backupName/verify] Missing backup_name');
+        Logger.info('[POST /api/backups/:backupName/verify] Missing backup_name');
         httpResponse.status(400).json({ ok: false, error: 'backup_name is required' });
         return;
       }
 
       // Verify backup exists
       const backupFilePath = path.join(BACKUP_STORAGE_DIRECTORY, backupNameToVerify);
-      console.log('[POST /api/backups/:backupName/verify] Checking backup exists:', backupFilePath);
+      Logger.info('[POST /api/backups/:backupName/verify] Checking backup exists:', backupFilePath);
       try {
         await fs.access(backupFilePath);
       } catch (accessError) {
-        console.log('[POST /api/backups/:backupName/verify] Backup not found');
+        Logger.info('[POST /api/backups/:backupName/verify] Backup not found');
         httpResponse.status(404).json({ ok: false, error: 'Backup not found' });
         return;
       }
 
       // Run verification
-      console.log(
+      Logger.info(
         `[POST /api/backups/:backupName/verify] Running verification for: ${backupNameToVerify}`
       );
       const verificationResult = await verifyBackupIntegrity(backupNameToVerify);
-      console.log(
+      Logger.info(
         '[POST /api/backups/:backupName/verify] Verification result:',
         verificationResult
       );
@@ -162,9 +163,9 @@ backupRouter.post(
         ok: true,
         verification: verificationResult,
       });
-      console.log('[POST /api/backups/:backupName/verify] Response sent successfully');
+      Logger.info('[POST /api/backups/:backupName/verify] Response sent successfully');
     } catch (verificationError) {
-      console.error('[POST /api/backups/:backupName/verify] Error:', verificationError);
+      Logger.error('[POST /api/backups/:backupName/verify] Error:', verificationError);
       httpResponse.status(500).json({
         ok: false,
         error: `Verification failed: ${verificationError instanceof Error ? verificationError.message : String(verificationError)}`,
@@ -182,11 +183,11 @@ backupRouter.post(
  * @route POST /api/delete
  */
 backupRouter.post('/api/delete', async (httpRequest: Request, httpResponse: Response) => {
-  console.log('[POST /api/delete] Request received:', httpRequest.body);
+  Logger.info('[POST /api/delete] Request received:', httpRequest.body);
   const { backup_name: backupNameToDelete } = httpRequest.body;
 
   if (!backupNameToDelete) {
-    console.log('[POST /api/delete] Missing backup_name');
+    Logger.info('[POST /api/delete] Missing backup_name');
     httpResponse.status(400).json({ ok: false, error: 'backup_name is required' });
     return;
   }
@@ -194,17 +195,17 @@ backupRouter.post('/api/delete', async (httpRequest: Request, httpResponse: Resp
   try {
     // Verify backup exists
     const backupFilePath = path.join(BACKUP_STORAGE_DIRECTORY, backupNameToDelete);
-    console.log('[POST /api/delete] Checking backup exists:', backupFilePath);
+    Logger.info('[POST /api/delete] Checking backup exists:', backupFilePath);
     await fs.access(backupFilePath);
 
     // Delete backup and metadata files
-    console.log('[POST /api/delete] Deleting backup:', backupNameToDelete);
+    Logger.info('[POST /api/delete] Deleting backup:', backupNameToDelete);
     await deleteBackup(backupNameToDelete);
 
     httpResponse.json({ ok: true });
-    console.log('[POST /api/delete] Response sent successfully');
+    Logger.info('[POST /api/delete] Response sent successfully');
   } catch (deleteError) {
-    console.error('[POST /api/delete] Error:', deleteError);
+    Logger.error('[POST /api/delete] Error:', deleteError);
     if ((deleteError as NodeJS.ErrnoException).code === 'ENOENT') {
       httpResponse.status(404).json({ ok: false, error: 'backup not found' });
     } else {

@@ -1,7 +1,3 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Project Overview
 
 ARK: Survival Ascended Backup Manager - A modern web application for automated backup management of ARK: Survival Ascended dedicated servers. Built with TypeScript, React, Express, and Docker with real-time monitoring via Server-Sent Events (SSE).
