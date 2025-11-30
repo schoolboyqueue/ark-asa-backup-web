@@ -3,22 +3,32 @@
   "version": "3.0.0",
   "description": "ARK: Survival Ascended Backup Manager - Monorepo Root",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/schoolboyqueue/ark-asa-backup-web.git"
+  },
+  "author": "schoolboyqueue",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.12.0"
+  },
   "scripts": {
     "prepare": "husky",
     "commit": "cz",
-    "dev:client": "pnpm --filter client run dev",
-    "dev:server": "pnpm --filter server run dev",
-    "build:client": "pnpm --filter client run build",
-    "build:server": "pnpm --filter server run build",
+    "dev:client": "pnpm --filter ark-asa-backup-client run dev",
+    "dev:server": "pnpm --filter ark-asa-backup-server run dev",
+    "build:client": "pnpm --filter ark-asa-backup-client run build",
+    "build:server": "pnpm --filter ark-asa-backup-server run build",
     "build": "pnpm run build:client && pnpm run build:server",
-    "clean:client": "pnpm --filter client exec rm -rf dist",
-    "clean:server": "pnpm --filter server exec rm -rf dist",
+    "clean:client": "pnpm --filter ark-asa-backup-client exec rm -rf dist",
+    "clean:server": "pnpm --filter ark-asa-backup-server exec rm -rf dist",
     "clean": "pnpm run clean:client && pnpm run clean:server",
-    "lint:client": "pnpm --filter client run format:check && pnpm --filter client exec tsc --noEmit",
-    "lint:server": "pnpm --filter server run format:check && pnpm --filter server exec tsc --noEmit",
+    "lint:client": "pnpm --filter ark-asa-backup-client run format:check && pnpm --filter ark-asa-backup-client exec tsc --noEmit",
+    "lint:server": "pnpm --filter ark-asa-backup-server run format:check && pnpm --filter ark-asa-backup-server exec tsc --noEmit",
     "lint:all": "pnpm run lint:client && pnpm run lint:server",
-    "format:client": "pnpm --filter client run format",
-    "format:server": "pnpm --filter server run format",
+    "format:client": "pnpm --filter ark-asa-backup-client run format",
+    "format:server": "pnpm --filter ark-asa-backup-server run format",
     "format:all": "pnpm run format:client && pnpm run format:server"
   },
   "devDependencies": {

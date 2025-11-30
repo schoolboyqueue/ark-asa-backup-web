@@ -3,6 +3,7 @@
   "version": "3.0.0",
   "description": "ARK: Survival Ascended Backup Manager - Backend API",
   "type": "module",
+  "main": "dist/server.js",
   "scripts": {
     "build": "tsc",
     "dev": "nodemon --watch src --exec 'tsc && node dist/server.js'",
@@ -15,10 +16,7 @@
     "@types/express": "^4.17.21",
     "@types/node": "^20.10.6",
     "@types/tar": "^6.1.10",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
     "nodemon": "^3.0.2",
-    "prettier": "^3.6.2",
     "typescript": "^5.3.3"
   },
   "dependencies": {
