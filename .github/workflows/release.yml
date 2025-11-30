@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Pull request
     needs: check
-    # Only create PR if not a release merge commit
+    # Only create/update PR when check says to and not for release merge commits
     if: |
       needs.check.outputs.workflow == 'pull-request' &&
       !contains(github.event.head_commit.message, 'chore(release):')
@@ -45,11 +45,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Release
     needs: check
-    # Only run release on merge commits from simple-release PRs
-    if: |
-      github.event_name == 'push' &&
-      github.ref == 'refs/heads/main' &&
-      contains(github.event.head_commit.message, 'chore(release):')
+    # Let simple-release decide when to run release via check output
+    if: needs.check.outputs.workflow == 'release'
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v4
