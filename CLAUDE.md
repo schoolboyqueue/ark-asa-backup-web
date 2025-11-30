@@ -30,6 +30,14 @@ ARK: Survival Ascended Backup Manager - A modern web application for automated b
 
 ## Development Commands
 
+### Dependency Management (pnpm)
+
+- Enable [Corepack](https://nodejs.org/api/corepack.html) (`corepack enable`) so Node automatically provides pnpm.
+- Install all workspace dependencies from the repo root: `pnpm install` (use `pnpm install --frozen-lockfile` in CI).
+- Root scripts (see `package.json`) wrap common tasks: `pnpm run dev:client`, `pnpm run dev:server`, `pnpm run build`, `pnpm run lint:all`, etc.
+- Workspace-specific commands can also be executed via filters, e.g. `pnpm --filter client run dev`, `pnpm --filter server run build`.
+- Use `pnpm run commit` to launch Commitizen/commitlint; never call `git commit` directly.
+
 ### Backend (Server)
 
 ```bash
@@ -37,22 +45,25 @@ ARK: Survival Ascended Backup Manager - A modern web application for automated b
 cd server
 
 # Install dependencies
-npm install
+pnpm install
+
+# Clean install (optional, wipes node_modules)
+pnpm install --frozen-lockfile
 
 # Development (nodemon auto-restart)
-npm run dev
+pnpm run dev
 
 # Production build
-npm run build
+pnpm run build
 
 # Start production server (requires build first)
-npm start
+pnpm --filter server run start
 
 # Code formatting
-npm run format
+pnpm run format
 
 # Check formatting without changes
-npm run format:check
+pnpm run format:check
 ```
 
 ### Frontend (Client)
@@ -62,32 +73,35 @@ npm run format:check
 cd client
 
 # Install dependencies
-npm install
+pnpm install
+
+# Clean install (optional)
+pnpm install --frozen-lockfile
 
 # Development (Vite HMR on port 5173)
-npm run dev
+pnpm run dev
 
 # Production build
-npm run build
+pnpm run build
 
 # Preview production build
-npm run preview
+pnpm run preview
 
 # Code formatting
-npm run format
+pnpm run format
 
 # Check formatting without changes
-npm run format:check
+pnpm run format:check
 ```
 
 ### Full Stack Development
 
 ```bash
 # Terminal 1 - Start backend
-cd server && npm run dev
+cd server && pnpm run dev
 
 # Terminal 2 - Start frontend (in another terminal)
-cd client && npm run dev
+cd client && pnpm run dev
 
 # Access application at http://localhost:5173
 # API proxied to http://localhost:8080
@@ -119,11 +133,11 @@ Before modifying any file, ALWAYS run:
 
 ```bash
 # From project root - Check everything
-npm run lint:all
+pnpm run lint:all
 
 # Or check specific parts
-npm run lint:client    # Client TypeScript + Prettier
-npm run lint:server    # Server TypeScript + Prettier
+pnpm run lint:client    # Client TypeScript + Prettier
+pnpm run lint:server    # Server TypeScript + Prettier
 ```
 
 ### Post-Change Linting (REQUIRED)
@@ -133,9 +147,9 @@ After ANY code modification, IMMEDIATELY run:
 1. **Format the code:**
 ```bash
 # Auto-fix formatting issues
-npm run format:all      # Format both client and server
-npm run format:client   # Format only client
-npm run format:server   # Format only server
+pnpm run format:all      # Format both client and server
+pnpm run format:client   # Format only client
+pnpm run format:server   # Format only server
 ```
 
 2. **Verify type safety:**
@@ -148,7 +162,7 @@ cd server && npx tsc --noEmit
 3. **Final verification:**
 ```bash
 # Ensure everything passes
-npm run lint:all
+pnpm run lint:all
 ```
 
 ### Linting Tools Configured
@@ -182,13 +196,13 @@ Pre-commit hooks are configured to automatically:
 ### Workflow Integration Rules
 
 **When Writing Code:**
-1. ✅ Run `npm run lint:all` BEFORE starting
+1. ✅ Run `pnpm run lint:all` BEFORE starting
 2. ✅ Make your changes
-3. ✅ Run `npm run format:all` to auto-fix
+3. ✅ Run `pnpm run format:all` to auto-fix
 4. ✅ Run `npx tsc --noEmit` in both client and server
 5. ✅ Fix any remaining errors
-6. ✅ Run `npm run lint:all` again to verify
-7. ✅ Test the build: `cd client && npm run build && cd ../server && npm run build`
+6. ✅ Run `pnpm run lint:all` again to verify
+7. ✅ Test the build: `cd client && pnpm run build && cd ../server && pnpm run build`
 
 **When Reading Files:**
 - Always note any linting issues you spot
@@ -206,7 +220,7 @@ If you encounter multiple linting issues:
 
 ```bash
 # 1. Auto-fix all formatting
-npm run format:all
+pnpm run format:all
 
 # 2. Check TypeScript errors
 cd client && npx tsc --noEmit
@@ -219,9 +233,9 @@ cd ../server && npx tsc --noEmit
 #    - Type compatibility last
 
 # 4. Verify everything works
-npm run lint:all
-cd client && npm run build
-cd ../server && npm run build
+pnpm run lint:all
+cd client && pnpm run build
+cd ../server && pnpm run build
 ```
 
 **REMEMBER:** Linting is not optional. Clean, well-formatted, type-safe code is a requirement.
@@ -1663,7 +1677,7 @@ AUTO_SAFETY_BACKUP=true     # Boolean
   - 100-character line width
   - 2-space indentation
   - LF line endings
-- Run `npm run format` before committing
+- Run `pnpm run format` before committing
 
 ### Backend Module Pattern
 
@@ -1785,7 +1799,7 @@ Check logs: `docker compose logs ark-asa-backup-web | grep scheduler`
 
 ## Commit Message Format
 
-- Always run `npm run commit` (Commitizen + `@commitlint/cz-commitlint`) instead of `git commit`; it guides you through type/scope/message entry.
+- Always run `pnpm run commit` (Commitizen + `@commitlint/cz-commitlint`) instead of `git commit`; it guides you through type/scope/message entry.
 - Valid scopes are auto-detected from workspaces (`client`, `server`) plus `deps`, `dev-deps`, `release`. Multiple scopes are allowed in the prompt.
 - Husky hooks automatically run `npx lint-staged` before the commit and `npx commitlint --edit "$1"` afterwards, so you cannot bypass formatting or Conventional Commit validation.
 - Standard Conventional Commit types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, etc. Use `!` or `BREAKING CHANGE:` footer when needed.

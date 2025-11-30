@@ -1,6 +1,6 @@
 {
   "project": [
-    "@simple-release/npm#NpmWorkspacesProject",
+    "@simple-release/pnpm#PnpmWorkspacesProject",
     {
       "mode": "fixed"
     }

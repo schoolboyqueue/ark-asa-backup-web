@@ -225,22 +225,20 @@ Access the web interface at `http://localhost:8091`
 ### Local Development
 
 ```bash
-cd web
-
-# Install dependencies
-npm install
+# Install dependencies (Corepack auto-detects pnpm from packageManager)
+pnpm install
 
 # Run frontend dev server (HMR enabled)
-npm run dev:client
+pnpm run dev:client
 
 # Run backend dev server (nodemon auto-restart)
-npm run dev:server
+pnpm run dev:server
 
-# Production build
-npm run build
+# Production build (client + server)
+pnpm run build
 
 # Start production server
-npm start
+pnpm --filter server run start
 ```
 
 ### Code Standards
@@ -347,7 +345,7 @@ Check browser console for JavaScript errors. Common causes:
 ## Conventional Commits & Automated Releases
 
 ### Commit Process
-- Use `npm run commit` to launch Commitizen with the `@commitlint/cz-commitlint` adapter.
+- Use `pnpm run commit` to launch Commitizen with the `@commitlint/cz-commitlint` adapter.
 - Scopes auto-complete from the project workspaces (`client`, `server`) and custom scopes (`deps`, `dev-deps`, `release`).
 - Husky hooks run Prettier via `lint-staged` before every commit and `commitlint` afterwards, preventing invalid messages from landing in the repo.
 
@@ -361,14 +359,14 @@ Check browser console for JavaScript errors. Common causes:
 
 Contributions are welcome! Please follow these guidelines:
 
-1. **Code Style**: Run `npm run format` before committing
+1. **Code Style**: Run `pnpm run format:all` before committing
 2. **Documentation**:
    - Add Google-style JSDoc for all new code
    - Update relevant README files (project/server/client)
    - Update CHANGELOG.md for notable changes
 3. **Architecture**: Follow Clean Architecture principles (see [client/README.md](client/README.md))
 4. **Testing**: Manually test all changes (no automated tests yet)
-5. **Commits**: Run `npm run commit` to create Conventional Commits (`feat(scope):`, `fix(scope):`, `chore(scope):`, `docs:` etc.); the Commitizen prompt plus commitlint hook keep history clean.
+5. **Commits**: Run `pnpm run commit` to create Conventional Commits (`feat(scope):`, `fix(scope):`, `chore(scope):`, `docs:` etc.); the Commitizen prompt plus commitlint hook keep history clean.
 
 For detailed development guidelines:
 - Frontend development: [client/README.md](client/README.md)

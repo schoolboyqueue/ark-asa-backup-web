@@ -113,7 +113,7 @@ The unified `/api/stream` endpoint sends all event types (backups, status, healt
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 20+ with Corepack enabled
 - Docker socket access (`/var/run/docker.sock`)
 - Write access to `/backups`, `/config` directories
 
@@ -123,16 +123,16 @@ The unified `/api/stream` endpoint sends all event types (backups, status, healt
 cd server
 
 # Install dependencies
-npm install
+pnpm install
 
 # Development (nodemon auto-restart)
-npm run dev
+pnpm run dev
 
 # Production build
-npm run build
+pnpm run build
 
 # Start production server
-npm start
+pnpm run start
 ```
 
 ### Environment Variables
@@ -222,10 +222,10 @@ export default router;
 
 ```bash
 # Format code (Prettier)
-npm run format
+pnpm run format
 
 # Check formatting
-npm run format:check
+pnpm run format:check
 ```
 
 **Prettier Configuration:**

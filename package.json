@@ -3,32 +3,30 @@
   "version": "3.0.0",
   "description": "ARK: Survival Ascended Backup Manager - Monorepo Root",
   "private": true,
-  "workspaces": [
-    "client",
-    "server"
-  ],
   "scripts": {
     "prepare": "husky",
     "commit": "cz",
-    "build:client": "cd client && npm run build",
-    "build:server": "cd server && npm run build",
-    "build": "npm run build:client && npm run build:server",
-    "clean:client": "cd client && rm -rf dist",
-    "clean:server": "cd server && rm -rf dist",
-    "clean": "npm run clean:client && npm run clean:server",
-    "lint:client": "cd client && npm run format:check && npx tsc --noEmit",
-    "lint:server": "cd server && npm run format:check && npx tsc --noEmit",
-    "lint:all": "npm run lint:client && npm run lint:server",
-    "format:client": "cd client && npm run format",
-    "format:server": "cd server && npm run format",
-    "format:all": "npm run format:client && npm run format:server"
+    "dev:client": "pnpm --filter client run dev",
+    "dev:server": "pnpm --filter server run dev",
+    "build:client": "pnpm --filter client run build",
+    "build:server": "pnpm --filter server run build",
+    "build": "pnpm run build:client && pnpm run build:server",
+    "clean:client": "pnpm --filter client exec rm -rf dist",
+    "clean:server": "pnpm --filter server exec rm -rf dist",
+    "clean": "pnpm run clean:client && pnpm run clean:server",
+    "lint:client": "pnpm --filter client run format:check && pnpm --filter client exec tsc --noEmit",
+    "lint:server": "pnpm --filter server run format:check && pnpm --filter server exec tsc --noEmit",
+    "lint:all": "pnpm run lint:client && pnpm run lint:server",
+    "format:client": "pnpm --filter client run format",
+    "format:server": "pnpm --filter server run format",
+    "format:all": "pnpm run format:client && pnpm run format:server"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
     "@commitlint/config-workspace-scopes": "^20.0.0",
     "@commitlint/cz-commitlint": "^20.1.0",
-    "@simple-release/npm": "^2.3.0",
+    "@simple-release/pnpm": "^2.3.0",
     "commitizen": "^4.3.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
@@ -37,5 +35,6 @@
   "lint-staged": {
     "client/src/**/*.{ts,tsx,js,jsx,json,css}": "prettier --write",
     "server/src/**/*.{ts,js,json}": "prettier --write"
-  }
+  },
+  "packageManager": "pnpm@9.12.0"
 }

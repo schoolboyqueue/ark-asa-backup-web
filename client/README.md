@@ -252,8 +252,8 @@ export function CreateBackupForm() {
 
 ### Prerequisites
 
-- Node.js 20+
-- npm or yarn
+- Node.js 20+ with [Corepack](https://nodejs.org/api/corepack.html) enabled (`corepack enable`)
+- pnpm 9 (auto-managed via `packageManager`)
 
 ### Setup
 
@@ -261,16 +261,16 @@ export function CreateBackupForm() {
 cd client
 
 # Install dependencies
-npm install
+pnpm install
 
 # Development (HMR enabled)
-npm run dev
+pnpm run dev
 
 # Production build
-npm run build
+pnpm run build
 
 # Preview production build
-npm run preview
+pnpm run preview
 ```
 
 ### Development Server
@@ -368,10 +368,10 @@ export async function doSomething(input: string): Promise<Result> {
 
 ```bash
 # Format code
-npm run format
+pnpm run format
 
 # Check formatting
-npm run format:check
+pnpm run format:check
 ```
 
 **Prettier Config:**
@@ -550,7 +550,7 @@ useEffect(() => {
 ### Production Build
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 **Output:**
@@ -633,8 +633,8 @@ npx tsc --noEmit
 
 ```bash
 # Clear cache and reinstall
-rm -rf node_modules package-lock.json
-npm install
+rm -rf node_modules pnpm-lock.yaml
+pnpm install
 ```
 
 ## Contributing

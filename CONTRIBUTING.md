@@ -24,7 +24,7 @@ Thank you for your interest in contributing to the ARK: Survival Ascended Backup
 2. Install dependencies:
    ```bash
    cd web
-   npm install
+   pnpm install
    ```
 3. Set up your development environment (see README.md for details)
 4. Create a feature branch:
@@ -41,7 +41,7 @@ Thank you for your interest in contributing to the ARK: Survival Ascended Backup
 - Single quotes for strings
 - 100-character line width
 - Semicolons required
-- Run `npm run format` before committing
+- Run `pnpm run format` before committing
 
 #### Variable Naming
 **CRITICAL**: Descriptive names ONLY - absolutely NO single-character variables
@@ -234,13 +234,13 @@ refactor(backend): split monolithic server into modular services
 3. **Test your changes**:
    ```bash
    # Frontend
-   npm run dev:client
+   pnpm run dev:client
 
    # Backend
-   npm run dev:server
+   pnpm run dev:server
 
    # Production build
-   npm run build
+   pnpm run build
 
    # Docker build
    docker compose up -d --build ark-asa-backup-web
@@ -248,7 +248,7 @@ refactor(backend): split monolithic server into modular services
 
 4. **Format your code**:
    ```bash
-   npm run format
+   pnpm run format
    ```
 
 5. **Commit with conventional commit messages**:
@@ -297,7 +297,7 @@ Brief description of changes and motivation
 ## Checklist
 - [ ] Code follows project style guidelines
 - [ ] Added/updated JSDoc comments
-- [ ] Ran `npm run format`
+- [ ] Ran `pnpm run format`
 - [ ] Tested locally (dev mode)
 - [ ] Tested Docker build
 - [ ] Updated documentation if needed
@@ -326,8 +326,8 @@ Example:
 
 Currently, the project uses manual testing. When adding features:
 
-1. Test in development mode (`npm run dev:client` and `npm run dev:server`)
-2. Test production build (`npm run build && npm start`)
+1. Test in development mode (`pnpm run dev:client` and `pnpm run dev:server`)
+2. Test production build (`pnpm run build && pnpm --filter server run start`)
 3. Test Docker build (`docker compose up -d --build`)
 4. Test all affected functionality manually
 5. Document testing steps in your PR

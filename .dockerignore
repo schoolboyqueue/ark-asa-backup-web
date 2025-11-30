@@ -1,0 +1,16 @@
+node_modules
+package-lock.json
+client/node_modules
+server/node_modules
+client/dist
+server/dist
+.pnpm-store
+backups
+save
+config
+Dockerfile
+.git
+.vscode
+husky
+.husky
+*.log
