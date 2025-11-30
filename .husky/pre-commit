@@ -1,5 +1,2 @@
-#!/usr/bin/env sh
-. "$(dirname "$0")/_/husky.sh"
-
 # Run lint-staged for both client and server
 npx lint-staged
