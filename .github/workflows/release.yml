@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history and tags
       - name: Context check
         id: check
         uses: TrigenSoftware/simple-release-action@v1
@@ -35,6 +37,8 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history and tags
       - name: Create or update pull request
         uses: TrigenSoftware/simple-release-action@v1
         with:
@@ -50,6 +54,8 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history and tags
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
