@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Release
     needs: check
-    if: needs.check.outputs.workflow == 'release'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v4
