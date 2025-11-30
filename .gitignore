@@ -26,7 +26,7 @@ pids
 *.pid.lock
 
 # Config directory (contains runtime settings)
-config/
+**/settings.env
 !config/settings.env.example
 
 # Backup storage (contains large backup files - top level only)
