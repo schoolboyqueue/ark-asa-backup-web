@@ -50,21 +50,26 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v4
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 9.12.0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
-          registry-url: 'https://registry.npmjs.org'
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Release
+
+      - name: Build Docker image (verify build works)
+        run: docker build -t ark-asa-backup-web:test .
+
+      - name: Create GitHub Release
         uses: TrigenSoftware/simple-release-action@v1
         with:
           workflow: release
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          npm-token: ${{ secrets.NPM_TOKEN }}
