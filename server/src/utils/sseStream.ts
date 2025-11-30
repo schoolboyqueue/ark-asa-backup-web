@@ -6,6 +6,26 @@
 import type { Response } from 'express';
 
 // ============================================================================
+// SSE Connection Tracking (for graceful shutdown)
+// ============================================================================
+
+/** Set of all active SSE connections */
+const activeSSEConnections = new Set<Response>();
+
+/**
+ * Closes all active SSE connections.
+ * Used during graceful shutdown to ensure HTTP server can close cleanly.
+ */
+export function closeAllSSEConnections(): void {
+  activeSSEConnections.forEach((response) => {
+    if (!response.writableEnded) {
+      response.end();
+    }
+  });
+  activeSSEConnections.clear();
+}
+
+// ============================================================================
 // SSE Stream Setup
 // ============================================================================
 
@@ -53,12 +73,20 @@ export function createSSEEventSender(
 /**
  * Sets up cleanup handler for SSE connection close events.
  * Useful for stopping polling loops and releasing resources when client disconnects.
+ * Automatically tracks connection for graceful shutdown.
  *
  * @param {Response} httpResponse - Express response object
  * @param {() => void} cleanupHandler - Function to call when connection closes
  */
 export function setupSSECleanup(httpResponse: Response, cleanupHandler: () => void): void {
-  httpResponse.on('close', cleanupHandler);
+  // Track this connection for graceful shutdown
+  activeSSEConnections.add(httpResponse);
+
+  httpResponse.on('close', () => {
+    // Remove from tracking when connection closes
+    activeSSEConnections.delete(httpResponse);
+    cleanupHandler();
+  });
 }
 
 /**

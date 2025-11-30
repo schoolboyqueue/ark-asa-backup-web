@@ -30,6 +30,7 @@ import sseRouter from './routes/sseRoutes.js';
 
 // Import services
 import { runBackupSchedulerLoop, stopScheduler } from './services/schedulerService.js';
+import { closeAllSSEConnections } from './utils/sseStream.js';
 
 // ============================================================================
 // Express Application Setup
@@ -97,13 +98,17 @@ runBackupSchedulerLoop();
 
 /**
  * Handles graceful shutdown on SIGTERM or SIGINT.
- * Stops scheduler and closes HTTP server cleanly.
+ * Stops scheduler, closes all SSE connections, and closes HTTP server cleanly.
  */
 const handleGracefulShutdown = (signalName: string): void => {
   Logger.info(`\nReceived ${signalName} signal. Starting graceful shutdown...`);
 
   // Stop backup scheduler
   stopScheduler();
+
+  // Close all active SSE connections to allow HTTP server to close
+  Logger.info('Closing all SSE connections...');
+  closeAllSSEConnections();
 
   // Close HTTP server
   httpServer.close(() => {
