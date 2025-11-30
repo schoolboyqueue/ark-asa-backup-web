@@ -344,6 +344,19 @@ Check browser console for JavaScript errors. Common causes:
 - Old variable references not updated to use hook properties
 - Missing dependencies in package.json
 
+## Conventional Commits & Automated Releases
+
+### Commit Process
+- Use `npm run commit` to launch Commitizen with the `@commitlint/cz-commitlint` adapter.
+- Scopes auto-complete from the project workspaces (`client`, `server`) and custom scopes (`deps`, `dev-deps`, `release`).
+- Husky hooks run Prettier via `lint-staged` before every commit and `commitlint` afterwards, preventing invalid messages from landing in the repo.
+
+### Release Workflow
+- Versioning and changelog generation are driven by [simple-release](https://github.com/TrigenSoftware/simple-release) via `.simple-release.json`.
+- The GitHub workflow at `.github/workflows/release.yml` runs on pushes to `main` and on release issue comments, orchestrating `check`, `pull-request`, and `release` jobs.
+- Provide `NPM_TOKEN` (publish access) and rely on the built-in `GITHUB_TOKEN` to allow the workflow to publish packages and release notes automatically.
+- When the workflow detects release-worthy commits, it raises a PR with version/changelog updates; merging that PR triggers the publish job.
+
 ## Contributing
 
 Contributions are welcome! Please follow these guidelines:
@@ -355,11 +368,7 @@ Contributions are welcome! Please follow these guidelines:
    - Update CHANGELOG.md for notable changes
 3. **Architecture**: Follow Clean Architecture principles (see [client/README.md](client/README.md))
 4. **Testing**: Manually test all changes (no automated tests yet)
-5. **Commits**: Use Conventional Commits format:
-   - `feat(scope): description` - New features
-   - `fix(scope): description` - Bug fixes
-   - `chore(scope): description` - Maintenance/updates
-   - `docs: description` - Documentation only
+5. **Commits**: Run `npm run commit` to create Conventional Commits (`feat(scope):`, `fix(scope):`, `chore(scope):`, `docs:` etc.); the Commitizen prompt plus commitlint hook keep history clean.
 
 For detailed development guidelines:
 - Frontend development: [client/README.md](client/README.md)

@@ -1789,8 +1789,14 @@ Check logs: `docker compose logs ark-asa-backup-web | grep scheduler`
 
 ## Commit Message Format
 
-Follow Conventional Commits:
-- `feat(scope): description` - New features
-- `fix(scope): description` - Bug fixes
-- `chore(scope): description` - Maintenance/updates
-- `docs: description` - Documentation only
+- Always run `npm run commit` (Commitizen + `@commitlint/cz-commitlint`) instead of `git commit`; it guides you through type/scope/message entry.
+- Valid scopes are auto-detected from workspaces (`client`, `server`) plus `deps`, `dev-deps`, `release`. Multiple scopes are allowed in the prompt.
+- Husky hooks automatically run `npx lint-staged` before the commit and `npx commitlint --edit "$1"` afterwards, so you cannot bypass formatting or Conventional Commit validation.
+- Standard Conventional Commit types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, etc. Use `!` or `BREAKING CHANGE:` footer when needed.
+
+### Release Automation
+
+- Versions/changelogs are managed via `.simple-release.json` using `@simple-release/npm` in fixed mode across the workspaces.
+- `.github/workflows/release.yml` runs on pushes to `main` and issue comments to open/update a release PR (`check` + `pull-request` jobs) and publish (`release` job) once merged.
+- Ensure repository secrets include `NPM_TOKEN`; GitHub supplies `GITHUB_TOKEN` automatically for tagging and PR updates.
+- Dependabot/Renovate commits should use `fix(deps): ...` or `fix(dev-deps): ...` so extra scopes trigger the correct bump.

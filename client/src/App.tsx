@@ -23,7 +23,6 @@ import './App.css';
 
 /**
  * Supported theme modes for the application.
- * @typedef {'light' | 'dark' | 'system'} ThemeMode
  */
 type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -63,7 +62,7 @@ function AppContent({
         <div className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="flex items-center gap-4">
             <CircleStackIcon
-              className="h-6 w-6 flex-shrink-0 sm:h-8 sm:w-8"
+              className="h-6 w-6 shrink-0 sm:h-8 sm:w-8"
               style={{ color: PRIMARY_COLOR }}
             />
             <div>

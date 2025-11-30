@@ -1,0 +1,11 @@
+{
+  "project": [
+    "@simple-release/npm#NpmWorkspacesProject",
+    {
+      "mode": "fixed"
+    }
+  ],
+  "bump": {
+    "extraScopes": ["deps", "dev-deps", "release"]
+  }
+}

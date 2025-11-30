@@ -3,8 +3,13 @@
   "version": "3.0.0",
   "description": "ARK: Survival Ascended Backup Manager - Monorepo Root",
   "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
   "scripts": {
     "prepare": "husky",
+    "commit": "cz",
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build",
     "build": "npm run build:client && npm run build:server",
@@ -19,6 +24,12 @@
     "format:all": "npm run format:client && npm run format:server"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@commitlint/config-workspace-scopes": "^20.0.0",
+    "@commitlint/cz-commitlint": "^20.1.0",
+    "@simple-release/npm": "^2.3.0",
+    "commitizen": "^4.3.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.1"
