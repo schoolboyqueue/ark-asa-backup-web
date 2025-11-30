@@ -25,14 +25,14 @@ const serverRouter = Router();
  * Returns the effective status which combines Docker state with transitional states.
  * @route GET /api/server/status
  */
-serverRouter.get('/api/server/status', async (_httpRequest: Request, httpResponse: Response) => {
-  Logger.info('[GET /api/server/status] Request received');
+serverRouter.get('/api/server/status', async (httpRequest: Request, httpResponse: Response) => {
+  Logger.info(httpRequest, 'Request received');
   try {
     const containerStatus = await getContainerStatus();
-    Logger.info('[GET /api/server/status] Container status:', containerStatus);
+    Logger.info(httpRequest, 'Container status', containerStatus);
 
     if (!containerStatus) {
-      Logger.info('[GET /api/server/status] Container not found');
+      Logger.info(httpRequest, 'Container not found');
       httpResponse.status(404).json({
         ok: false,
         error: `container '${ARK_SERVER_CONTAINER_NAME}' not found`,
@@ -43,9 +43,9 @@ serverRouter.get('/api/server/status', async (_httpRequest: Request, httpRespons
     // Apply transitional state if applicable
     const effectiveStatus = getEffectiveServerStatus(containerStatus);
     httpResponse.json({ ok: true, status: effectiveStatus });
-    Logger.info('[GET /api/server/status] Response sent successfully:', effectiveStatus);
+    Logger.info(httpRequest, 'Response sent successfully', effectiveStatus);
   } catch (statusError) {
-    Logger.error('[GET /api/server/status] Error:', statusError);
+    Logger.error(httpRequest, 'Error', statusError);
     httpResponse.status(500).json({ ok: false, error: String(statusError) });
   }
 });
@@ -55,27 +55,27 @@ serverRouter.get('/api/server/status', async (_httpRequest: Request, httpRespons
  * Sets transitional 'starting' state before operation and clears it after.
  * @route POST /api/server/start
  */
-serverRouter.post('/api/server/start', async (_httpRequest: Request, httpResponse: Response) => {
-  Logger.info('[POST /api/server/start] Request received');
+serverRouter.post('/api/server/start', async (httpRequest: Request, httpResponse: Response) => {
+  Logger.info(httpRequest, 'Request received');
 
   // Set transitional state BEFORE starting - SSE will pick this up immediately
   setServerStarting();
 
   try {
-    Logger.info('[POST /api/server/start] Starting container...');
+    Logger.info(httpRequest, 'Starting container...');
     const containerStatus = await startContainer();
-    Logger.info('[POST /api/server/start] Container started:', containerStatus);
+    Logger.info(httpRequest, 'Container started', containerStatus);
 
     // Clear transitional state now that operation is complete
     clearTransitionalState();
 
     httpResponse.json({ ok: true, status: containerStatus });
-    Logger.info('[POST /api/server/start] Response sent successfully');
+    Logger.info(httpRequest, 'Response sent successfully');
   } catch (startError) {
     // Clear transitional state on error
     clearTransitionalState();
 
-    Logger.error('[POST /api/server/start] Error:', startError);
+    Logger.error(httpRequest, 'Error', startError);
     if ((startError as Error).message.includes('not found')) {
       httpResponse.status(404).json({
         ok: false,
@@ -92,27 +92,27 @@ serverRouter.post('/api/server/start', async (_httpRequest: Request, httpRespons
  * Sets transitional 'stopping' state before operation and clears it after.
  * @route POST /api/server/stop
  */
-serverRouter.post('/api/server/stop', async (_httpRequest: Request, httpResponse: Response) => {
-  Logger.info('[POST /api/server/stop] Request received');
+serverRouter.post('/api/server/stop', async (httpRequest: Request, httpResponse: Response) => {
+  Logger.info(httpRequest, 'Request received');
 
   // Set transitional state BEFORE stopping - SSE will pick this up immediately
   setServerStopping();
 
   try {
-    Logger.info('[POST /api/server/stop] Stopping container...');
+    Logger.info(httpRequest, 'Stopping container...');
     const containerStatus = await stopContainer();
-    Logger.info('[POST /api/server/stop] Container stopped:', containerStatus);
+    Logger.info(httpRequest, 'Container stopped', containerStatus);
 
     // Clear transitional state now that operation is complete
     clearTransitionalState();
 
     httpResponse.json({ ok: true, status: containerStatus });
-    Logger.info('[POST /api/server/stop] Response sent successfully');
+    Logger.info(httpRequest, 'Response sent successfully');
   } catch (stopError) {
     // Clear transitional state on error
     clearTransitionalState();
 
-    Logger.error('[POST /api/server/stop] Error:', stopError);
+    Logger.error(httpRequest, 'Error', stopError);
     if ((stopError as Error).message.includes('not found')) {
       httpResponse.status(404).json({
         ok: false,

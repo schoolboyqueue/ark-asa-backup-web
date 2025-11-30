@@ -19,15 +19,15 @@ const settingsRouter = Router();
  * Retrieves current backup configuration settings.
  * @route GET /api/settings
  */
-settingsRouter.get('/api/settings', async (_httpRequest: Request, httpResponse: Response) => {
-  Logger.info('[GET /api/settings] Request received');
+settingsRouter.get('/api/settings', async (httpRequest: Request, httpResponse: Response) => {
+  Logger.info(httpRequest, 'Request received');
   try {
     const currentSettings = await loadBackupSettings();
-    Logger.info('[GET /api/settings] Settings loaded:', currentSettings);
+    Logger.info(httpRequest, 'Settings loaded', currentSettings);
     httpResponse.json(currentSettings);
-    Logger.info('[GET /api/settings] Response sent successfully');
+    Logger.info(httpRequest, 'Response sent successfully');
   } catch (error) {
-    Logger.error('[GET /api/settings] Error:', error);
+    Logger.error(httpRequest, 'Error', error);
     httpResponse.status(500).json({ ok: false, error: 'Failed to load settings' });
   }
 });
@@ -38,7 +38,7 @@ settingsRouter.get('/api/settings', async (_httpRequest: Request, httpResponse: 
  * @route POST /api/settings
  */
 settingsRouter.post('/api/settings', async (httpRequest: Request, httpResponse: Response) => {
-  Logger.info('[POST /api/settings] Request received:', httpRequest.body);
+  Logger.info(httpRequest, 'Request received', httpRequest.body);
   try {
     const { BACKUP_INTERVAL, MAX_BACKUPS, AUTO_SAFETY_BACKUP } = httpRequest.body;
 
@@ -48,24 +48,24 @@ settingsRouter.post('/api/settings', async (httpRequest: Request, httpResponse: 
     const newAutoSafetyBackup =
       AUTO_SAFETY_BACKUP !== undefined ? Boolean(AUTO_SAFETY_BACKUP) : true;
 
-    Logger.info('[POST /api/settings] Parsed settings:', {
+    Logger.info(httpRequest, 'Parsed settings', {
       newBackupInterval,
       newMaxBackups,
       newAutoSafetyBackup,
     });
 
-    Logger.info('[POST /api/settings] Saving settings...');
+    Logger.info(httpRequest, 'Saving settings...');
     await saveBackupSettings(newBackupInterval, newMaxBackups, newAutoSafetyBackup);
-    Logger.info('[POST /api/settings] Settings saved, pruning backups...');
+    Logger.info(httpRequest, 'Settings saved, pruning backups...');
     await pruneOldBackupArchives(newMaxBackups);
-    Logger.info('[POST /api/settings] Backups pruned, loading updated settings...');
+    Logger.info(httpRequest, 'Backups pruned, loading updated settings...');
 
     const updatedSettings = await loadBackupSettings();
-    Logger.info('[POST /api/settings] Updated settings loaded:', updatedSettings);
+    Logger.info(httpRequest, 'Updated settings loaded', updatedSettings);
     httpResponse.json({ ok: true, settings: updatedSettings });
-    Logger.info('[POST /api/settings] Response sent successfully');
+    Logger.info(httpRequest, 'Response sent successfully');
   } catch (error) {
-    Logger.error('[POST /api/settings] Error:', error);
+    Logger.error(httpRequest, 'Error', error);
     httpResponse.status(500).json({ ok: false, error: 'Failed to update settings' });
   }
 });
