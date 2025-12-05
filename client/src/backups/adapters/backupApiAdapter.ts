@@ -275,7 +275,7 @@ export const backupApiAdapter = {
   },
 
   /**
-   * Restores a backup with progress tracking via SSE.
+   * Restores a backup with progress tracking via HTTP streaming.
    * WARNING: Replaces all current save files.
    *
    * @param {string} backupName - Name of backup to restore
@@ -293,56 +293,49 @@ export const backupApiAdapter = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ backup_name: backupName }),
       })
-        .then((response) => {
+        .then(async (response) => {
           if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
           }
 
           const reader = response.body?.getReader();
-          const decoder = new TextDecoder();
-
           if (!reader) {
             throw new Error('Response body is not readable');
           }
 
-          const readStream = (): void => {
-            reader
-              .read()
-              .then(({ done, value }) => {
-                if (done) {
-                  return;
-                }
+          const decoder = new TextDecoder();
+          let buffer = '';
 
-                const chunk = decoder.decode(value);
-                const lines = chunk.split('\n');
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
 
-                for (const line of lines) {
-                  if (line.startsWith('event: ')) {
-                    const eventType = line.substring(7).trim();
-                    const nextLineIndex = lines.indexOf(line) + 1;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
 
-                    if (nextLineIndex < lines.length && lines[nextLineIndex].startsWith('data: ')) {
-                      const eventData = JSON.parse(lines[nextLineIndex].substring(6));
+            for (const line of lines) {
+              if (line.trim()) {
+                try {
+                  const event = JSON.parse(line);
+                  const eventType = event.type;
+                  const eventData = event.data;
 
-                      if (eventType === 'progress') {
-                        onProgress(eventData);
-                      } else if (eventType === 'done') {
-                        resolve();
-                        return;
-                      } else if (eventType === 'error') {
-                        reject(new Error(eventData.error || 'Restore failed'));
-                        return;
-                      }
-                    }
+                  if (eventType === 'progress') {
+                    onProgress(eventData);
+                  } else if (eventType === 'done') {
+                    resolve();
+                    return;
+                  } else if (eventType === 'error') {
+                    reject(new Error(eventData.error || 'Restore failed'));
+                    return;
                   }
+                } catch (parseError) {
+                  console.error('[restoreBackup] Failed to parse event:', parseError);
                 }
-
-                readStream();
-              })
-              .catch(reject);
-          };
-
-          readStream();
+              }
+            }
+          }
         })
         .catch(reject);
     });

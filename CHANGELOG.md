@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+* **BREAKING**: Migrated from Server-Sent Events (SSE) to HTTP Streaming with NDJSON format
+  - Backend now uses `application/x-ndjson` content type for streaming
+  - Frontend uses Fetch API with ReadableStream instead of EventSource
+  - Improved reconnection logic with exponential backoff
+  - Better error handling and resource management
+  - See `MIGRATION_SSE_TO_HTTP_STREAMING.md` for detailed migration guide
+* Renamed server utilities: `sseStream.ts` → `httpStream.ts`
+* Renamed server routes: `sseRoutes.ts` → `streamRoutes.ts`
+* Renamed client hook: `useUnifiedSSE.ts` → `useUnifiedStream.ts` (backward compatible alias maintained)
+
 
 ## 3.0.0 (2025-11-30)
 

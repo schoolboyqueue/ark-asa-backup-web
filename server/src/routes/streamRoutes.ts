@@ -1,6 +1,7 @@
 /**
- * @fileoverview Server-Sent Events (SSE) routes for ARK ASA Backup Manager.
+ * @fileoverview HTTP Streaming routes for ARK ASA Backup Manager.
  * Provides real-time streaming updates for server status, backups, health, disk space, and restore progress.
+ * Uses NDJSON (newline-delimited JSON) format for efficient HTTP streaming.
  */
 
 import { Router, Request, Response } from 'express';
@@ -22,7 +23,7 @@ import {
 import { getContainerStatus } from '../services/dockerService.js';
 import { getEffectiveServerStatus } from '../services/serverStateService.js';
 import { loadBackupSettings } from '../services/settingsService.js';
-import { initializeSSEStream, setupSSECleanup } from '../utils/sseStream.js';
+import { initializeStream, setupStreamCleanup } from '../utils/httpStream.js';
 import {
   BACKUP_STORAGE_DIRECTORY,
   ARK_SAVE_DIRECTORY,
@@ -30,22 +31,22 @@ import {
 } from '../config/constants.js';
 import { Logger } from '../utils/logger.js';
 
-const sseRouter = Router();
+const streamRouter = Router();
 
 // ============================================================================
-// Server Status SSE Stream
+// Server Status HTTP Stream
 // ============================================================================
 
 /**
- * Server-Sent Events stream for real-time server status updates.
+ * HTTP streaming endpoint for real-time server status updates.
  * Polls Docker API every 500ms and sends updates when status changes.
  * Includes transitional states (starting/stopping) for better UX.
  * @route GET /api/server/status/stream
  */
-sseRouter.get(
+streamRouter.get(
   '/api/server/status/stream',
   async (_httpRequest: Request, httpResponse: Response) => {
-    const sendEvent = initializeSSEStream(httpResponse);
+    const sendEvent = initializeStream(httpResponse);
 
     let previousStatus: string | null = null;
     let isStreamActive = true;
@@ -87,7 +88,7 @@ sseRouter.get(
       }
     };
 
-    setupSSECleanup(httpResponse, () => {
+    setupStreamCleanup(httpResponse, () => {
       isStreamActive = false;
       Logger.info('Server status stream client disconnected');
     });
@@ -97,16 +98,16 @@ sseRouter.get(
 );
 
 // ============================================================================
-// Backups List SSE Stream
+// Backups List HTTP Stream
 // ============================================================================
 
 /**
- * Server-Sent Events stream for real-time backups list updates.
+ * HTTP streaming endpoint for real-time backups list updates.
  * Polls filesystem every 3 seconds and sends updates when backups change.
  * @route GET /api/backups/stream
  */
-sseRouter.get('/api/backups/stream', async (_httpRequest: Request, httpResponse: Response) => {
-  const sendEvent = initializeSSEStream(httpResponse);
+streamRouter.get('/api/backups/stream', async (_httpRequest: Request, httpResponse: Response) => {
+  const sendEvent = initializeStream(httpResponse);
 
   let previousBackupsList: string | null = null;
   let isStreamActive = true;
@@ -132,7 +133,7 @@ sseRouter.get('/api/backups/stream', async (_httpRequest: Request, httpResponse:
     }
   };
 
-  setupSSECleanup(httpResponse, () => {
+  setupStreamCleanup(httpResponse, () => {
     isStreamActive = false;
     Logger.info('Backups stream client disconnected');
   });
@@ -141,18 +142,18 @@ sseRouter.get('/api/backups/stream', async (_httpRequest: Request, httpResponse:
 });
 
 // ============================================================================
-// Backup Health SSE Stream
+// Backup Health HTTP Stream
 // ============================================================================
 
 /**
- * Server-Sent Events stream for real-time backup health status updates.
+ * HTTP streaming endpoint for real-time backup health status updates.
  * Sends updates every 5 seconds with scheduler status and last backup info.
  * @route GET /api/backup/health/stream
  */
-sseRouter.get(
+streamRouter.get(
   '/api/backup/health/stream',
   async (_httpRequest: Request, httpResponse: Response) => {
-    const sendEvent = initializeSSEStream(httpResponse);
+    const sendEvent = initializeStream(httpResponse);
 
     let previousHealthJson: string | null = null;
     let isStreamActive = true;
@@ -183,7 +184,7 @@ sseRouter.get(
       }
     };
 
-    setupSSECleanup(httpResponse, () => {
+    setupStreamCleanup(httpResponse, () => {
       isStreamActive = false;
       Logger.info('Backup health stream client disconnected');
     });
@@ -193,16 +194,16 @@ sseRouter.get(
 );
 
 // ============================================================================
-// Disk Space SSE Stream
+// Disk Space HTTP Stream
 // ============================================================================
 
 /**
- * Server-Sent Events stream for real-time disk space updates.
+ * HTTP streaming endpoint for real-time disk space updates.
  * Polls filesystem every 10 seconds and sends updates when disk usage changes.
  * @route GET /api/disk-space/stream
  */
-sseRouter.get('/api/disk-space/stream', async (_httpRequest: Request, httpResponse: Response) => {
-  const sendEvent = initializeSSEStream(httpResponse);
+streamRouter.get('/api/disk-space/stream', async (_httpRequest: Request, httpResponse: Response) => {
+  const sendEvent = initializeStream(httpResponse);
 
   let previousDiskSpaceJson: string | null = null;
   let isStreamActive = true;
@@ -228,7 +229,7 @@ sseRouter.get('/api/disk-space/stream', async (_httpRequest: Request, httpRespon
     }
   };
 
-  setupSSECleanup(httpResponse, () => {
+  setupStreamCleanup(httpResponse, () => {
     isStreamActive = false;
     Logger.info('Disk space stream client disconnected');
   });
@@ -237,7 +238,7 @@ sseRouter.get('/api/disk-space/stream', async (_httpRequest: Request, httpRespon
 });
 
 // ============================================================================
-// Disk Space Single Request (Not SSE)
+// Disk Space Single Request (Not Streaming)
 // ============================================================================
 
 /**
@@ -245,7 +246,7 @@ sseRouter.get('/api/disk-space/stream', async (_httpRequest: Request, httpRespon
  * Returns total, used, and available disk space in bytes.
  * @route GET /api/disk-space
  */
-sseRouter.get('/api/disk-space', async (_httpRequest: Request, httpResponse: Response) => {
+streamRouter.get('/api/disk-space', async (_httpRequest: Request, httpResponse: Response) => {
   try {
     const diskSpaceInfo = await retrieveDiskSpaceInfo();
     httpResponse.json(diskSpaceInfo);
@@ -258,15 +259,16 @@ sseRouter.get('/api/disk-space', async (_httpRequest: Request, httpResponse: Res
 });
 
 // ============================================================================
-// Unified SSE Stream (single connection for multiple event types)
+// Unified HTTP Stream (single connection for multiple event types)
 // ============================================================================
 
 /**
- * Unified SSE stream that emits server status, backups, health, and disk space updates.
+ * Unified HTTP stream that emits server status, backups, health, and disk space updates.
+ * Uses NDJSON format for efficient streaming.
  * @route GET /api/stream
  */
-sseRouter.get('/api/stream', async (_httpRequest: Request, httpResponse: Response) => {
-  const sendEvent = initializeSSEStream(httpResponse);
+streamRouter.get('/api/stream', async (_httpRequest: Request, httpResponse: Response) => {
+  const sendEvent = initializeStream(httpResponse);
   sendEvent('connected', { message: 'Unified stream connected' });
 
   // Send version info immediately on connection (static, doesn't need polling)
@@ -281,7 +283,7 @@ sseRouter.get('/api/stream', async (_httpRequest: Request, httpResponse: Respons
     Logger.info('Unified stream client disconnected');
   };
 
-  setupSSECleanup(httpResponse, cleanup);
+  setupStreamCleanup(httpResponse, cleanup);
 
   const startPolling = (fn: () => void, intervalMs: number): void => {
     fn();
@@ -366,16 +368,16 @@ sseRouter.get('/api/stream', async (_httpRequest: Request, httpResponse: Respons
 });
 
 // ============================================================================
-// Restore Operation with SSE Progress
+// Restore Operation with HTTP Streaming Progress
 // ============================================================================
 
 /**
- * Restores a backup archive to the ARK save directory with Server-Sent Events progress.
+ * Restores a backup archive to the ARK save directory with HTTP streaming progress.
  * Optionally creates a pre-restore safety backup based on AUTO_SAFETY_BACKUP setting.
  * WARNING: Deletes all current save files after optional safety backup, then extracts restore archive.
  * @route POST /api/restore
  */
-sseRouter.post('/api/restore', async (httpRequest: Request, httpResponse: Response) => {
+streamRouter.post('/api/restore', async (httpRequest: Request, httpResponse: Response) => {
   const { backup_name: backupNameToRestore } = httpRequest.body;
 
   if (!backupNameToRestore) {
@@ -384,7 +386,7 @@ sseRouter.post('/api/restore', async (httpRequest: Request, httpResponse: Respon
   }
 
   const backupFilePath = path.join(BACKUP_STORAGE_DIRECTORY, backupNameToRestore);
-  const sendEvent = initializeSSEStream(httpResponse);
+  const sendEvent = initializeStream(httpResponse);
 
   try {
     await fs.access(backupFilePath);
@@ -484,4 +486,4 @@ sseRouter.post('/api/restore', async (httpRequest: Request, httpResponse: Respon
   }
 });
 
-export default sseRouter;
+export default streamRouter;

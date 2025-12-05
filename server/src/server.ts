@@ -26,11 +26,11 @@ import healthRouter from './routes/healthRoutes.js';
 import settingsRouter from './routes/settingsRoutes.js';
 import backupRouter from './routes/backupRoutes.js';
 import serverRouter from './routes/serverRoutes.js';
-import sseRouter from './routes/sseRoutes.js';
+import streamRouter from './routes/streamRoutes.js';
 
 // Import services
 import { runBackupSchedulerLoop, stopScheduler } from './services/schedulerService.js';
-import { closeAllSSEConnections } from './utils/sseStream.js';
+import { closeAllStreamConnections } from './utils/httpStream.js';
 
 // ============================================================================
 // Express Application Setup
@@ -58,8 +58,8 @@ expressApplication.use(backupRouter);
 // Docker server control routes
 expressApplication.use(serverRouter);
 
-// SSE streams and restore routes
-expressApplication.use(sseRouter);
+// HTTP streaming and restore routes
+expressApplication.use(streamRouter);
 
 // ============================================================================
 // Static File Serving (React SPA)
@@ -98,7 +98,7 @@ runBackupSchedulerLoop();
 
 /**
  * Handles graceful shutdown on SIGTERM or SIGINT.
- * Stops scheduler, closes all SSE connections, and closes HTTP server cleanly.
+ * Stops scheduler, closes all HTTP streaming connections, and closes HTTP server cleanly.
  */
 const handleGracefulShutdown = (signalName: string): void => {
   Logger.info(`\nReceived ${signalName} signal. Starting graceful shutdown...`);
@@ -106,9 +106,9 @@ const handleGracefulShutdown = (signalName: string): void => {
   // Stop backup scheduler
   stopScheduler();
 
-  // Close all active SSE connections to allow HTTP server to close
-  Logger.info('Closing all SSE connections...');
-  closeAllSSEConnections();
+  // Close all active HTTP streaming connections to allow HTTP server to close
+  Logger.info('Closing all HTTP streaming connections...');
+  closeAllStreamConnections();
 
   // Close HTTP server
   httpServer.close(() => {

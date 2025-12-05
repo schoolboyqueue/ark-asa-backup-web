@@ -1,104 +1,106 @@
 /**
- * @fileoverview Server-Sent Events (SSE) utility functions for ARK ASA Backup Manager.
- * Provides helpers for setting up and managing SSE streams with clients.
+ * @fileoverview HTTP Streaming utility functions for ARK ASA Backup Manager.
+ * Provides helpers for setting up and managing HTTP streams with clients using NDJSON format.
  */
 
 import type { Response } from 'express';
 
 // ============================================================================
-// SSE Connection Tracking (for graceful shutdown)
+// HTTP Stream Connection Tracking (for graceful shutdown)
 // ============================================================================
 
-/** Set of all active SSE connections */
-const activeSSEConnections = new Set<Response>();
+/** Set of all active HTTP streaming connections */
+const activeStreamConnections = new Set<Response>();
 
 /**
- * Closes all active SSE connections.
+ * Closes all active HTTP streaming connections.
  * Used during graceful shutdown to ensure HTTP server can close cleanly.
  */
-export function closeAllSSEConnections(): void {
-  activeSSEConnections.forEach((response) => {
+export function closeAllStreamConnections(): void {
+  activeStreamConnections.forEach((response) => {
     if (!response.writableEnded) {
       response.end();
     }
   });
-  activeSSEConnections.clear();
+  activeStreamConnections.clear();
 }
 
 // ============================================================================
-// SSE Stream Setup
+// HTTP Stream Setup
 // ============================================================================
 
 /**
- * Configures HTTP response headers for Server-Sent Events streaming.
+ * Configures HTTP response headers for streaming.
  * Sets appropriate content type, cache control, and connection settings.
+ * Uses application/x-ndjson (newline-delimited JSON) for efficient streaming.
  *
  * @param {Response} httpResponse - Express response object
  */
-export function setupSSEHeaders(httpResponse: Response): void {
-  httpResponse.setHeader('Content-Type', 'text/event-stream');
+export function setupStreamHeaders(httpResponse: Response): void {
+  httpResponse.setHeader('Content-Type', 'application/x-ndjson');
   httpResponse.setHeader('Cache-Control', 'no-cache');
   httpResponse.setHeader('Connection', 'keep-alive');
+  httpResponse.setHeader('X-Content-Type-Options', 'nosniff');
   httpResponse.flushHeaders();
 }
 
 /**
- * Sends a Server-Sent Event to the client.
- * Formats the event according to SSE protocol specification.
+ * Sends a streaming event to the client using NDJSON format.
+ * Each event is a JSON object with 'type' and 'data' fields, followed by a newline.
  *
  * @param {Response} httpResponse - Express response object
  * @param {string} eventType - The event type (e.g., 'status', 'error', 'progress')
  * @param {any} eventData - The event data payload
  */
-export function sendSSEEvent(httpResponse: Response, eventType: string, eventData: any): void {
-  httpResponse.write(`event: ${eventType}\n`);
-  httpResponse.write(`data: ${JSON.stringify(eventData)}\n\n`);
+export function sendStreamEvent(httpResponse: Response, eventType: string, eventData: any): void {
+  const event = { type: eventType, data: eventData };
+  httpResponse.write(JSON.stringify(event) + '\n');
 }
 
 /**
- * Creates an SSE event sender function bound to a specific response.
+ * Creates a stream event sender function bound to a specific response.
  * Returns a function that can be called to send events without passing the response each time.
  *
  * @param {Response} httpResponse - Express response object
  * @returns {(eventType: string, eventData: any) => void} Event sender function
  */
-export function createSSEEventSender(
+export function createStreamEventSender(
   httpResponse: Response
 ): (eventType: string, eventData: any) => void {
   return (eventType: string, eventData: any): void => {
-    sendSSEEvent(httpResponse, eventType, eventData);
+    sendStreamEvent(httpResponse, eventType, eventData);
   };
 }
 
 /**
- * Sets up cleanup handler for SSE connection close events.
+ * Sets up cleanup handler for HTTP stream connection close events.
  * Useful for stopping polling loops and releasing resources when client disconnects.
  * Automatically tracks connection for graceful shutdown.
  *
  * @param {Response} httpResponse - Express response object
  * @param {() => void} cleanupHandler - Function to call when connection closes
  */
-export function setupSSECleanup(httpResponse: Response, cleanupHandler: () => void): void {
+export function setupStreamCleanup(httpResponse: Response, cleanupHandler: () => void): void {
   // Track this connection for graceful shutdown
-  activeSSEConnections.add(httpResponse);
+  activeStreamConnections.add(httpResponse);
 
   httpResponse.on('close', () => {
     // Remove from tracking when connection closes
-    activeSSEConnections.delete(httpResponse);
+    activeStreamConnections.delete(httpResponse);
     cleanupHandler();
   });
 }
 
 /**
- * Complete SSE stream setup helper that combines header setup and event sender creation.
+ * Complete HTTP stream setup helper that combines header setup and event sender creation.
  * Returns a configured event sender function ready to use.
  *
  * @param {Response} httpResponse - Express response object
  * @returns {(eventType: string, eventData: any) => void} Event sender function
  */
-export function initializeSSEStream(
+export function initializeStream(
   httpResponse: Response
 ): (eventType: string, eventData: any) => void {
-  setupSSEHeaders(httpResponse);
-  return createSSEEventSender(httpResponse);
+  setupStreamHeaders(httpResponse);
+  return createStreamEventSender(httpResponse);
 }
