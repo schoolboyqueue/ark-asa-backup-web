@@ -22,7 +22,7 @@ import {
   transformApiBackupHealthToDomain,
   transformApiVersionInfoToDomain,
 } from '../adapters/systemApiAdapter';
-import { useUnifiedSSE } from '../../shared/api/useUnifiedSSE';
+import { useUnifiedStream } from '../../shared/api/useUnifiedStream';
 
 /**
  * Return type for useSystemRepository.
@@ -38,7 +38,7 @@ export interface UseSystemRepositoryReturn {
   isLoading: boolean;
   /** Error message if failed to load */
   error: string | null;
-  /** Manually refresh system status (marks loading until next SSE event) */
+  /** Manually refresh system status (marks loading until next stream event) */
   refreshSystem: () => void;
 }
 
@@ -53,7 +53,7 @@ export function useSystemRepository(): UseSystemRepositoryReturn {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Stable callback references to prevent SSE listener re-registration on every render
+  // Stable callback references to prevent stream listener re-registration on every render
   const handleDiskSpaceUpdate = useCallback((apiData: DiskSpaceApi) => {
     const domainData = transformApiDiskSpaceToDomain(apiData);
     setDiskSpace(domainData);
@@ -84,11 +84,11 @@ export function useSystemRepository(): UseSystemRepositoryReturn {
     setVersionInfo(domainData);
   }, []);
 
-  useUnifiedSSE<DiskSpaceApi>('disk-space', handleDiskSpaceUpdate);
-  useUnifiedSSE<BackupHealthApi>('backup-health', handleBackupHealthUpdate);
-  useUnifiedSSE<VersionInfoApi>('version', handleVersionUpdate);
-  useUnifiedSSE<{ ok: boolean; error?: string }>('disk-space-error', handleDiskSpaceError);
-  useUnifiedSSE<{ ok: boolean; error?: string }>('backup-health-error', handleBackupHealthError);
+  useUnifiedStream<DiskSpaceApi>('disk-space', handleDiskSpaceUpdate);
+  useUnifiedStream<BackupHealthApi>('backup-health', handleBackupHealthUpdate);
+  useUnifiedStream<VersionInfoApi>('version', handleVersionUpdate);
+  useUnifiedStream<{ ok: boolean; error?: string }>('disk-space-error', handleDiskSpaceError);
+  useUnifiedStream<{ ok: boolean; error?: string }>('backup-health-error', handleBackupHealthError);
 
   const refreshSystem = useCallback(() => {
     setIsLoading(true);

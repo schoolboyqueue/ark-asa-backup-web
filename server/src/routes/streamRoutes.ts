@@ -202,40 +202,43 @@ streamRouter.get(
  * Polls filesystem every 10 seconds and sends updates when disk usage changes.
  * @route GET /api/disk-space/stream
  */
-streamRouter.get('/api/disk-space/stream', async (_httpRequest: Request, httpResponse: Response) => {
-  const sendEvent = initializeStream(httpResponse);
+streamRouter.get(
+  '/api/disk-space/stream',
+  async (_httpRequest: Request, httpResponse: Response) => {
+    const sendEvent = initializeStream(httpResponse);
 
-  let previousDiskSpaceJson: string | null = null;
-  let isStreamActive = true;
+    let previousDiskSpaceJson: string | null = null;
+    let isStreamActive = true;
 
-  sendEvent('connected', { message: 'Disk space stream connected' });
+    sendEvent('connected', { message: 'Disk space stream connected' });
 
-  const pollDiskSpace = async (): Promise<void> => {
-    while (isStreamActive) {
-      try {
-        const diskSpaceInfo = await retrieveDiskSpaceInfo();
-        const diskSpaceJson = JSON.stringify(diskSpaceInfo);
+    const pollDiskSpace = async (): Promise<void> => {
+      while (isStreamActive) {
+        try {
+          const diskSpaceInfo = await retrieveDiskSpaceInfo();
+          const diskSpaceJson = JSON.stringify(diskSpaceInfo);
 
-        if (diskSpaceJson !== previousDiskSpaceJson) {
-          sendEvent('diskspace', diskSpaceInfo);
-          previousDiskSpaceJson = diskSpaceJson;
+          if (diskSpaceJson !== previousDiskSpaceJson) {
+            sendEvent('diskspace', diskSpaceInfo);
+            previousDiskSpaceJson = diskSpaceJson;
+          }
+
+          await new Promise((resolvePromise) => setTimeout(resolvePromise, 10000));
+        } catch (diskSpaceError) {
+          sendEvent('error', { ok: false, error: String(diskSpaceError) });
+          await new Promise((resolvePromise) => setTimeout(resolvePromise, 10000));
         }
-
-        await new Promise((resolvePromise) => setTimeout(resolvePromise, 10000));
-      } catch (diskSpaceError) {
-        sendEvent('error', { ok: false, error: String(diskSpaceError) });
-        await new Promise((resolvePromise) => setTimeout(resolvePromise, 10000));
       }
-    }
-  };
+    };
 
-  setupStreamCleanup(httpResponse, () => {
-    isStreamActive = false;
-    Logger.info('Disk space stream client disconnected');
-  });
+    setupStreamCleanup(httpResponse, () => {
+      isStreamActive = false;
+      Logger.info('Disk space stream client disconnected');
+    });
 
-  pollDiskSpace();
-});
+    pollDiskSpace();
+  }
+);
 
 // ============================================================================
 // Disk Space Single Request (Not Streaming)

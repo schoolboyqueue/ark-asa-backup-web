@@ -1,9 +1,9 @@
 /**
- * @fileoverview Server status repository with unified SSE.
+ * @fileoverview Server status repository with unified HTTP streaming.
  * Manages real-time server status updates.
  *
  * Clean Architecture: Repository Layer
- * - Encapsulates where server data comes from (unified SSE stream)
+ * - Encapsulates where server data comes from (unified HTTP stream)
  * - Provides a stable API for consumers
  * - Handles loading/error state for the server domain
  */
@@ -11,7 +11,7 @@
 import { useState, useCallback } from 'react';
 import type { Server, ServerStatus } from '../domain/server';
 import { createServerFromStatus } from '../domain/server';
-import { useUnifiedSSE } from '../../shared/api/useUnifiedSSE';
+import { useUnifiedStream } from '../../shared/api/useUnifiedStream';
 
 /**
  * Return type for useServerRepository.
@@ -23,13 +23,13 @@ export interface UseServerRepositoryReturn {
   isLoading: boolean;
   /** Error message if failed to load */
   error: string | null;
-  /** Manually refresh server status (marks loading until next SSE event) */
+  /** Manually refresh server status (marks loading until next stream event) */
   refreshServer: () => void;
 }
 
 /**
  * Repository hook for server status.
- * Subscribes to unified SSE for real-time updates.
+ * Subscribes to unified HTTP stream for real-time updates.
  * Acts as the single source of truth for server status in the client.
  */
 export function useServerRepository(): UseServerRepositoryReturn {
@@ -37,7 +37,7 @@ export function useServerRepository(): UseServerRepositoryReturn {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Stable callback references to prevent SSE listener re-registration on every render
+  // Stable callback references to prevent stream listener re-registration on every render
   const handleServerStatusUpdate = useCallback((data: { ok: boolean; status: string }) => {
     if (data.ok && data.status) {
       const status = data.status as ServerStatus;
@@ -53,8 +53,8 @@ export function useServerRepository(): UseServerRepositoryReturn {
     setIsLoading(false);
   }, []);
 
-  useUnifiedSSE<{ ok: boolean; status: string }>('server-status', handleServerStatusUpdate);
-  useUnifiedSSE<{ ok: boolean; error?: string }>('server-status-error', handleServerStatusError);
+  useUnifiedStream<{ ok: boolean; status: string }>('server-status', handleServerStatusUpdate);
+  useUnifiedStream<{ ok: boolean; error?: string }>('server-status-error', handleServerStatusError);
 
   const refreshServer = useCallback(() => {
     setIsLoading(true);

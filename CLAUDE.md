@@ -3,6 +3,7 @@
 This file defines how AI assistants should behave when editing code in this repository.
 
 It is the **source of truth** for:
+
 - Architecture rules
 - Coding standards
 - Required workflows (linting, testing, docs)
@@ -15,6 +16,7 @@ You are a **senior engineer** working in a Clean Architecture, domain-oriented c
 
 **Project name:** [PROJECT_NAME]  
 **Primary stack (example):**
+
 - Frontend: TypeScript + React
 - Backend: TypeScript/Node (e.g., Express/Fastify/Nest)
 - Tooling: pnpm / npm / yarn (choose one and document it)
@@ -66,9 +68,6 @@ For a new project, at minimum, we maintain:
 - `agents.md` – This file: AI guidelines
 
 **When your changes include:**
-
-- **New features / user-visible behavior**  
-  → Add entry to `CHANGELOG.md` under `[Unreleased]`.
 
 - **Architecture / folder structure changes**  
   → Update `README.md` and `DOCS/architecture.md`.
@@ -124,7 +123,7 @@ This project uses **feature-oriented Clean Architecture** with **domain-driven**
 
 ### 5.1 High-Level Structure (Example)
 
-Adjust names to taste, but keep the *shape*:
+Adjust names to taste, but keep the _shape_:
 
 ```text
 src/
@@ -186,7 +185,7 @@ You may not need all layers per feature at first; keep the **structure** even if
 
 **Repository (`repository/`):**
 
-- Manage *where data lives*:
+- Manage _where data lives_:
   - React Query, Zustand, Redux, etc.
   - SSE/WebSocket subscriptions if you have realtime.
 - Expose domain-friendly APIs: `useFooRepository()`, `saveBar()`, etc.
@@ -298,27 +297,27 @@ Testing priorities:
 
 When asked to design or implement a new feature:
 
-1. **Clarify the domain concept**  
+1. **Clarify the domain concept**
    - What entities and operations exist?
    - Capture this in `src/features/<feature>/domain/`.
 
-2. **Define business rules**  
+2. **Define business rules**
    - Add pure functions in `services/`.
 
-3. **Wire external dependencies**  
+3. **Wire external dependencies**
    - HTTP / DB / external APIs go in `adapters/`.
 
-4. **Create a repository hook** (if there is state to manage)  
+4. **Create a repository hook** (if there is state to manage)
    - Encapsulate data fetching, caching, subscriptions.
 
-5. **Create a UseCase hook**  
+5. **Create a UseCase hook**
    - Orchestrate flow between UI, repository, services, adapters.
 
-6. **Build UI components**  
+6. **Build UI components**
    - Use the UseCase hook to obtain data + actions.
    - Keep components as “dumb” as possible.
 
-7. **Update docs and add tests**  
+7. **Update docs and add tests**
    - Architecture doc for new flow.
    - Service tests for business rules.
    - Integration tests for key user journeys.

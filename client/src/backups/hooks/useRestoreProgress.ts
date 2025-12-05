@@ -56,7 +56,7 @@ const COMPLETION_DISPLAY_DELAY_MS = 2000;
  * Features:
  * - Track which backup is being restored
  * - Monitor progress percentage (0-100)
- * - Display status messages from SSE stream
+ * - Display status messages from HTTP stream
  * - Auto-cleanup after completion
  * - Observable pattern for progress updates
  *
@@ -78,7 +78,7 @@ const COMPLETION_DISPLAY_DELAY_MS = 2000;
  * // Start restore
  * startRestore('backup-2025-01-15.tar.gz');
  *
- * // Update progress from SSE callback
+ * // Update progress from stream callback
  * await api.restoreBackup(backupName, (event) => {
  *   updateProgress(event);
  * });

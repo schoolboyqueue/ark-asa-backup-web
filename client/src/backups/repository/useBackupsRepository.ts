@@ -1,15 +1,15 @@
 /**
- * @fileoverview Backups repository for state management using unified SSE.
+ * @fileoverview Backups repository for state management using unified HTTP streaming.
  *
  * Clean Architecture: Repository Layer
- * - Encapsulates where backups data comes from (unified SSE + manual fetch refresh)
+ * - Encapsulates where backups data comes from (unified HTTP stream + manual fetch refresh)
  * - Transforms API models to domain backups
  * - Provides loading/error state and optimistic helpers for UI
  */
 
 import { useState, useCallback } from 'react';
 import type { Backup, SaveInfo } from '../domain/backup';
-import { useUnifiedSSE } from '../../shared/api/useUnifiedSSE';
+import { useUnifiedStream } from '../../shared/api/useUnifiedStream';
 import { backupApiAdapter } from '../adapters/backupApiAdapter';
 
 /** API SaveInfo type (snake_case) */
@@ -112,8 +112,8 @@ export function useBackupsRepository(): UseBackupsRepositoryReturn {
     setIsLoading(false);
   }, []);
 
-  useUnifiedSSE<BackupMetadataApi[]>('backups', handleBackupsUpdate);
-  useUnifiedSSE<{ ok: boolean; error?: string }>('backups-error', handleBackupsError);
+  useUnifiedStream<BackupMetadataApi[]>('backups', handleBackupsUpdate);
+  useUnifiedStream<{ ok: boolean; error?: string }>('backups-error', handleBackupsError);
 
   const refreshBackups = useCallback(() => {
     setIsLoading(true);
