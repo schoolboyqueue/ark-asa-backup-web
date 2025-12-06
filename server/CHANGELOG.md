@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-server-v1.0.1...ark-asa-backup-server-v1.0.2) (2025-12-06)
+
+
+### Bug Fixes
+
+* fixes sonarlint issues and remove old guides/docs ([b99f235](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/b99f2354775d3d6c451f89edc4a9262a97958945))
+
 ## [1.0.1](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-server-v1.0.0...ark-asa-backup-server-v1.0.1) (2025-12-06)
 
 
