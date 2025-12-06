@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-client-v0.2.2...ark-asa-backup-client-v0.2.3) (2025-12-06)
+
+
+### Bug Fixes
+
+* resolve HeroUI Table getCollectionNode error ([3942112](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/39421129a4899f64a3a27d2242a6516c12f3fe08))
+
 ## [0.2.2](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-client-v0.2.1...ark-asa-backup-client-v0.2.2) (2025-12-06)
 
 
