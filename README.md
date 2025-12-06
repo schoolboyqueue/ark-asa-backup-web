@@ -350,10 +350,10 @@ Check browser console for JavaScript errors. Common causes:
 - Husky hooks run Prettier via `lint-staged` before every commit and `commitlint` afterwards, preventing invalid messages from landing in the repo.
 
 ### Release Workflow
-- Versioning and changelog generation are driven by [simple-release](https://github.com/TrigenSoftware/simple-release) via `.simple-release.json`.
-- The GitHub workflow at `.github/workflows/release.yml` runs on pushes to `main` and on release issue comments, orchestrating `check`, `pull-request`, and `release` jobs.
-- Provide `NPM_TOKEN` (publish access) and rely on the built-in `GITHUB_TOKEN` to allow the workflow to publish packages and release notes automatically.
-- When the workflow detects release-worthy commits, it raises a PR with version/changelog updates; merging that PR triggers the publish job.
+- Versioning and changelog generation are driven by [Release Please](https://github.com/googleapis/release-please) via GitHub Actions.
+- The GitHub workflow at `.github/workflows/release.yml` runs on pushes to `main` and automatically creates release PRs based on conventional commits.
+- Release Please analyzes commit history, bumps versions according to semver, and updates `CHANGELOG.md` files automatically.
+- When a release PR is merged, GitHub releases are created automatically with the generated changelog.
 
 ## Contributing
 
