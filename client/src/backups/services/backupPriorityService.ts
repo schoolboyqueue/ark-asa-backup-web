@@ -19,8 +19,8 @@ const RECENT_BACKUP_DAYS = 7;
 const OLD_BACKUP_DAYS = 30;
 
 /** Important tags that elevate backup priority */
-const CRITICAL_TAGS = ['critical', 'important', 'milestone'];
-const HIGH_PRIORITY_TAGS = ['pre-boss', 'stable', 'production'];
+const CRITICAL_TAGS = new Set(['critical', 'important', 'milestone']);
+const HIGH_PRIORITY_TAGS = new Set(['pre-boss', 'stable', 'production']);
 
 /** Milliseconds per day for date calculations */
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -47,15 +47,13 @@ const MS_PER_DAY = 1000 * 60 * 60 * 24;
  */
 export function calculateBackupPriority(backup: Backup): BackupPriority {
   // Check for critical tags first
-  const hasCriticalTag = backup.tags?.some((tag) => CRITICAL_TAGS.includes(tag.toLowerCase()));
+  const hasCriticalTag = backup.tags?.some((tag) => CRITICAL_TAGS.has(tag.toLowerCase()));
   if (hasCriticalTag) {
     return BackupPriority.CRITICAL;
   }
 
   // Check for high priority tags
-  const hasHighPriorityTag = backup.tags?.some((tag) =>
-    HIGH_PRIORITY_TAGS.includes(tag.toLowerCase())
-  );
+  const hasHighPriorityTag = backup.tags?.some((tag) => HIGH_PRIORITY_TAGS.has(tag.toLowerCase()));
   if (hasHighPriorityTag) {
     return BackupPriority.HIGH;
   }

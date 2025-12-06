@@ -5,13 +5,13 @@ import { useEffect, useRef } from 'react';
  * Replaces EventSource with Fetch + ReadableStream for better control and compatibility.
  */
 class StreamConnection {
-  private url: string;
-  private listeners: Map<string, Set<(data: any) => void>>;
+  private readonly url: string;
+  private readonly listeners: Map<string, Set<(data: any) => void>>;
   private reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
   private abortController: AbortController | null = null;
   private reconnectTimeout: NodeJS.Timeout | null = null;
   private reconnectDelay = 1000;
-  private maxReconnectDelay = 30000;
+  private readonly maxReconnectDelay = 30000;
   private isConnecting = false;
 
   constructor(url: string) {
@@ -59,10 +59,25 @@ class StreamConnection {
     }
   }
 
+  private processSSELine(line: string, currentEvent: { value: string }): void {
+    if (line.startsWith('event: ')) {
+      currentEvent.value = line.slice(7).trim();
+    } else if (line.startsWith('data: ')) {
+      const data = line.slice(6);
+      try {
+        const parsed = JSON.parse(data);
+        this.dispatch(currentEvent.value, parsed);
+        currentEvent.value = '';
+      } catch (err) {
+        console.error('[StreamConnection] Failed to parse SSE data:', err);
+      }
+    }
+  }
+
   private async readSSEStream(): Promise<void> {
     const decoder = new TextDecoder();
     let buffer = '';
-    let currentEvent = '';
+    const currentEvent = { value: '' };
 
     try {
       while (this.reader) {
@@ -74,18 +89,7 @@ class StreamConnection {
         buffer = lines.pop() || '';
 
         for (const line of lines) {
-          if (line.startsWith('event: ')) {
-            currentEvent = line.slice(7).trim();
-          } else if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            try {
-              const parsed = JSON.parse(data);
-              this.dispatch(currentEvent, parsed);
-              currentEvent = '';
-            } catch (err) {
-              console.error('[StreamConnection] Failed to parse SSE data:', err);
-            }
-          }
+          this.processSSELine(line, currentEvent);
         }
       }
     } catch (error) {
@@ -95,6 +99,18 @@ class StreamConnection {
     } finally {
       this.cleanup();
       this.scheduleReconnect();
+    }
+  }
+
+  private processNDJSONLine(line: string): void {
+    if (!line.trim()) return;
+    try {
+      const event = JSON.parse(line);
+      if (event.type && event.data !== undefined) {
+        this.dispatch(event.type, event.data);
+      }
+    } catch (err) {
+      console.error('[StreamConnection] Failed to parse NDJSON line:', err);
     }
   }
 
@@ -112,15 +128,7 @@ class StreamConnection {
         buffer = lines.pop() || '';
 
         for (const line of lines) {
-          if (!line.trim()) continue;
-          try {
-            const event = JSON.parse(line);
-            if (event.type && event.data !== undefined) {
-              this.dispatch(event.type, event.data);
-            }
-          } catch (err) {
-            console.error('[StreamConnection] Failed to parse NDJSON line:', err);
-          }
+          this.processNDJSONLine(line);
         }
       }
     } catch (error) {
@@ -136,13 +144,13 @@ class StreamConnection {
   private dispatch(eventType: string, data: any): void {
     const handlers = this.listeners.get(eventType);
     if (handlers) {
-      handlers.forEach((handler) => {
+      for (const handler of handlers) {
         try {
           handler(data);
         } catch (err) {
           console.error(`[StreamConnection] Handler error for ${eventType}:`, err);
         }
-      });
+      }
     }
   }
 

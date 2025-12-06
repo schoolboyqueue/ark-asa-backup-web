@@ -16,46 +16,18 @@
  * ```
  */
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   Card,
   CardHeader,
   CardBody,
   Table,
-  TableHeader,
-  TableColumn,
   TableBody,
-  TableRow,
-  TableCell,
-  Button,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
   Spinner,
   Pagination,
-  Input,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
   Tooltip,
 } from '@heroui/react';
-import {
-  CircleStackIcon,
-  ArrowPathIcon,
-  TrashIcon,
-  PlusCircleIcon,
-  ClipboardDocumentIcon,
-  ChevronUpIcon,
-  ChevronDownIcon,
-  MagnifyingGlassIcon,
-  XMarkIcon,
-  FunnelIcon,
-  ArrowDownTrayIcon,
-  ShieldCheckIcon,
-} from '@heroicons/react/24/solid';
-import NumberFlow from '@number-flow/react';
+import { ShieldCheckIcon } from '@heroicons/react/24/solid';
 
 // Clean Architecture imports - organized by layer
 import {
@@ -65,9 +37,6 @@ import {
   useBackupActions,
   useUpdateBackupMetadata,
   useRelativeTimeRefresh,
-  parseFileSize,
-  formatTimestamp,
-  formatRelativeTime,
 } from '..';
 import type { Backup } from '../domain/backup';
 import type { Server } from '../../server/domain/server';
@@ -75,17 +44,18 @@ import type { Server } from '../../server/domain/server';
 // UI helper hooks (Clean Architecture: UI layer utilities)
 import { useBackupSort, useBackupFilters, useBackupPagination, useRestoreProgress } from '../hooks';
 import BackupDetailsDrawer from './BackupDetailsDrawer';
+import BackupsCardHeader from './BackupsCardHeader';
+import BackupsSearchBar from './BackupsSearchBar';
+import BackupsTableHeader from './BackupsTableHeader';
+import BackupTableRow from './BackupTableRow';
+import BackupsModals from './BackupsModals';
 
 /**
  * Props for BackupsList component.
  */
 interface BackupsListProps {
-  /** Server status for safety checks */
-  serverStatus: Server | null;
+  readonly serverStatus: Server | null;
 }
-
-/** Primary brand color */
-const PRIMARY_COLOR = '#0ea5e9';
 
 /**
  * BackupsList component - displays and manages backups.
@@ -140,19 +110,19 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
   // EVENT HANDLERS - Wire UI events to UseCase actions
   // ========================================================================
 
-  const handleCreateBackup = () => {
+  const handleCreateBackupClick = () => {
     setIsCreateModalOpen(true);
   };
 
   const handleSubmitCreate = async () => {
-    await createBackup.actions.handleSubmit();
+    createBackup.actions.handleSubmit();
     setIsCreateModalOpen(false);
   };
 
-  const handleDeleteClick = (backup: Backup) => {
+  const handleDeleteClick = useCallback((backup: Backup) => {
     setSelectedBackupForDelete(backup);
     setIsDeleteModalVisible(true);
-  };
+  }, []);
 
   const handleConfirmDelete = async () => {
     if (!selectedBackupForDelete) return;
@@ -161,35 +131,36 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
     setSelectedBackupForDelete(null);
   };
 
-  const handleRestoreClick = (backup: Backup) => {
-    if (serverStatus?.status === 'running') return;
-    setSelectedBackupForRestore(backup);
-    setIsRestoreModalVisible(true);
-  };
+  const handleRestoreClick = useCallback(
+    (backup: Backup) => {
+      if (serverStatus?.status === 'running') return;
+      setSelectedBackupForRestore(backup);
+      setIsRestoreModalVisible(true);
+    },
+    [serverStatus?.status]
+  );
 
   const handleConfirmRestore = async () => {
     if (!selectedBackupForRestore) return;
     setIsRestoreModalVisible(false);
-    // TODO: Create useRestoreBackup UseCase
-    // For now, use legacy restore progress hook
     restoreProgress.startRestore(selectedBackupForRestore.name);
     setSelectedBackupForRestore(null);
   };
 
-  const handleOpenDetails = (backup: Backup) => {
+  const handleOpenDetails = useCallback((backup: Backup) => {
     setSelectedBackupNameForDetails(backup.name);
     setIsDetailsDrawerOpen(true);
-  };
+  }, []);
 
-  const handleCloseDetails = () => {
+  const handleCloseDetails = useCallback(() => {
     setIsDetailsDrawerOpen(false);
     setTimeout(() => setSelectedBackupNameForDetails(null), 300);
-  };
+  }, []);
 
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     filters.clearFilters();
     pagination.setPage(1);
-  };
+  }, [filters, pagination]);
 
   // ========================================================================
   // RENDER HELPERS
@@ -229,13 +200,16 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
 
   const isServerRunning = serverStatus?.status === 'running';
 
-  const columns = [
-    { key: 'name', label: 'BACKUP NAME', sortable: true },
-    { key: 'size', label: 'SIZE', sortable: true },
-    { key: 'date', label: 'CREATED', sortable: true },
-    { key: 'notes', label: 'NOTES', sortable: false },
-    { key: 'actions', label: 'ACTIONS', sortable: false },
-  ];
+  const columns = useMemo(
+    () => [
+      { key: 'name', label: 'BACKUP NAME', sortable: true },
+      { key: 'size', label: 'SIZE', sortable: true },
+      { key: 'date', label: 'CREATED', sortable: true },
+      { key: 'notes', label: 'NOTES', sortable: false },
+      { key: 'actions', label: 'ACTIONS', sortable: false },
+    ],
+    []
+  );
 
   // ========================================================================
   // RENDER - Pure JSX, no business logic
@@ -257,95 +231,24 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
     <>
       <Card className="w-full">
         <CardHeader className="flex flex-col gap-4">
-          <div className="flex w-full items-center justify-between">
-            <div className="flex items-center gap-2">
-              <CircleStackIcon className="h-5 w-5" style={{ color: PRIMARY_COLOR }} />
-              <h2 className="text-lg font-semibold">Backups</h2>
-            </div>
-            <div className="flex items-center gap-4">
-              <Button
-                color="primary"
-                variant="flat"
-                size="sm"
-                startContent={<PlusCircleIcon className="h-4 w-4" />}
-                onPress={handleCreateBackup}
-                isDisabled={isLoading}
-              >
-                Create Backup
-              </Button>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-default-500">Total:</span>
-                <NumberFlow
-                  value={backups.length}
-                  className="text-xl font-bold"
-                  style={{ color: PRIMARY_COLOR }}
-                />
-              </div>
-            </div>
-          </div>
+          <BackupsCardHeader
+            backupCount={backups.length}
+            isLoading={isLoading}
+            onCreateBackup={handleCreateBackupClick}
+          />
 
-          {/* Search and Filters */}
-          <div className="flex w-full items-center gap-2">
-            <Input
-              className="flex-1"
-              placeholder="Search backups..."
-              value={filters.searchQuery}
-              onValueChange={filters.setSearchQuery}
-              startContent={<MagnifyingGlassIcon className="h-4 w-4 text-default-400" />}
-              endContent={
-                filters.searchQuery && (
-                  <button onClick={() => filters.setSearchQuery('')}>
-                    <XMarkIcon className="h-4 w-4 text-default-400" />
-                  </button>
-                )
-              }
-              size="sm"
-              variant="bordered"
-            />
-
-            <Popover
-              isOpen={isFilterPopoverOpen}
-              onOpenChange={setIsFilterPopoverOpen}
-              placement="bottom"
-            >
-              <PopoverTrigger>
-                <Button
-                  size="sm"
-                  variant="flat"
-                  color={filters.hasActiveFilters ? 'primary' : 'default'}
-                  startContent={<FunnelIcon className="h-4 w-4" />}
-                >
-                  Filters
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-4">
-                <div className="flex flex-col gap-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-semibold">Filters</h4>
-                    {filters.hasActiveFilters && (
-                      <Button size="sm" variant="light" onPress={handleClearFilters}>
-                        Clear
-                      </Button>
-                    )}
-                  </div>
-                  <Input
-                    type="date"
-                    label="Start Date"
-                    size="sm"
-                    value={filters.dateRangeStart}
-                    onValueChange={filters.setDateRangeStart}
-                  />
-                  <Input
-                    type="date"
-                    label="End Date"
-                    size="sm"
-                    value={filters.dateRangeEnd}
-                    onValueChange={filters.setDateRangeEnd}
-                  />
-                </div>
-              </PopoverContent>
-            </Popover>
-          </div>
+          <BackupsSearchBar
+            searchQuery={filters.searchQuery}
+            hasActiveFilters={filters.hasActiveFilters}
+            dateRangeStart={filters.dateRangeStart}
+            dateRangeEnd={filters.dateRangeEnd}
+            isFilterPopoverOpen={isFilterPopoverOpen}
+            onSearchChange={filters.setSearchQuery}
+            onDateRangeStartChange={filters.setDateRangeStart}
+            onDateRangeEndChange={filters.setDateRangeEnd}
+            onFilterPopoverOpenChange={setIsFilterPopoverOpen}
+            onClearFilters={handleClearFilters}
+          />
         </CardHeader>
 
         <CardBody>
@@ -368,252 +271,89 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
               ) : null
             }
           >
-            <TableHeader columns={columns}>
-              {(column) => (
-                <TableColumn
-                  key={column.key}
-                  className={column.sortable ? 'cursor-pointer' : ''}
-                  onClick={() => column.sortable && sort.toggleSort(column.key as any)}
-                >
-                  <div className="flex items-center gap-1">
-                    {column.label}
-                    {column.sortable &&
-                      sort.sortColumn === column.key &&
-                      (sort.sortDirection === 'asc' ? (
-                        <ChevronUpIcon className="h-3 w-3" />
-                      ) : (
-                        <ChevronDownIcon className="h-3 w-3" />
-                      ))}
-                  </div>
-                </TableColumn>
-              )}
-            </TableHeader>
+            <BackupsTableHeader
+              columns={columns}
+              sortColumn={sort.sortColumn}
+              sortDirection={sort.sortDirection}
+              onSort={(columnKey) => sort.toggleSort(columnKey as any)}
+            />
             <TableBody
               items={pagination.paginatedBackups}
               isLoading={isLoading}
               loadingContent={<Spinner label="Loading..." />}
               emptyContent="No backups found"
             >
-              {(item: Backup) => {
-                return (
-                  <TableRow
-                    key={item.name}
-                    className="cursor-pointer"
-                    onClick={() => handleOpenDetails(item)}
-                  >
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {renderVerificationIcon(item)}
-                        <span className="font-semibold hover:text-primary">{item.name}</span>
-                        <Tooltip content="Copy name">
-                          <Button
-                            isIconOnly
-                            size="sm"
-                            variant="light"
-                            onPress={() => backupActions.copyBackupName(item)}
-                            onClick={(clickEvent: React.MouseEvent) => clickEvent.stopPropagation()}
-                          >
-                            <ClipboardDocumentIcon className="h-4 w-4" />
-                          </Button>
-                        </Tooltip>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {(() => {
-                        const parsed = parseFileSize(item.sizeBytes);
-                        return (
-                          <span className="font-mono tabular-nums">
-                            <NumberFlow value={parsed.value} suffix={` ${parsed.unit}`} />
-                          </span>
-                        );
-                      })()}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span>{formatTimestamp(item.createdAt)}</span>
-                        <span className="text-xs text-default-400">
-                          {formatRelativeTime(item.createdAt)}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{item.notes || '—'}</TableCell>
-                    <TableCell
-                      onClick={(e: React.MouseEvent) => {
-                        e.stopPropagation();
-                      }}
-                    >
-                      <div className="flex gap-1">
-                        <Tooltip content="Verify">
-                          <Button
-                            isIconOnly
-                            size="sm"
-                            color="warning"
-                            variant="flat"
-                            isLoading={backupActions.verifyingBackupName === item.name}
-                            onPress={() => backupActions.verifyBackup(item)}
-                          >
-                            <ShieldCheckIcon className="h-4 w-4" />
-                          </Button>
-                        </Tooltip>
-                        <Tooltip content={isServerRunning ? 'Stop server first' : 'Restore'}>
-                          <Button
-                            isIconOnly
-                            size="sm"
-                            color="primary"
-                            variant="flat"
-                            isDisabled={isServerRunning}
-                            onPress={() => handleRestoreClick(item)}
-                          >
-                            <ArrowPathIcon className="h-4 w-4" />
-                          </Button>
-                        </Tooltip>
-                        <Tooltip content="Download">
-                          <Button
-                            isIconOnly
-                            size="sm"
-                            color="success"
-                            variant="flat"
-                            isLoading={backupActions.downloadingBackupName === item.name}
-                            onPress={() => backupActions.downloadBackup(item)}
-                          >
-                            <ArrowDownTrayIcon className="h-4 w-4" />
-                          </Button>
-                        </Tooltip>
-                        <Tooltip content="Delete">
-                          <Button
-                            isIconOnly
-                            size="sm"
-                            color="danger"
-                            variant="flat"
-                            isLoading={deleteBackup.deletingBackupName === item.name}
-                            onPress={() => handleDeleteClick(item)}
-                          >
-                            <TrashIcon className="h-4 w-4" />
-                          </Button>
-                        </Tooltip>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              }}
+              {(item: Backup) => (
+                <BackupTableRow
+                  backup={item}
+                  isServerRunning={isServerRunning}
+                  isVerifying={backupActions.verifyingBackupName === item.name}
+                  isDownloading={backupActions.downloadingBackupName === item.name}
+                  isDeleting={deleteBackup.deletingBackupName === item.name}
+                  renderVerificationIcon={renderVerificationIcon}
+                  onOpenDetails={handleOpenDetails}
+                  onCopyName={backupActions.copyBackupName}
+                  onVerify={backupActions.verifyBackup}
+                  onRestore={handleRestoreClick}
+                  onDownload={backupActions.downloadBackup}
+                  onDelete={handleDeleteClick}
+                />
+              )}
             </TableBody>
           </Table>
         </CardBody>
       </Card>
 
-      {/* Create Backup Modal */}
-      <Modal isOpen={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>Create Backup</ModalHeader>
-              <ModalBody>
-                <Input
-                  label="Notes (optional)"
-                  placeholder="Pre-boss fight, milestone, etc."
-                  value={createBackup.formState.notes}
-                  onValueChange={createBackup.actions.setNotes}
-                  maxLength={500}
-                />
-                {createBackup.error && <p className="text-sm text-danger">{createBackup.error}</p>}
-              </ModalBody>
-              <ModalFooter>
-                <Button variant="flat" onPress={onClose} disableRipple>
-                  Cancel
-                </Button>
-                <Button
-                  color="primary"
-                  isLoading={createBackup.isCreating}
-                  onPress={handleSubmitCreate}
-                  disableRipple
-                >
-                  Create
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      <BackupsModals
+        isCreateModalOpen={isCreateModalOpen}
+        isDeleteModalVisible={isDeleteModalVisible}
+        isRestoreModalVisible={isRestoreModalVisible}
+        createNotes={createBackup.formState.notes}
+        createError={createBackup.error}
+        isCreating={createBackup.isCreating}
+        selectedDeleteBackupName={selectedBackupForDelete?.name || null}
+        selectedRestoreBackupName={selectedBackupForRestore?.name || null}
+        onCreateModalOpenChange={setIsCreateModalOpen}
+        onDeleteModalOpenChange={setIsDeleteModalVisible}
+        onRestoreModalOpenChange={setIsRestoreModalVisible}
+        onCreateNotesChange={createBackup.actions.setNotes}
+        onSubmitCreate={handleSubmitCreate}
+        onConfirmDelete={handleConfirmDelete}
+        onConfirmRestore={handleConfirmRestore}
+      />
 
-      {/* Delete Modal */}
-      <Modal isOpen={isDeleteModalVisible} onOpenChange={setIsDeleteModalVisible}>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>Delete Backup?</ModalHeader>
-              <ModalBody>
-                <p>
-                  Delete <strong>{selectedBackupForDelete?.name}</strong>?
-                </p>
-                <p className="text-sm text-danger">This action cannot be undone.</p>
-              </ModalBody>
-              <ModalFooter>
-                <Button variant="flat" onPress={onClose}>
-                  Cancel
-                </Button>
-                <Button color="danger" onPress={handleConfirmDelete}>
-                  Delete
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-
-      {/* Restore Modal */}
-      <Modal isOpen={isRestoreModalVisible} onOpenChange={setIsRestoreModalVisible}>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader>Restore Backup?</ModalHeader>
-              <ModalBody>
-                <p>
-                  Restore <strong>{selectedBackupForRestore?.name}</strong>?
-                </p>
-                <p className="text-sm text-warning">This will replace all current saves.</p>
-              </ModalBody>
-              <ModalFooter>
-                <Button variant="flat" onPress={onClose}>
-                  Cancel
-                </Button>
-                <Button color="danger" onPress={handleConfirmRestore}>
-                  Restore
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-
-      {/* Details Drawer - Legacy (will be refactored) */}
       <BackupDetailsDrawer
         isOpen={isDetailsDrawerOpen}
         onClose={handleCloseDetails}
         backup={selectedBackupForDetails}
         serverStatus={serverStatus}
-        onRestore={async () => {
-          if (selectedBackupForDetails) {
-            await handleRestoreClick(selectedBackupForDetails);
+        onRestore={async (backupName: string) => {
+          const backup = backups.find((b) => b.name === backupName);
+          if (backup) {
+            handleRestoreClick(backup);
           }
         }}
-        onDelete={async () => {
-          if (selectedBackupForDetails) {
-            await handleDeleteClick(selectedBackupForDetails);
+        onDelete={async (backupName: string) => {
+          const backup = backups.find((b) => b.name === backupName);
+          if (backup) {
+            handleDeleteClick(backup);
           }
         }}
-        onDownload={async () => {
-          if (selectedBackupForDetails) {
-            await backupActions.downloadBackup(selectedBackupForDetails);
+        onDownload={async (backupName: string) => {
+          const backup = backups.find((b) => b.name === backupName);
+          if (backup) {
+            backupActions.downloadBackup(backup);
           }
         }}
-        onVerify={async () => {
-          if (selectedBackupForDetails) {
-            await backupActions.verifyBackup(selectedBackupForDetails);
+        onVerify={async (backupName: string) => {
+          const backup = backups.find((b) => b.name === backupName);
+          if (backup) {
+            backupActions.verifyBackup(backup);
           }
         }}
         onSaveMetadata={async (_backupName: string, notes: string, tags: string[]) => {
           if (selectedBackupForDetails) {
-            await updateMetadata.updateMetadata(selectedBackupForDetails, notes, tags);
+            updateMetadata.updateMetadata(selectedBackupForDetails, notes, tags);
           }
         }}
         isRestoring={false}

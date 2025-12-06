@@ -121,7 +121,7 @@ export function useBackupsRepository(): UseBackupsRepositoryReturn {
     backupApiAdapter
       .getBackups()
       .then((apiBackups) => {
-        const sorted = sortBackups(apiBackups as Backup[]);
+        const sorted = sortBackups(apiBackups);
         setBackups(sorted);
         setError(null);
       })

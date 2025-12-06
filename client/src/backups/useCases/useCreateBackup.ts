@@ -93,17 +93,17 @@ export interface UseCreateBackupReturn {
  * ```
  */
 export function useCreateBackup(): UseCreateBackupReturn {
-  const [notes, setNotesState] = useState<string>('');
-  const [tags, setTagsState] = useState<string[]>([]);
-  const [isCreating, setIsCreating] = useState<boolean>(false);
+  const [notes, setNotes] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
 
   /**
    * Updates notes and generates tag suggestions.
    */
-  const setNotes = useCallback((newNotes: string) => {
-    setNotesState(newNotes);
+  const handleNotesChange = useCallback((newNotes: string) => {
+    setNotes(newNotes);
     setError(null);
 
     // Generate tag suggestions based on notes content
@@ -118,8 +118,8 @@ export function useCreateBackup(): UseCreateBackupReturn {
   /**
    * Updates tags array.
    */
-  const setTags = useCallback((newTags: string[]) => {
-    setTagsState(newTags);
+  const handleTagsChange = useCallback((newTags: string[]) => {
+    setTags(newTags);
     setError(null);
   }, []);
 
@@ -130,7 +130,7 @@ export function useCreateBackup(): UseCreateBackupReturn {
     (tag: string) => {
       const normalized = tag.trim().toLowerCase();
       if (normalized && !tags.includes(normalized)) {
-        setTagsState((current) => [...current, normalized]);
+        setTags((current) => [...current, normalized]);
         setError(null);
       }
     },
@@ -141,7 +141,7 @@ export function useCreateBackup(): UseCreateBackupReturn {
    * Removes a tag from the list.
    */
   const removeTag = useCallback((tag: string) => {
-    setTagsState((current) => current.filter((t) => t !== tag));
+    setTags((current) => current.filter((t) => t !== tag));
     setError(null);
   }, []);
 
@@ -149,8 +149,8 @@ export function useCreateBackup(): UseCreateBackupReturn {
    * Resets form to initial empty state.
    */
   const resetForm = useCallback(() => {
-    setNotesState('');
-    setTagsState([]);
+    setNotes('');
+    setTags([]);
     setError(null);
     setSuggestedTags([]);
   }, []);
@@ -223,8 +223,8 @@ export function useCreateBackup(): UseCreateBackupReturn {
     error,
     suggestedTags,
     actions: {
-      setNotes,
-      setTags,
+      setNotes: handleNotesChange,
+      setTags: handleTagsChange,
       addTag,
       removeTag,
       resetForm,

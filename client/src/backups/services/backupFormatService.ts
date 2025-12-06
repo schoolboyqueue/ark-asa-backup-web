@@ -57,11 +57,12 @@ export interface ParsedFileSize {
  */
 export function parseFileSize(sizeInBytes: number): ParsedFileSize {
   const formatted = prettyBytes(sizeInBytes);
-  const match = formatted.match(/^([\d.]+)\s*(.+)$/);
+  const regex = /^([\d.]+)\s*(.+)$/;
+  const match = regex.exec(formatted);
 
   if (match) {
     return {
-      value: parseFloat(match[1]),
+      value: Number.parseFloat(match[1]),
       unit: match[2] as FileSizeUnit,
     };
   }

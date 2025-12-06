@@ -93,6 +93,72 @@ function transformApiBackupToDomain(apiBackup: BackupMetadataApi): Backup {
 }
 
 /**
+ * Processes a single event line from the restore stream.
+ * @param {string} line - Event line to process
+ * @param {Function} onProgress - Progress callback
+ * @param {Function} resolve - Promise resolve function
+ * @param {Function} reject - Promise reject function
+ */
+function processRestoreEventLine(
+  line: string,
+  onProgress: (event: { stage: string; percent: number; message?: string }) => void,
+  resolve: () => void,
+  reject: (error: Error) => void
+): void {
+  try {
+    const event = JSON.parse(line);
+    const eventType = event.type;
+    const eventData = event.data;
+
+    if (eventType === 'progress') {
+      onProgress(eventData);
+    } else if (eventType === 'done') {
+      resolve();
+    } else if (eventType === 'error') {
+      reject(new Error(eventData.error || 'Restore failed'));
+    }
+  } catch (parseError) {
+    console.error('[restoreBackup] Failed to parse event:', parseError);
+  }
+}
+
+/**
+ * Processes the restore stream by reading chunks and parsing event lines.
+ * @param {ReadableStreamDefaultReader<Uint8Array>} reader - Stream reader
+ * @param {Function} onProgress - Progress callback
+ * @param {Function} resolve - Promise resolve function
+ * @param {Function} reject - Promise reject function
+ */
+async function processRestoreStream(
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  onProgress: (event: { stage: string; percent: number; message?: string }) => void,
+  resolve: () => void,
+  reject: (error: Error) => void
+): Promise<void> {
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        if (line.trim()) {
+          processRestoreEventLine(line, onProgress, resolve, reject);
+        }
+      }
+    }
+  } catch (streamError) {
+    reject(streamError instanceof Error ? streamError : new Error('Stream processing failed'));
+  }
+}
+
+/**
  * Backup API adapter - handles all HTTP communication for backup operations.
  * Provides a clean interface for backup data access without exposing HTTP details.
  */
@@ -271,7 +337,7 @@ export const backupApiAdapter = {
 
     document.body.appendChild(anchor);
     anchor.click();
-    document.body.removeChild(anchor);
+    anchor.remove();
   },
 
   /**
@@ -303,39 +369,7 @@ export const backupApiAdapter = {
             throw new Error('Response body is not readable');
           }
 
-          const decoder = new TextDecoder();
-          let buffer = '';
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
-
-            for (const line of lines) {
-              if (line.trim()) {
-                try {
-                  const event = JSON.parse(line);
-                  const eventType = event.type;
-                  const eventData = event.data;
-
-                  if (eventType === 'progress') {
-                    onProgress(eventData);
-                  } else if (eventType === 'done') {
-                    resolve();
-                    return;
-                  } else if (eventType === 'error') {
-                    reject(new Error(eventData.error || 'Restore failed'));
-                    return;
-                  }
-                } catch (parseError) {
-                  console.error('[restoreBackup] Failed to parse event:', parseError);
-                }
-              }
-            }
-          }
+          await processRestoreStream(reader, onProgress, resolve, reject);
         })
         .catch(reject);
     });
@@ -352,16 +386,23 @@ export const backupApiAdapter = {
   async copyToClipboard(text: string): Promise<void> {
     try {
       await navigator.clipboard.writeText(text);
-    } catch (error) {
-      // Fallback for older browsers
+    } catch (clipboardError) {
+      // Fallback for older browsers using textarea selection
       const textarea = document.createElement('textarea');
       textarea.value = text;
       textarea.style.position = 'fixed';
       textarea.style.opacity = '0';
       document.body.appendChild(textarea);
       textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
+
+      // eslint-disable-next-line deprecation/deprecation
+      const successful = document.execCommand('copy');
+      textarea.remove();
+
+      if (!successful) {
+        const errorMsg = clipboardError instanceof Error ? clipboardError.message : 'Unknown error';
+        throw new Error(`Clipboard copy failed: ${errorMsg}`);
+      }
     }
   },
 };

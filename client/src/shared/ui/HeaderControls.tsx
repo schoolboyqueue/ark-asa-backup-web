@@ -60,7 +60,7 @@ export default function HeaderControls({
   versionInfo,
   themeMode,
   onThemeChange,
-}: HeaderControlsProps): JSX.Element {
+}: Readonly<HeaderControlsProps>): JSX.Element {
   /**
    * Theme icons for the theme switcher.
    */

@@ -47,32 +47,19 @@ import { toast } from '../../shared/services/toast';
  * @interface BackupDetailsDrawerProps
  */
 interface BackupDetailsDrawerProps {
-  /** Whether the drawer is currently open */
-  isOpen: boolean;
-  /** Callback to close the drawer */
-  onClose: () => void;
-  /** Backup metadata to display */
-  backup: Backup | null;
-  /** Current server status for safety checks */
-  serverStatus: Server | null;
-  /** Callback to handle backup restoration */
-  onRestore: (backupName: string) => Promise<void>;
-  /** Callback to handle backup deletion */
-  onDelete: (backupName: string) => Promise<void>;
-  /** Callback to handle backup download */
-  onDownload: (backupName: string) => Promise<void>;
-  /** Callback to handle backup verification */
-  onVerify: (backupName: string) => Promise<void>;
-  /** Callback to save backup notes and tags */
-  onSaveMetadata: (backupName: string, notes: string, tags: string[]) => Promise<void>;
-  /** Whether the backup is currently being restored */
-  isRestoring?: boolean;
-  /** Whether the backup is currently being deleted */
-  isDeleting?: boolean;
-  /** Whether the backup is currently being downloaded */
-  isDownloading?: boolean;
-  /** Whether the backup is currently being verified */
-  isVerifying?: boolean;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly backup: Backup | null;
+  readonly serverStatus: Server | null;
+  readonly onRestore: (backupName: string) => Promise<void>;
+  readonly onDelete: (backupName: string) => Promise<void>;
+  readonly onDownload: (backupName: string) => Promise<void>;
+  readonly onVerify: (backupName: string) => Promise<void>;
+  readonly onSaveMetadata: (backupName: string, notes: string, tags: string[]) => Promise<void>;
+  readonly isRestoring?: boolean;
+  readonly isDeleting?: boolean;
+  readonly isDownloading?: boolean;
+  readonly isVerifying?: boolean;
 }
 
 /** Standard predefined tags for quick selection */

@@ -47,10 +47,10 @@ const PRIMARY_COLOR = '#0ea5e9';
 function AppContent({
   themeMode,
   onThemeChange,
-}: {
+}: Readonly<{
   themeMode: ThemeMode;
   onThemeChange: (mode: ThemeMode) => void;
-}): JSX.Element {
+}>): JSX.Element {
   // Clean Architecture: Domain data from repositories
   const serverRepo = useServerRepository();
   const systemRepo = useSystemRepository();
@@ -137,7 +137,7 @@ function App(): JSX.Element {
    */
   const getActualTheme = (): 'light' | 'dark' => {
     if (themeMode === 'system') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      return globalThis.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
     return themeMode;
   };

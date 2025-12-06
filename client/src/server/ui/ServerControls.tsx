@@ -41,7 +41,7 @@ export default function ServerControls({
   isOpen,
   onOpenChange,
   serverStatus,
-}: ServerControlsProps) {
+}: Readonly<ServerControlsProps>) {
   const settingsRepo = useSettingsRepository();
   const serverControl = useServerControl();
   const updateSettings = useUpdateSettings({

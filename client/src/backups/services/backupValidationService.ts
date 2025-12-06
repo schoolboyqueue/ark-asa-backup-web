@@ -22,7 +22,7 @@ const MAX_TAGS_COUNT = 10;
 const MAX_TAG_LENGTH = 50;
 
 /** Important tags that indicate high-priority backups */
-const IMPORTANT_TAGS = ['pre-boss', 'milestone', 'stable', 'critical', 'important'];
+const IMPORTANT_TAGS = new Set(['pre-boss', 'milestone', 'stable', 'critical', 'important']);
 
 /**
  * Validates backup notes according to business rules.
@@ -119,12 +119,12 @@ export function validateBackupTags(tags: ReadonlyArray<string>): ValidationResul
  */
 export function canDeleteBackup(backup: Backup): ValidationResult {
   // Check if backup has important tags that prevent deletion
-  const hasImportantTag = backup.tags?.some((tag) => IMPORTANT_TAGS.includes(tag.toLowerCase()));
+  const hasImportantTag = backup.tags?.some((tag) => IMPORTANT_TAGS.has(tag.toLowerCase()));
 
   if (hasImportantTag) {
     return {
       isValid: false,
-      error: `Cannot delete backup with important tags: ${backup.tags?.filter((tag) => IMPORTANT_TAGS.includes(tag.toLowerCase())).join(', ')}`,
+      error: `Cannot delete backup with important tags: ${backup.tags?.filter((tag) => IMPORTANT_TAGS.has(tag.toLowerCase())).join(', ')}`,
     };
   }
 
@@ -175,7 +175,7 @@ export function canRestoreBackup(backup: Backup, isServerRunning: boolean): Vali
  * // Returns: 'Pre-boss fight'
  */
 export function sanitizeBackupNotes(notes: string): string {
-  return notes.trim().replace(/\r\n/g, '\n');
+  return notes.trim().replaceAll('\r\n', '\n');
 }
 
 /**

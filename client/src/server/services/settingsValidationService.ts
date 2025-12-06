@@ -26,7 +26,7 @@ export const MAX_BACKUPS_TO_KEEP = 100;
  * @returns {string | undefined} Error message if invalid
  */
 export function validateBackupInterval(intervalSeconds: number): string | undefined {
-  if (isNaN(intervalSeconds)) {
+  if (Number.isNaN(intervalSeconds)) {
     return 'Backup interval must be a number';
   }
 
@@ -48,7 +48,7 @@ export function validateBackupInterval(intervalSeconds: number): string | undefi
  * @returns {string | undefined} Error message if invalid
  */
 export function validateMaxBackups(maxBackups: number): string | undefined {
-  if (isNaN(maxBackups)) {
+  if (Number.isNaN(maxBackups)) {
     return 'Max backups must be a number';
   }
 
@@ -101,9 +101,9 @@ export function formatBackupInterval(seconds: number): string {
 
   if (seconds < 3600) {
     const minutes = Math.floor(seconds / 60);
-    return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+    return `${minutes} minute${minutes === 1 ? '' : 's'}`;
   }
 
   const hours = Math.floor(seconds / 3600);
-  return `${hours} hour${hours !== 1 ? 's' : ''}`;
+  return `${hours} hour${hours === 1 ? '' : 's'}`;
 }
