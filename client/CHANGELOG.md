@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-client-v0.2.1...ark-asa-backup-client-v0.2.2) (2025-12-06)
+
+
+### Bug Fixes
+
+* resolve all SonarQube code quality issues ([70b0cc5](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/70b0cc57cb06d865826e0a1f071c42da539d5b5d))
+
 ## [0.2.1](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-client-v0.2.0...ark-asa-backup-client-v0.2.1) (2025-12-06)
 
 
