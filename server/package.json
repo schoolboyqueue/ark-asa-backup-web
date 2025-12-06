@@ -1,6 +1,6 @@
 {
   "name": "ark-asa-backup-server",
-  "version": "3.0.0",
+  "version": "1.0.0",
   "description": "ARK: Survival Ascended Backup Manager - Backend API",
   "type": "module",
   "main": "dist/server.js",
