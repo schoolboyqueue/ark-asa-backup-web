@@ -3,7 +3,6 @@
  * Handles column rendering and sorting UI.
  */
 
-import { useMemo } from 'react';
 import { TableHeader, TableColumn } from '@heroui/react';
 import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 
@@ -26,11 +25,9 @@ export default function BackupsTableHeader({
   sortDirection,
   onSort,
 }: BackupsTableHeaderProps) {
-  const memoizedColumns = useMemo(() => columns, [columns]);
-
   return (
-    <TableHeader columns={memoizedColumns}>
-      {(column) => (
+    <TableHeader>
+      {columns.map((column) => (
         <TableColumn
           key={column.key}
           className={column.sortable ? 'cursor-pointer' : ''}
@@ -47,7 +44,7 @@ export default function BackupsTableHeader({
               ))}
           </div>
         </TableColumn>
-      )}
+      ))}
     </TableHeader>
   );
 }
