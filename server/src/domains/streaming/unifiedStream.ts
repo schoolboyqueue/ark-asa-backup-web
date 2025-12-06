@@ -50,13 +50,13 @@ export function createUnifiedStreamRoute(
         client,
         containerName,
         (status) => {
-          sendEvent('status', { ok: true, status });
+          sendEvent('server-status', { ok: true, status });
         },
         () => isStreamActive
       )
       .catch((error) => {
         Logger.error('[Streaming] Server status polling error:', error);
-        sendEvent('error', { message: 'Server status polling error' });
+        sendEvent('server-status-error', { ok: false, error: String(error) });
       });
 
     // Start polling backups list
@@ -64,13 +64,13 @@ export function createUnifiedStreamRoute(
       .pollBackupsList(
         backupConfig,
         (backups) => {
-          sendEvent('backups', { ok: true, backups });
+          sendEvent('backups', backups);
         },
         () => isStreamActive
       )
       .catch((error) => {
         Logger.error('[Streaming] Backups polling error:', error);
-        sendEvent('error', { message: 'Backups polling error' });
+        sendEvent('backups-error', { ok: false, error: String(error) });
       });
 
     // Poll disk space info
