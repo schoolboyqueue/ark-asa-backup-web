@@ -3,8 +3,8 @@
  * Centralized configuration values for paths, limits, and environment variables.
  */
 
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
 import type { BackupSettings } from '../types/index.js';
 
 // ES Module __dirname equivalent
@@ -45,13 +45,13 @@ export const DOCKER_DAEMON_SOCKET = '/var/run/docker.sock';
 export const ARK_SERVER_CONTAINER_NAME = process.env.ARK_BACKUP_CONTAINER_NAME || 'ark-asa';
 
 /** HTTP server port */
-export const HTTP_SERVER_PORT = parseInt(process.env.PORT || '8080', 10);
+export const HTTP_SERVER_PORT = Number.parseInt(process.env.PORT || '8080', 10);
 
 /** Process user ID for file ownership */
-export const PROCESS_USER_ID = parseInt(process.env.PUID || '1000', 10);
+export const PROCESS_USER_ID = Number.parseInt(process.env.PUID || '1000', 10);
 
 /** Process group ID for file ownership */
-export const PROCESS_GROUP_ID = parseInt(process.env.PGID || '1000', 10);
+export const PROCESS_GROUP_ID = Number.parseInt(process.env.PGID || '1000', 10);
 
 // ============================================================================
 // Limits and Constraints

@@ -17,11 +17,11 @@ const activeStreamConnections = new Set<Response>();
  * Used during graceful shutdown to ensure HTTP server can close cleanly.
  */
 export function closeAllStreamConnections(): void {
-  activeStreamConnections.forEach((response) => {
+  for (const response of activeStreamConnections) {
     if (!response.writableEnded) {
       response.end();
     }
-  });
+  }
   activeStreamConnections.clear();
 }
 
