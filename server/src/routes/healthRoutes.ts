@@ -11,7 +11,6 @@ import {
   getLastFailedBackupTime,
   getLastBackupError,
 } from '../services/schedulerService.js';
-import { Logger } from '../utils/logger.js';
 
 const healthRouter = Router();
 
@@ -23,10 +22,8 @@ const healthRouter = Router();
  * Basic health check endpoint for monitoring.
  * @route GET /health
  */
-healthRouter.get('/health', (httpRequest: Request, httpResponse: Response) => {
-  Logger.info(httpRequest, 'Request received');
+healthRouter.get('/health', (_httpRequest: Request, httpResponse: Response) => {
   httpResponse.status(200).send('OK');
-  Logger.info(httpRequest, 'Response sent');
 });
 
 /**
@@ -34,8 +31,7 @@ healthRouter.get('/health', (httpRequest: Request, httpResponse: Response) => {
  * Returns scheduler status and backup success/failure information.
  * @route GET /api/backup/health
  */
-healthRouter.get('/api/backup/health', (httpRequest: Request, httpResponse: Response) => {
-  Logger.info(httpRequest, 'Request received');
+healthRouter.get('/api/backup/health', (_httpRequest: Request, httpResponse: Response) => {
   const healthStatus = getBackupHealthStatus(
     isSchedulerActive(),
     getLastSuccessfulBackupTime(),
@@ -43,9 +39,7 @@ healthRouter.get('/api/backup/health', (httpRequest: Request, httpResponse: Resp
     getLastBackupError()
   );
 
-  Logger.info(httpRequest, 'Health status', healthStatus);
   httpResponse.json(healthStatus);
-  Logger.info(httpRequest, 'Response sent');
 });
 
 export default healthRouter;

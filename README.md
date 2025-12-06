@@ -7,6 +7,7 @@ A modern, full-featured web application for automated backup management of ARK: 
 ## Features
 
 ### Core Backup Functionality
+
 - **Automated Backups**: Configurable interval-based backup scheduling (30 seconds to 24 hours)
 - **Manual Backups**: Trigger on-demand backups with optional notes and tags
 - **Smart Retention**: Automatic pruning to maintain configured backup count
@@ -23,6 +24,7 @@ A modern, full-featured web application for automated backup management of ARK: 
 - **Backup Verification**: Validate backup archives for integrity
 
 ### Real-Time Monitoring
+
 - **Server-Sent Events (SSE)**: Real-time updates without polling
   - ARK server status changes
   - Backup list updates
@@ -38,6 +40,7 @@ A modern, full-featured web application for automated backup management of ARK: 
   - Client and server version display
 
 ### Modern Web Interface
+
 - **Responsive Design**: Optimized for mobile (iPhone), tablet (iPad), and desktop
   - Mobile: Card-based layout with vertical stacking
   - Tablet/Desktop: Table view with horizontal controls
@@ -50,6 +53,7 @@ A modern, full-featured web application for automated backup management of ARK: 
 - **Backup Details Drawer**: Comprehensive backup information and metadata management
 
 ### Server Management
+
 - **ARK Server Control**: Start/stop ARK container via Docker API
 - **Container Integration**: Monitors and controls ARK server container
 - **Health Checks**: Continuous monitoring of server and scheduler status
@@ -81,6 +85,7 @@ This project uses a tiered documentation structure:
 ## Technology Stack
 
 ### Backend
+
 - **Runtime**: Node.js 20 (Slim)
 - **Framework**: Express.js with TypeScript
 - **Docker Integration**: Dockerode for container management
@@ -91,6 +96,7 @@ This project uses a tiered documentation structure:
   - Single-threaded event loop with background scheduler
 
 ### Frontend
+
 - **Framework**: React 18 with TypeScript
 - **Build Tool**: Vite (fast HMR during development)
 - **UI Library**: Hero UI (NextUI fork) with Tailwind CSS
@@ -103,6 +109,7 @@ This project uses a tiered documentation structure:
   - Framework-agnostic domain layer
 
 ### DevOps
+
 - **Container**: Multi-stage Docker build (builder → production)
 - **Volume Mounts**:
   - `/backups` - Backup archive storage
@@ -113,6 +120,7 @@ This project uses a tiered documentation structure:
 ## Quick Start
 
 ### Prerequisites
+
 - Docker and Docker Compose installed
 - ARK: Survival Ascended server running in a Docker container
 - Access to Docker socket (`/var/run/docker.sock`)
@@ -130,7 +138,7 @@ services:
     container_name: ark-asa-backup-web
     build: ./ark-asa-backup-web/web
     ports:
-      - "8091:8080"
+      - '8091:8080'
     volumes:
       - ./backups:/backups
       - ./config:/config
@@ -171,6 +179,7 @@ Access the web interface at `http://localhost:8091`
 ### High-Level Overview
 
 **Frontend (React + TypeScript)**:
+
 - Clean Architecture with domain-driven design
 - Three domains: backups, server, system
 - Strict layer separation: Domain → Service → Adapter → Repository → UseCase → View
@@ -178,6 +187,7 @@ Access the web interface at `http://localhost:8091`
 - See [client/README.md](client/README.md) for detailed architecture
 
 **Backend (Node.js + Express)**:
+
 - Modular service-oriented architecture
 - Routes → Services → Data layers
 - Background scheduler for automated backups
@@ -185,6 +195,7 @@ Access the web interface at `http://localhost:8091`
 - See [server/README.md](server/README.md) for detailed architecture
 
 ### Key Design Patterns
+
 - **Singleton**: Docker client for centralized container management
 - **Repository**: State management and data access abstraction
 - **Observer**: SSE broadcast system for real-time updates
@@ -195,6 +206,7 @@ Access the web interface at `http://localhost:8091`
 ## API Endpoints
 
 ### Backups
+
 - `GET /api/backups` - List all backups with metadata
 - `GET /api/backups/stream` - SSE stream for backup list updates
 - `POST /api/backups/trigger` - Create manual backup with optional notes and tags
@@ -205,16 +217,19 @@ Access the web interface at `http://localhost:8091`
 - `POST /api/verify` - Verify backup archive integrity
 
 ### Settings
+
 - `GET /api/settings` - Get backup configuration
 - `POST /api/settings` - Update backup configuration
 
 ### Server Control
+
 - `GET /api/server/status` - Get ARK server status
 - `GET /api/server/status/stream` - SSE stream for status updates
 - `POST /api/server/start` - Start ARK server
 - `POST /api/server/stop` - Stop ARK server
 
 ### System Monitoring
+
 - `GET /api/disk-space` - Get storage usage
 - `GET /api/disk-space/stream` - SSE stream for storage updates
 - `GET /api/backup/health` - Get backup system health
@@ -252,6 +267,7 @@ This project follows strict TypeScript and Clean Architecture standards:
 - **Variable Naming**: Descriptive names only - NO single-character variables
 
 For detailed code standards and patterns:
+
 - Frontend: See [client/README.md](client/README.md) - Clean Architecture layer rules
 - Backend: See [server/README.md](server/README.md) - Modular service patterns
 
@@ -282,6 +298,7 @@ Backups are stored as `.tar.gz` archives with optional `.meta.json` files:
 ```
 
 ### Standard Tags
+
 - `pre-boss` - Before boss encounters
 - `milestone` - Significant progress points
 - `pre-update` - Before game updates
@@ -315,29 +332,38 @@ Backups are stored as `.tar.gz` archives with optional `.meta.json` files:
 ## Troubleshooting
 
 ### Container Name Mismatch
+
 If your ARK container isn't named `ark-asa`, set the environment variable:
+
 ```yaml
 environment:
   - ARK_BACKUP_CONTAINER_NAME=your-container-name
 ```
 
 ### Permission Issues
+
 Ensure backup directory is writable:
+
 ```bash
 chmod -R 777 backups
 ```
 
 ### SSE Connection Errors
+
 Check browser console for EventSource errors. SSE requires HTTP/1.1 or HTTP/2.
 
 ### Backup Scheduler Not Running
+
 Check logs for scheduler errors:
+
 ```bash
 docker compose logs ark-asa-backup-web | grep scheduler
 ```
 
 ### White Screen / Blank Page
+
 Check browser console for JavaScript errors. Common causes:
+
 - Variable initialization order (hooks called before state declared)
 - Old variable references not updated to use hook properties
 - Missing dependencies in package.json
@@ -345,11 +371,13 @@ Check browser console for JavaScript errors. Common causes:
 ## Conventional Commits & Automated Releases
 
 ### Commit Process
+
 - Use `pnpm run commit` to launch Commitizen with the `@commitlint/cz-commitlint` adapter.
 - Scopes auto-complete from the project workspaces (`client`, `server`) and custom scopes (`deps`, `dev-deps`, `release`).
 - Husky hooks run Prettier via `lint-staged` before every commit and `commitlint` afterwards, preventing invalid messages from landing in the repo.
 
 ### Release Workflow
+
 - Versioning and changelog generation are driven by [Release Please](https://github.com/googleapis/release-please) via GitHub Actions.
 - The GitHub workflow at `.github/workflows/release.yml` runs on pushes to `main` and automatically creates release PRs based on conventional commits.
 - Release Please analyzes commit history, bumps versions according to semver, and updates `CHANGELOG.md` files automatically.
@@ -369,6 +397,7 @@ Contributions are welcome! Please follow these guidelines:
 5. **Commits**: Run `pnpm run commit` to create Conventional Commits (`feat(scope):`, `fix(scope):`, `chore(scope):`, `docs:` etc.); the Commitizen prompt plus commitlint hook keep history clean.
 
 For detailed development guidelines:
+
 - Frontend development: [client/README.md](client/README.md)
 - Backend development: [server/README.md](server/README.md)
 - AI assistant guidelines: [CLAUDE.md](CLAUDE.md)

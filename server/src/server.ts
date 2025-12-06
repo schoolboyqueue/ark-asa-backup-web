@@ -31,6 +31,7 @@ import streamRouter from './routes/streamRoutes.js';
 // Import services
 import { runBackupSchedulerLoop, stopScheduler } from './services/schedulerService.js';
 import { closeAllStreamConnections } from './utils/httpStream.js';
+import { errorHandler } from './utils/errorHandler.js';
 
 // ============================================================================
 // Express Application Setup
@@ -75,6 +76,16 @@ expressApplication.use(express.static(staticFilesDirectory));
 expressApplication.get('*', (_httpRequest, httpResponse) => {
   httpResponse.sendFile(path.join(staticFilesDirectory, 'index.html'));
 });
+
+// ============================================================================
+// Error Handling Middleware
+// ============================================================================
+
+/**
+ * Error handling middleware must be registered AFTER all other middleware and routes.
+ * Catches errors thrown by route handlers and converts them to HTTP responses.
+ */
+expressApplication.use(errorHandler);
 
 // ============================================================================
 // HTTP Server Startup

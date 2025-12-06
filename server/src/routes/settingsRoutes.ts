@@ -7,7 +7,7 @@ import { Router, Request, Response } from 'express';
 import { loadBackupSettings, saveBackupSettings } from '../services/settingsService.js';
 import { pruneOldBackupArchives } from '../services/backupService.js';
 import { DEFAULT_BACKUP_SETTINGS } from '../config/constants.js';
-import { Logger } from '../utils/logger.js';
+import { asyncHandler } from '../utils/errorHandler.js';
 
 const settingsRouter = Router();
 
@@ -19,27 +19,22 @@ const settingsRouter = Router();
  * Retrieves current backup configuration settings.
  * @route GET /api/settings
  */
-settingsRouter.get('/api/settings', async (httpRequest: Request, httpResponse: Response) => {
-  Logger.info(httpRequest, 'Request received');
-  try {
+settingsRouter.get(
+  '/api/settings',
+  asyncHandler(async (_httpRequest: Request, httpResponse: Response) => {
     const currentSettings = await loadBackupSettings();
-    Logger.info(httpRequest, 'Settings loaded', currentSettings);
     httpResponse.json(currentSettings);
-    Logger.info(httpRequest, 'Response sent successfully');
-  } catch (error) {
-    Logger.error(httpRequest, 'Error', error);
-    httpResponse.status(500).json({ ok: false, error: 'Failed to load settings' });
-  }
-});
+  })
+);
 
 /**
  * Updates backup configuration settings.
  * Validates input and triggers immediate pruning with new retention limit.
  * @route POST /api/settings
  */
-settingsRouter.post('/api/settings', async (httpRequest: Request, httpResponse: Response) => {
-  Logger.info(httpRequest, 'Request received', httpRequest.body);
-  try {
+settingsRouter.post(
+  '/api/settings',
+  asyncHandler(async (httpRequest: Request, httpResponse: Response) => {
     const { BACKUP_INTERVAL, MAX_BACKUPS, AUTO_SAFETY_BACKUP } = httpRequest.body;
 
     const newBackupInterval =
@@ -48,26 +43,12 @@ settingsRouter.post('/api/settings', async (httpRequest: Request, httpResponse: 
     const newAutoSafetyBackup =
       AUTO_SAFETY_BACKUP !== undefined ? Boolean(AUTO_SAFETY_BACKUP) : true;
 
-    Logger.info(httpRequest, 'Parsed settings', {
-      newBackupInterval,
-      newMaxBackups,
-      newAutoSafetyBackup,
-    });
-
-    Logger.info(httpRequest, 'Saving settings...');
     await saveBackupSettings(newBackupInterval, newMaxBackups, newAutoSafetyBackup);
-    Logger.info(httpRequest, 'Settings saved, pruning backups...');
     await pruneOldBackupArchives(newMaxBackups);
-    Logger.info(httpRequest, 'Backups pruned, loading updated settings...');
 
     const updatedSettings = await loadBackupSettings();
-    Logger.info(httpRequest, 'Updated settings loaded', updatedSettings);
     httpResponse.json({ ok: true, settings: updatedSettings });
-    Logger.info(httpRequest, 'Response sent successfully');
-  } catch (error) {
-    Logger.error(httpRequest, 'Error', error);
-    httpResponse.status(500).json({ ok: false, error: 'Failed to update settings' });
-  }
-});
+  })
+);
 
 export default settingsRouter;
