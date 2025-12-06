@@ -1,52 +1,28 @@
 name: Release
 
 on:
-  issue_comment:
-    types: [created, deleted]
   push:
     branches:
       - main
 
 jobs:
-  check:
+  release-please:
     runs-on: ubuntu-latest
-    name: Context check
-    outputs:
-      continue: ${{ steps.check.outputs.continue }}
-      workflow: ${{ steps.check.outputs.workflow }}
+    name: Release Please
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v4
-      - name: Context check
-        id: check
-        uses: TrigenSoftware/simple-release-action@v1
+      - name: Create or update release PR
+        uses: googleapis/release-please-action@v4
         with:
-          workflow: check
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
 
-  pull-request:
+  build:
     runs-on: ubuntu-latest
-    name: Pull request
-    needs: check
-    # Only create/update PR when check says to and not for release merge commits
-    if: |
-      needs.check.outputs.workflow == 'pull-request' &&
-      !contains(github.event.head_commit.message, 'chore(release):')
-    steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v4
-      - name: Create or update pull request
-        uses: TrigenSoftware/simple-release-action@v1
-        with:
-          workflow: pull-request
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-  release:
-    runs-on: ubuntu-latest
-    name: Release
-    needs: check
-    # Let simple-release decide when to run release via check output
-    if: needs.check.outputs.workflow == 'release'
+    name: Build and verify
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v4
@@ -67,9 +43,3 @@ jobs:
 
       - name: Build Docker image (verify build works)
         run: docker build -t ark-asa-backup-web:test .
-
-      - name: Create GitHub Release
-        uses: TrigenSoftware/simple-release-action@v1
-        with:
-          workflow: release
-          github-token: ${{ secrets.GITHUB_TOKEN }}
