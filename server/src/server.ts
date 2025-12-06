@@ -1,37 +1,103 @@
 /**
- * @fileoverview ARK ASA Backup Manager - Express/TypeScript Server (Refactored)
- * Main entry point for the backup management application.
- * Coordinates services, routes, and background scheduler.
+ * @fileoverview ARK ASA Backup Manager - Express/TypeScript Server
  *
- * Architecture:
- * - Modular design with separation of concerns
- * - Services handle business logic and data operations
- * - Routes handle HTTP request/response
- * - Utilities provide reusable helpers
+ * **Architecture:** Domain-Driven Design with Dependency Injection
+ *
+ * Main entry point that:
+ * 1. Initializes configuration and dependencies
+ * 2. Creates domain-specific routes with injected config
+ * 3. Registers routes with Express
+ * 4. Starts background scheduler
+ * 5. Handles graceful shutdown
+ *
+ * **Design Principles:**
+ * - Domain-driven organization (backup, server, settings, etc.)
+ * - Dependency injection for testability and flexibility
+ * - Clear layer separation: Transport → Domain → Data-Access
+ * - No circular dependencies
  */
 
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { HTTP_SERVER_PORT } from './config/constants.js';
-import { Logger } from './utils/logger.js';
+import Dockerode from 'dockerode';
 
-// ES Module __dirname equivalent for server.ts location
+// Configuration
+import {
+  HTTP_SERVER_PORT,
+  BACKUP_STORAGE_DIRECTORY,
+  ARK_SAVE_DIRECTORY,
+  DOCKER_DAEMON_SOCKET,
+  ARK_SERVER_CONTAINER_NAME,
+  CONTAINER_STOP_TIMEOUT_SECONDS,
+  PROCESS_USER_ID,
+  PROCESS_GROUP_ID,
+  CONFIGURATION_FILE_PATH,
+  DEFAULT_BACKUP_SETTINGS,
+  MINIMUM_BACKUP_INTERVAL_SECONDS,
+  MINIMUM_BACKUP_RETENTION_COUNT,
+} from './config/constants.js';
+
+// Utilities
+import { Logger } from './utils/logger.js';
+import { errorHandler } from './utils/errorHandler.js';
+
+// Domain routes
+import { createBackupRoutes } from './domains/backup/routes.js';
+import { createArkServerRoutes } from './domains/arkServer/routes.js';
+import { createSettingsRoutes } from './domains/settings/routes.js';
+import { createHealthRoutes } from './domains/health/routes.js';
+import { createStreamingRoutes } from './domains/streaming/routes.js';
+
+// Domain services
+import * as schedulerService from './domains/scheduler/service.js';
+import * as systemService from './domains/system/service.js';
+
+// Utilities
+import { closeAllStreamConnections } from './utils/httpStream.js';
+
+// ES Module __dirname equivalent
 const currentFilePath = fileURLToPath(import.meta.url);
 const currentDirectoryPath = dirname(currentFilePath);
 
-// Import route modules
-import healthRouter from './routes/healthRoutes.js';
-import settingsRouter from './routes/settingsRoutes.js';
-import backupRouter from './routes/backupRoutes.js';
-import serverRouter from './routes/serverRoutes.js';
-import streamRouter from './routes/streamRoutes.js';
+// ============================================================================
+// Dependency Injection Setup
+// ============================================================================
 
-// Import services
-import { runBackupSchedulerLoop, stopScheduler } from './services/schedulerService.js';
-import { closeAllStreamConnections } from './utils/httpStream.js';
-import { errorHandler } from './utils/errorHandler.js';
+/**
+ * Backup domain configuration.
+ * Injected into backup service and routes.
+ */
+const backupConfig = {
+  backupDir: BACKUP_STORAGE_DIRECTORY,
+  saveDir: ARK_SAVE_DIRECTORY,
+  userId: PROCESS_USER_ID,
+  groupId: PROCESS_GROUP_ID,
+};
+
+/**
+ * Settings domain configuration.
+ * Injected into settings service and routes.
+ */
+const settingsConfig = {
+  configPath: CONFIGURATION_FILE_PATH,
+  defaults: DEFAULT_BACKUP_SETTINGS,
+  minInterval: MINIMUM_BACKUP_INTERVAL_SECONDS,
+  minRetention: MINIMUM_BACKUP_RETENTION_COUNT,
+};
+
+/**
+ * Docker/Server domain configuration.
+ * Injected into server service and routes.
+ */
+const dockerConfig = {
+  socketPath: DOCKER_DAEMON_SOCKET,
+  containerName: ARK_SERVER_CONTAINER_NAME,
+  stopTimeoutSeconds: CONTAINER_STOP_TIMEOUT_SECONDS,
+};
+
+const dockerClient = new Dockerode({ socketPath: dockerConfig.socketPath });
 
 // ============================================================================
 // Express Application Setup
@@ -44,23 +110,42 @@ expressApplication.use(express.json());
 expressApplication.use(express.urlencoded({ extended: true }));
 
 // ============================================================================
-// Route Registration
+// Domain Route Registration
 // ============================================================================
 
-// Health and monitoring routes
-expressApplication.use(healthRouter);
+// Register backup domain routes with injected config
+expressApplication.use(
+  createBackupRoutes(backupConfig, () =>
+    import('./domains/settings/service.js').then((m) => m.loadSettings(settingsConfig))
+  )
+);
 
-// Settings management routes
-expressApplication.use(settingsRouter);
+// Register settings domain routes with injected config
+expressApplication.use(createSettingsRoutes(settingsConfig, backupConfig));
 
-// Backup CRUD routes
-expressApplication.use(backupRouter);
+// Register ARK server domain routes with injected config
+expressApplication.use(createArkServerRoutes(dockerClient, dockerConfig));
 
-// Docker server control routes
-expressApplication.use(serverRouter);
+// Register health domain routes with injected dependencies
+expressApplication.use(
+  createHealthRoutes(
+    {
+      isActive: () => schedulerService.isSchedulerActive(),
+      getLastSuccessfulTime: () => schedulerService.getLastSuccessfulBackupTime(),
+      getLastFailedTime: () => schedulerService.getLastFailedBackupTime(),
+      getLastError: () => schedulerService.getLastBackupError(),
+    },
+    {
+      getDiskSpace: () => systemService.getDiskSpaceInfo(BACKUP_STORAGE_DIRECTORY),
+      getVersion: () => systemService.getVersion(),
+    }
+  )
+);
 
-// HTTP streaming and restore routes
-expressApplication.use(streamRouter);
+// Register streaming domain routes with injected config
+expressApplication.use(
+  createStreamingRoutes(dockerClient, ARK_SERVER_CONTAINER_NAME, backupConfig)
+);
 
 // ============================================================================
 // Static File Serving (React SPA)
@@ -100,8 +185,8 @@ const httpServer = expressApplication.listen(HTTP_SERVER_PORT, () => {
 // Background Scheduler Startup
 // ============================================================================
 
-// Start automated backup scheduler loop
-runBackupSchedulerLoop();
+// Start automated backup scheduler loop with injected dependencies
+schedulerService.runBackupSchedulerLoop(backupConfig, settingsConfig);
 
 // ============================================================================
 // Graceful Shutdown Handling
@@ -115,7 +200,7 @@ const handleGracefulShutdown = (signalName: string): void => {
   Logger.info(`\nReceived ${signalName} signal. Starting graceful shutdown...`);
 
   // Stop backup scheduler
-  stopScheduler();
+  schedulerService.stopScheduler();
 
   // Close all active HTTP streaming connections to allow HTTP server to close
   Logger.info('Closing all HTTP streaming connections...');
