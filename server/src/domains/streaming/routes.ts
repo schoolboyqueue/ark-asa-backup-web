@@ -43,14 +43,20 @@ export function createStreamingRoutes(
 
     sendEvent('connected', { message: 'Status stream connected' });
 
-    streamingService.pollServerStatus(
-      client,
-      containerName,
-      (status) => {
-        sendEvent('status', { ok: true, status });
-      },
-      () => isStreamActive
-    );
+    // Start polling in background without awaiting
+    streamingService
+      .pollServerStatus(
+        client,
+        containerName,
+        (status) => {
+          sendEvent('status', { ok: true, status });
+        },
+        () => isStreamActive
+      )
+      .catch((error) => {
+        Logger.error('[Streaming] Server status polling error:', error);
+        sendEvent('error', { message: 'Polling error' });
+      });
 
     setupStreamCleanup(res, () => {
       isStreamActive = false;
@@ -67,13 +73,19 @@ export function createStreamingRoutes(
 
     sendEvent('connected', { message: 'Backups stream connected' });
 
-    streamingService.pollBackupsList(
-      backupConfig,
-      (backups) => {
-        sendEvent('backups', { ok: true, backups });
-      },
-      () => isStreamActive
-    );
+    // Start polling in background without awaiting
+    streamingService
+      .pollBackupsList(
+        backupConfig,
+        (backups) => {
+          sendEvent('backups', { ok: true, backups });
+        },
+        () => isStreamActive
+      )
+      .catch((error) => {
+        Logger.error('[Streaming] Backups polling error:', error);
+        sendEvent('error', { message: 'Polling error' });
+      });
 
     setupStreamCleanup(res, () => {
       isStreamActive = false;

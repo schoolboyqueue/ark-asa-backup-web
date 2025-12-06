@@ -49,6 +49,7 @@ import { createArkServerRoutes } from './domains/arkServer/routes.js';
 import { createSettingsRoutes } from './domains/settings/routes.js';
 import { createHealthRoutes } from './domains/health/routes.js';
 import { createStreamingRoutes } from './domains/streaming/routes.js';
+import { createUnifiedStreamRoute } from './domains/streaming/unifiedStream.js';
 
 // Domain services
 import * as schedulerService from './domains/scheduler/service.js';
@@ -145,6 +146,16 @@ expressApplication.use(
 // Register streaming domain routes with injected config
 expressApplication.use(
   createStreamingRoutes(dockerClient, ARK_SERVER_CONTAINER_NAME, backupConfig)
+);
+
+// Register unified streaming endpoint that multiplexes all data sources
+expressApplication.use(
+  createUnifiedStreamRoute(
+    dockerClient,
+    ARK_SERVER_CONTAINER_NAME,
+    backupConfig,
+    BACKUP_STORAGE_DIRECTORY
+  )
 );
 
 // ============================================================================
