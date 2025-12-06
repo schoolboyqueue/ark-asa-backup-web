@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.1](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-server-v1.0.0...ark-asa-backup-server-v1.0.1) (2025-12-06)
+
+
+### Bug Fixes
+
+* correct changelog paths in release-please config ([dc98729](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/dc9872953bf2550f20df73012bec82615a7ae386))
+* correct streaming event types and data formats for client compatibility ([671af8b](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/671af8b776e247007a42e463ec04da894c2634dc))
+* create unified streaming endpoint for client compatibility ([b2466cf](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/b2466cf8dbf25d61daf0ebb902fc55cf69372d65))
+* grant docker socket access to node user for server status monitoring ([1cf382a](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/1cf382a606b140f35414df9c7fc5ac67ce6a3575))
+
 ## [1.0.0](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-server-v0.1.0...ark-asa-backup-server-v1.0.0) (2025-12-06)
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-client-v0.2.0...ark-asa-backup-client-v0.2.1) (2025-12-06)
+
+
+### Bug Fixes
+
+* correct changelog paths in release-please config ([dc98729](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/dc9872953bf2550f20df73012bec82615a7ae386))
+
 ## [0.2.0](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-client-v0.1.0...ark-asa-backup-client-v0.2.0) (2025-12-06)
 
 
