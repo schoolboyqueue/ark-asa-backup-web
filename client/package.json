@@ -1,6 +1,6 @@
 {
   "name": "ark-asa-backup-client",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "ARK: Survival Ascended Backup Manager - Frontend React App",
   "type": "module",
   "scripts": {

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-web-v1.0.3...ark-asa-backup-web-v1.0.4) (2025-12-06)
+
+
+### Bug Fixes
+
+* resolve HeroUI Table getCollectionNode error ([3942112](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/39421129a4899f64a3a27d2242a6516c12f3fe08))
+
 ## [1.0.3](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-web-v1.0.2...ark-asa-backup-web-v1.0.3) (2025-12-06)
 
 
