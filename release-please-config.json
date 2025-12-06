@@ -4,10 +4,10 @@
       "changelog-path": "CHANGELOG.md"
     },
     "client": {
-      "changelog-path": "client/CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md"
     },
     "server": {
-      "changelog-path": "server/CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md"
     }
   },
   "changelog-sections": [
