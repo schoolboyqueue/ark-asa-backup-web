@@ -27,7 +27,14 @@ export function createHealthRoutes(
     getLastError: () => string | null;
   },
   systemMonitoring: {
-    getDiskSpace: () => Promise<{ total: number; used: number; available: number }>;
+    getDiskSpace: () => Promise<{
+      ok: boolean;
+      total_bytes: number;
+      used_bytes: number;
+      available_bytes: number;
+      used_percent: number;
+      error?: string;
+    }>;
     getVersion: () => string;
   }
 ): Router {
@@ -65,9 +72,9 @@ export function createHealthRoutes(
     asyncHandler(async (_req: Request, res: Response) => {
       const diskInfo = await systemMonitoring.getDiskSpace();
       const status = healthService.getDiskSpaceStatus(
-        diskInfo.total,
-        diskInfo.used,
-        diskInfo.available
+        diskInfo.total_bytes,
+        diskInfo.used_bytes,
+        diskInfo.available_bytes
       );
 
       res.json(status);

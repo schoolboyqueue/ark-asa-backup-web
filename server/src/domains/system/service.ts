@@ -22,25 +22,39 @@ const SERVER_VERSION: string = packageJson.version || 'unknown';
  * **Why:** Helps users monitor available storage for backups.
  *
  * @param backupDir - Directory to check disk space for
- * @returns Disk space statistics
+ * @returns Disk space statistics with percentage
  */
 export async function getDiskSpaceInfo(backupDir: string): Promise<{
-  total: number;
-  used: number;
-  available: number;
+  ok: boolean;
+  total_bytes: number;
+  used_bytes: number;
+  available_bytes: number;
+  used_percent: number;
+  error?: string;
 }> {
   try {
     const stats = await fs.statfs(backupDir);
 
+    const totalBytes = stats.blocks * stats.bsize;
+    const usedBytes = (stats.blocks - stats.bavail) * stats.bsize;
+    const usedPercent = totalBytes > 0 ? Math.round((usedBytes / totalBytes) * 100) : 0;
+
     return {
-      total: stats.blocks * stats.bsize,
-      used: (stats.blocks - stats.bavail) * stats.bsize,
-      available: stats.bavail * stats.bsize,
+      ok: true,
+      total_bytes: totalBytes,
+      used_bytes: usedBytes,
+      available_bytes: stats.bavail * stats.bsize,
+      used_percent: usedPercent,
     };
   } catch (error) {
-    throw new Error(
-      `Failed to get disk space info: ${error instanceof Error ? error.message : String(error)}`
-    );
+    return {
+      ok: false,
+      total_bytes: 0,
+      used_bytes: 0,
+      available_bytes: 0,
+      used_percent: 0,
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
 }
 

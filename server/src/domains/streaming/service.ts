@@ -25,12 +25,14 @@ import { Logger } from '../../utils/logger.js';
  * @param containerName - Container name
  * @param onStatusChange - Callback when status changes
  * @param isActive - Function to check if polling should continue
+ * @param onError - Optional callback when polling fails
  */
 export async function pollServerStatus(
   client: Dockerode,
   containerName: string,
   onStatusChange: (status: string) => void,
-  isActive: () => boolean
+  isActive: () => boolean,
+  onError?: (error: Error) => void
 ): Promise<void> {
   let previousStatus: string | null = null;
 
@@ -47,6 +49,9 @@ export async function pollServerStatus(
       await new Promise((resolve) => setTimeout(resolve, 500));
     } catch (error) {
       Logger.error('[Streaming] Error polling server status:', error);
+      if (onError && error instanceof Error) {
+        onError(error);
+      }
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
   }

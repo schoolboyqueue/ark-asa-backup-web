@@ -64,6 +64,11 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD curl -f http://localhost:8080/health || exit 1
 
+# Add node user to docker group to access Docker socket
+# This allows the app to communicate with Docker daemon for server status
+RUN groupadd -g 999 docker || true && \
+    usermod -aG docker node
+
 # Run as non-root user for security
 USER node
 

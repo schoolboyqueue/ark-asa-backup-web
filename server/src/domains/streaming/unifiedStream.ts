@@ -52,7 +52,10 @@ export function createUnifiedStreamRoute(
         (status) => {
           sendEvent('server-status', { ok: true, status });
         },
-        () => isStreamActive
+        () => isStreamActive,
+        (error) => {
+          sendEvent('server-status-error', { ok: false, error: error.message });
+        }
       )
       .catch((error) => {
         Logger.error('[Streaming] Server status polling error:', error);
@@ -74,13 +77,13 @@ export function createUnifiedStreamRoute(
       });
 
     // Poll disk space info
-    const diskSpaceInterval = setInterval(() => {
+    const diskSpaceInterval = setInterval(async () => {
       if (!isStreamActive) {
         clearInterval(diskSpaceInterval);
         return;
       }
       try {
-        const diskSpace = systemService.getDiskSpaceInfo(backupStorageDir);
+        const diskSpace = await systemService.getDiskSpaceInfo(backupStorageDir);
         sendEvent('disk-space', diskSpace);
       } catch (error) {
         Logger.error('[Streaming] Disk space polling error:', error);
@@ -96,10 +99,11 @@ export function createUnifiedStreamRoute(
       }
       try {
         const health = {
-          isSchedulerActive: schedulerService.isSchedulerActive(),
-          lastSuccessfulTime: schedulerService.getLastSuccessfulBackupTime(),
-          lastFailedTime: schedulerService.getLastFailedBackupTime(),
-          lastError: schedulerService.getLastBackupError(),
+          ok: true,
+          scheduler_active: schedulerService.isSchedulerActive(),
+          last_successful_backup: schedulerService.getLastSuccessfulBackupTime(),
+          last_failed_backup: schedulerService.getLastFailedBackupTime(),
+          last_error: schedulerService.getLastBackupError(),
         };
         sendEvent('backup-health', health);
       } catch (error) {
@@ -111,7 +115,7 @@ export function createUnifiedStreamRoute(
     // Send version info once
     try {
       const version = systemService.getVersion();
-      sendEvent('version', version);
+      sendEvent('version', { server_version: version });
     } catch (error) {
       Logger.error('[Streaming] Version info error:', error);
     }
