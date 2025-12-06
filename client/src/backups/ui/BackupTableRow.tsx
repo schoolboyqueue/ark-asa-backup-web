@@ -3,7 +3,7 @@
  * Displays backup information and action buttons.
  */
 
-import { TableRow, TableCell, Button, Tooltip } from '@heroui/react';
+import { TableRow, TableCell, Tooltip } from '@heroui/react';
 import {
   ClipboardDocumentIcon,
   ShieldCheckIcon,
@@ -48,21 +48,22 @@ export default function BackupTableRow({
   const parsed = parseFileSize(backup.sizeBytes);
 
   return (
-    <TableRow key={backup.name} className="cursor-pointer" onClick={() => onOpenDetails(backup)}>
+    <TableRow className="cursor-pointer" onClick={() => onOpenDetails(backup)}>
       <TableCell>
         <div className="flex items-center gap-2">
           {renderVerificationIcon(backup)}
           <span className="font-semibold hover:text-primary">{backup.name}</span>
           <Tooltip content="Copy backup name to clipboard">
-            <Button
-              isIconOnly
-              size="sm"
-              variant="light"
-              onPress={() => onCopyName(backup)}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onCopyName(backup);
+              }}
+              className="rounded p-1 hover:bg-default-200"
               aria-label={`Copy ${backup.name} to clipboard`}
             >
               <ClipboardDocumentIcon className="h-4 w-4" />
-            </Button>
+            </button>
           </Tooltip>
         </div>
       </TableCell>
@@ -85,59 +86,47 @@ export default function BackupTableRow({
       <TableCell onClick={(e: React.MouseEvent) => e.stopPropagation()}>
         <div className="flex gap-1">
           <Tooltip content="Verify backup integrity">
-            <Button
-              isIconOnly
-              size="sm"
-              color="warning"
-              variant="flat"
-              isLoading={isVerifying}
-              onPress={() => onVerify(backup)}
+            <button
+              onClick={() => onVerify(backup)}
+              disabled={isVerifying}
+              className="rounded p-1 hover:bg-warning/20 disabled:opacity-50"
               aria-label="Verify backup"
             >
               <ShieldCheckIcon className="h-4 w-4" />
-            </Button>
+            </button>
           </Tooltip>
 
           <Tooltip content={isServerRunning ? 'Stop server first' : 'Restore backup'}>
-            <Button
-              isIconOnly
-              size="sm"
-              color="primary"
-              variant="flat"
-              isDisabled={isServerRunning}
-              onPress={() => onRestore(backup)}
+            <button
+              onClick={() => onRestore(backup)}
+              disabled={isServerRunning}
+              className="rounded p-1 hover:bg-primary/20 disabled:opacity-50"
               aria-label="Restore backup"
             >
               <ArrowPathIcon className="h-4 w-4" />
-            </Button>
+            </button>
           </Tooltip>
 
           <Tooltip content="Download backup">
-            <Button
-              isIconOnly
-              size="sm"
-              color="success"
-              variant="flat"
-              isLoading={isDownloading}
-              onPress={() => onDownload(backup)}
+            <button
+              onClick={() => onDownload(backup)}
+              disabled={isDownloading}
+              className="rounded p-1 hover:bg-success/20 disabled:opacity-50"
               aria-label="Download backup"
             >
               <ArrowDownTrayIcon className="h-4 w-4" />
-            </Button>
+            </button>
           </Tooltip>
 
           <Tooltip content="Delete backup">
-            <Button
-              isIconOnly
-              size="sm"
-              color="danger"
-              variant="flat"
-              isLoading={isDeleting}
-              onPress={() => onDelete(backup)}
+            <button
+              onClick={() => onDelete(backup)}
+              disabled={isDeleting}
+              className="rounded p-1 hover:bg-danger/20 disabled:opacity-50"
               aria-label="Delete backup"
             >
               <TrashIcon className="h-4 w-4" />
-            </Button>
+            </button>
           </Tooltip>
         </div>
       </TableCell>

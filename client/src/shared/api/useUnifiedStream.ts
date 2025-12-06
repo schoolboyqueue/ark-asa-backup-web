@@ -53,7 +53,11 @@ class StreamConnection {
     } catch (error) {
       this.isConnecting = false;
       if ((error as Error).name !== 'AbortError') {
-        console.error('[StreamConnection] Connection error:', error);
+        // Only log connection errors if not a simple network failure during dev
+        const errorMessage = (error as Error).message;
+        if (!errorMessage.includes('Load failed') && !errorMessage.includes('Failed to fetch')) {
+          console.error('[StreamConnection] Connection error:', error);
+        }
         this.scheduleReconnect();
       }
     }
@@ -133,7 +137,11 @@ class StreamConnection {
       }
     } catch (error) {
       if ((error as Error).name !== 'AbortError') {
-        console.error('[StreamConnection] Stream read error:', error);
+        const errorMessage = (error as Error).message;
+        // Only log unexpected errors, not common network failures
+        if (!errorMessage.includes('Load failed') && !errorMessage.includes('Failed to fetch')) {
+          console.error('[StreamConnection] Stream read error:', error);
+        }
       }
     } finally {
       this.cleanup();

@@ -22,7 +22,11 @@ import {
   CardHeader,
   CardBody,
   Table,
+  TableHeader,
+  TableColumn,
   TableBody,
+  TableRow,
+  TableCell,
   Spinner,
   Pagination,
   Tooltip,
@@ -252,13 +256,50 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
         </CardHeader>
 
         <CardBody>
-          <Table
-            aria-label="Backups table"
-            isStriped
-            className="min-h-[400px]"
-            bottomContent={
-              pagination.totalPages > 1 ? (
-                <div className="flex w-full justify-center">
+          {isLoading ? (
+            <div className="flex min-h-[400px] items-center justify-center">
+              <Spinner label="Loading..." />
+            </div>
+          ) : pagination.paginatedBackups.length === 0 ? (
+            <div className="flex min-h-[400px] items-center justify-center">
+              <p className="text-default-500">No backups found</p>
+            </div>
+          ) : (
+            <>
+              <Table aria-label="Backups table" isStriped className="min-h-[400px]">
+                <TableHeader>
+                  {columns.map((column) => (
+                    <BackupsTableHeader
+                      key={column.key}
+                      column={column}
+                      sortColumn={sort.sortColumn}
+                      sortDirection={sort.sortDirection}
+                      onSort={() => sort.toggleSort(column.key as any)}
+                    />
+                  ))}
+                </TableHeader>
+                <TableBody>
+                  {pagination.paginatedBackups.map((item: Backup) => (
+                    <BackupTableRow
+                      key={item.name}
+                      backup={item}
+                      isServerRunning={isServerRunning}
+                      isVerifying={backupActions.verifyingBackupName === item.name}
+                      isDownloading={backupActions.downloadingBackupName === item.name}
+                      isDeleting={deleteBackup.deletingBackupName === item.name}
+                      renderVerificationIcon={renderVerificationIcon}
+                      onOpenDetails={handleOpenDetails}
+                      onCopyName={backupActions.copyBackupName}
+                      onVerify={backupActions.verifyBackup}
+                      onRestore={handleRestoreClick}
+                      onDownload={backupActions.downloadBackup}
+                      onDelete={handleDeleteClick}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+              {pagination.totalPages > 1 && (
+                <div className="mt-4 flex w-full justify-center">
                   <Pagination
                     isCompact
                     showControls
@@ -268,39 +309,9 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
                     onChange={pagination.setPage}
                   />
                 </div>
-              ) : null
-            }
-          >
-            <BackupsTableHeader
-              columns={columns}
-              sortColumn={sort.sortColumn}
-              sortDirection={sort.sortDirection}
-              onSort={(columnKey) => sort.toggleSort(columnKey as any)}
-            />
-            <TableBody
-              items={pagination.paginatedBackups}
-              isLoading={isLoading}
-              loadingContent={<Spinner label="Loading..." />}
-              emptyContent="No backups found"
-            >
-              {(item: Backup) => (
-                <BackupTableRow
-                  backup={item}
-                  isServerRunning={isServerRunning}
-                  isVerifying={backupActions.verifyingBackupName === item.name}
-                  isDownloading={backupActions.downloadingBackupName === item.name}
-                  isDeleting={deleteBackup.deletingBackupName === item.name}
-                  renderVerificationIcon={renderVerificationIcon}
-                  onOpenDetails={handleOpenDetails}
-                  onCopyName={backupActions.copyBackupName}
-                  onVerify={backupActions.verifyBackup}
-                  onRestore={handleRestoreClick}
-                  onDownload={backupActions.downloadBackup}
-                  onDelete={handleDeleteClick}
-                />
               )}
-            </TableBody>
-          </Table>
+            </>
+          )}
         </CardBody>
       </Card>
 
