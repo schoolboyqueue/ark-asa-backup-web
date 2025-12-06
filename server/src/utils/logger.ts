@@ -277,7 +277,8 @@ export class Logger {
         try {
           return JSON.stringify(arg, null, 2);
         } catch {
-          return String(arg);
+          // Fallback for non-serializable objects (circular refs, etc.)
+          return `[${Object.prototype.toString.call(arg)}]`;
         }
       }
       return arg;

@@ -35,19 +35,19 @@ export async function loadSettings(config: SettingsConfig): Promise<BackupSettin
   const fileSettings = await repository.loadSettingsFile(config.configPath);
 
   const backupInterval = Math.max(
-    parseInt(fileSettings.BACKUP_INTERVAL || '', 10) || config.defaults.BACKUP_INTERVAL,
+    Number.parseInt(fileSettings.BACKUP_INTERVAL || '', 10) || config.defaults.BACKUP_INTERVAL,
     config.minInterval
   );
 
   const maxBackups = Math.max(
-    parseInt(fileSettings.MAX_BACKUPS || '', 10) || config.defaults.MAX_BACKUPS,
+    Number.parseInt(fileSettings.MAX_BACKUPS || '', 10) || config.defaults.MAX_BACKUPS,
     config.minRetention
   );
 
   const autoSafetyBackup =
-    fileSettings.AUTO_SAFETY_BACKUP !== undefined
-      ? fileSettings.AUTO_SAFETY_BACKUP === 'true'
-      : (config.defaults.AUTO_SAFETY_BACKUP ?? true);
+    fileSettings.AUTO_SAFETY_BACKUP === undefined
+      ? (config.defaults.AUTO_SAFETY_BACKUP ?? true)
+      : fileSettings.AUTO_SAFETY_BACKUP === 'true';
 
   return {
     BACKUP_INTERVAL: backupInterval,

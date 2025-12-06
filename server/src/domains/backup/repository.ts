@@ -8,8 +8,8 @@
  * **Used By:** Backup service
  */
 
-import { promises as fs } from 'fs';
-import path from 'path';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
 import tar from 'tar';
 import type { VerificationResult, SaveInfo, BackupFileEntry } from './types.js';
 

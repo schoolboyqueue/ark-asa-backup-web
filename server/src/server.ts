@@ -18,9 +18,8 @@
  */
 
 import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { fileURLToPath } from 'node:url';
+import path, { dirname } from 'node:path';
 import Dockerode from 'dockerode';
 
 // Configuration

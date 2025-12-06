@@ -8,8 +8,8 @@
  * **Used By:** Health routes, streaming routes
  */
 
-import { promises as fs } from 'fs';
-import { createRequire } from 'module';
+import { promises as fs } from 'node:fs';
+import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const packageJson = require('../../../package.json');

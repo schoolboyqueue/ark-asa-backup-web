@@ -11,9 +11,11 @@
  * This makes the service testable and flexible.
  */
 
+import { promises as fs } from 'node:fs';
 import type { BackupMetadata, VerificationResult, SaveInfo } from './types.js';
 import * as repository from './repository.js';
 import { extractSaveInfo } from '../saveInfo/service.js';
+import { Logger } from '../../utils/logger.js';
 
 /**
  * Configuration for backup operations.
@@ -40,7 +42,7 @@ export interface BackupConfig {
 export async function createBackup(config: BackupConfig, notes?: string): Promise<BackupMetadata> {
   // Generate backup filename with timestamp
   const now = new Date();
-  const timestamp = now.toISOString().replace(/[:.]/g, '').slice(0, 15);
+  const timestamp = now.toISOString().replaceAll(/[:.]/g, '').slice(0, 15);
   const backupFileName = `saves-${timestamp}.tar.gz`;
 
   // Create archive
@@ -51,7 +53,8 @@ export async function createBackup(config: BackupConfig, notes?: string): Promis
   try {
     saveInfo = await extractSaveInfo(config.backupDir, backupFileName);
   } catch (error) {
-    // Continue even if save info extraction fails
+    // Log but continue if save info extraction fails—backup is still valid
+    Logger.warn(`Failed to extract save info for ${backupFileName}:`, error);
   }
 
   // Save metadata
@@ -81,7 +84,7 @@ export async function listBackups(config: BackupConfig): Promise<BackupMetadata[
 
   const backups = await Promise.all(
     backupFiles.map(async (file) => {
-      const stats = await import('fs').then((m) => m.promises.stat(file.path));
+      const stats = await fs.stat(file.path);
       const metadata = await repository.loadMetadata(config.backupDir, file.name);
       const verification = await repository.loadVerification(config.backupDir, file.name);
 
@@ -181,11 +184,13 @@ export async function updateMetadata(
   } else {
     // Delete metadata file if both notes and tags are empty
     try {
-      const fs = await import('fs');
       const metadataPath = `${config.backupDir}/${backupFileName}.meta.json`;
-      await fs.promises.unlink(metadataPath);
-    } catch {
-      // Ignore if file doesn't exist
+      await fs.unlink(metadataPath);
+    } catch (error) {
+      // Silently ignore if file doesn't exist; other errors are unexpected but non-fatal
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+        Logger.warn(`Unexpected error deleting metadata for ${backupFileName}:`, error);
+      }
     }
   }
 }

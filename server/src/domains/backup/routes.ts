@@ -11,13 +11,12 @@
  * making them testable and flexible.
  */
 
-import { Router, Request, Response } from 'express';
-import { promises as fs } from 'fs';
-import { createReadStream } from 'fs';
-import path from 'path';
+import { Request, Response, Router } from 'express';
+import { createReadStream, promises as fs } from 'node:fs';
+import path from 'node:path';
+import { asyncHandler, NotFoundError, ValidationError } from '../../utils/errorHandler.js';
 import type { BackupConfig } from './service.js';
 import * as backupService from './service.js';
-import { asyncHandler, ValidationError, NotFoundError } from '../../utils/errorHandler.js';
 
 /**
  * Creates backup routes with injected configuration.

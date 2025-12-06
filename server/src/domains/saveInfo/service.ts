@@ -8,7 +8,7 @@
  * **Used By:** Backup service
  */
 
-import path from 'path';
+import path from 'node:path';
 import tar from 'tar';
 import type { SaveInfo } from '../backup/types.js';
 
@@ -83,7 +83,7 @@ export async function extractSaveInfo(
       }
 
       // Count auto-saves
-      if (entry.path.match(/\d{8}_\d{6}\.ark$/)) {
+      if (new RegExp(/\d{8}_\d{6}\.ark$/).exec(entry.path)) {
         autoSaveCount++;
       }
 

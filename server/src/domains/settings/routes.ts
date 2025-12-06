@@ -48,9 +48,10 @@ export function createSettingsRoutes(
       const { BACKUP_INTERVAL, MAX_BACKUPS, AUTO_SAFETY_BACKUP } = req.body;
 
       const newSettings = {
-        BACKUP_INTERVAL: parseInt(BACKUP_INTERVAL, 10) || settingsConfig.defaults.BACKUP_INTERVAL,
-        MAX_BACKUPS: parseInt(MAX_BACKUPS, 10) || settingsConfig.defaults.MAX_BACKUPS,
-        AUTO_SAFETY_BACKUP: AUTO_SAFETY_BACKUP !== undefined ? Boolean(AUTO_SAFETY_BACKUP) : true,
+        BACKUP_INTERVAL:
+          Number.parseInt(BACKUP_INTERVAL, 10) || settingsConfig.defaults.BACKUP_INTERVAL,
+        MAX_BACKUPS: Number.parseInt(MAX_BACKUPS, 10) || settingsConfig.defaults.MAX_BACKUPS,
+        AUTO_SAFETY_BACKUP: AUTO_SAFETY_BACKUP === undefined ? true : Boolean(AUTO_SAFETY_BACKUP),
       };
 
       // Validate settings
