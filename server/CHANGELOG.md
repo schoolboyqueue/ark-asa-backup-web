@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-server-v1.0.2...ark-asa-backup-server-v1.0.3) (2025-12-06)
+
+
+### Bug Fixes
+
+* address SonarQube issues in server configuration and utilities ([5eaa9a8](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/5eaa9a8302607066cb1419fa431dcb400afefb0d))
+
 ## [1.0.2](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-server-v1.0.1...ark-asa-backup-server-v1.0.2) (2025-12-06)
 
 

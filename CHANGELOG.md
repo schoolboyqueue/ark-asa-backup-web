@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-web-v1.0.2...ark-asa-backup-web-v1.0.3) (2025-12-06)
+
+
+### Bug Fixes
+
+* address SonarQube issues in server configuration and utilities ([5eaa9a8](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/5eaa9a8302607066cb1419fa431dcb400afefb0d))
+* resolve all SonarQube code quality issues ([70b0cc5](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/70b0cc57cb06d865826e0a1f071c42da539d5b5d))
+
 ## [1.0.2](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-web-v1.0.1...ark-asa-backup-web-v1.0.2) (2025-12-06)
 
 
