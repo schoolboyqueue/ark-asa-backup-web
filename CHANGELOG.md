@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-web-v1.0.4...ark-asa-backup-web-v1.0.5) (2025-12-06)
+
+
+### Bug Fixes
+
+* resolve HeroUI Table component issues and improve stream error handling ([b3669cd](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/b3669cda2a974f6aeb8786579741e31805cb33aa))
+
+
+### Refactoring
+
+* replace nested ternary with if-else statements in BackupsList ([9b19e15](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/9b19e15a5c1d2eddf7f869a07ad69e7c60515ce0))
+
 ## [1.0.4](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-web-v1.0.3...ark-asa-backup-web-v1.0.4) (2025-12-06)
 
 
