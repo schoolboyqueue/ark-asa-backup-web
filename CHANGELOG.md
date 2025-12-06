@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-web-v1.0.1...ark-asa-backup-web-v1.0.2) (2025-12-06)
+
+
+### Bug Fixes
+
+* fixes sonarlint issues and remove old guides/docs ([b99f235](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/b99f2354775d3d6c451f89edc4a9262a97958945))
+
+
+### Miscellaneous
+
+* updated github flow to publish container image ([5a6cb3a](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/5a6cb3a08427d0088ec9ec2e41c3241c2883f69e))
+
 ## [1.0.1](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-web-v1.0.0...ark-asa-backup-web-v1.0.1) (2025-12-06)
 
 
