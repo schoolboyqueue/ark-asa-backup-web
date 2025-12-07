@@ -1,6 +1,6 @@
 {
   "name": "ark-asa-backup-web",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "ARK: Survival Ascended Backup Manager - Monorepo Root",
   "private": true,
   "repository": {
