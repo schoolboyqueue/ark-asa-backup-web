@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.5](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-client-v0.2.4...ark-asa-backup-client-v0.2.5) (2025-12-07)
+
+
+### Bug Fixes
+
+* fixes broken tables. HeroUI tables are a pain ([75630d6](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/75630d6c6bddfe5823b7472ebe810471e79ac07c))
+
 ## [0.2.4](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-client-v0.2.3...ark-asa-backup-client-v0.2.4) (2025-12-06)
 
 
