@@ -23,22 +23,23 @@ import {
   CardBody,
   Table,
   TableHeader,
+  TableColumn,
   TableBody,
+  TableRow,
+  TableCell,
   Spinner,
   Pagination,
   Tooltip,
 } from '@heroui/react';
-import { ShieldCheckIcon } from '@heroicons/react/24/solid';
+import {
+  ShieldCheckIcon,
+  ClipboardDocumentIcon,
+  ArrowPathIcon,
+  ArrowDownTrayIcon,
+  TrashIcon,
+} from '@heroicons/react/24/solid';
 
 // Clean Architecture imports - organized by layer
-import {
-  useBackupsRepository,
-  useCreateBackup,
-  useDeleteBackup,
-  useBackupActions,
-  useUpdateBackupMetadata,
-  useRelativeTimeRefresh,
-} from '..';
 import type { Backup } from '../domain/backup';
 import type { Server } from '../../server/domain/server';
 
@@ -47,9 +48,18 @@ import { useBackupSort, useBackupFilters, useBackupPagination, useRestoreProgres
 import BackupDetailsDrawer from './BackupDetailsDrawer';
 import BackupsCardHeader from './BackupsCardHeader';
 import BackupsSearchBar from './BackupsSearchBar';
-import BackupsTableHeader from './BackupsTableHeader';
-import BackupTableRow from './BackupTableRow';
 import BackupsModals from './BackupsModals';
+import {
+  parseFileSize,
+  formatTimestamp,
+  formatRelativeTime,
+  useBackupActions,
+  useBackupsRepository,
+  useCreateBackup,
+  useDeleteBackup,
+  useRelativeTimeRefresh,
+  useUpdateBackupMetadata,
+} from '..';
 
 /**
  * Props for BackupsList component.
@@ -212,6 +222,108 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
     []
   );
 
+  const renderCell = useCallback(
+    (item: Backup, columnKey: string) => {
+      const parsed = parseFileSize(item.sizeBytes);
+
+      switch (columnKey) {
+        case 'name':
+          return (
+            <div
+              className="flex cursor-pointer items-center gap-2"
+              onClick={() => handleOpenDetails(item)}
+            >
+              {renderVerificationIcon(item)}
+              <span className="font-semibold hover:text-primary">{item.name}</span>
+              <Tooltip content="Copy backup name to clipboard">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    backupActions.copyBackupName(item);
+                  }}
+                  className="rounded p-1 hover:bg-default-200"
+                  aria-label={`Copy ${item.name} to clipboard`}
+                >
+                  <ClipboardDocumentIcon className="h-4 w-4" />
+                </button>
+              </Tooltip>
+            </div>
+          );
+        case 'size':
+          return (
+            <span className="font-mono tabular-nums">
+              {parsed.value} {parsed.unit}
+            </span>
+          );
+        case 'date':
+          return (
+            <div className="flex flex-col">
+              <span>{formatTimestamp(item.createdAt)}</span>
+              <span className="text-xs text-default-400">{formatRelativeTime(item.createdAt)}</span>
+            </div>
+          );
+        case 'notes':
+          return item.notes || '—';
+        case 'actions':
+          return (
+            <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+              <Tooltip content="Verify backup integrity">
+                <button
+                  onClick={() => backupActions.verifyBackup(item)}
+                  disabled={backupActions.verifyingBackupName === item.name}
+                  className="rounded p-1 hover:bg-warning/20 disabled:opacity-50"
+                  aria-label="Verify backup"
+                >
+                  <ShieldCheckIcon className="h-4 w-4" />
+                </button>
+              </Tooltip>
+              <Tooltip content={isServerRunning ? 'Stop server first' : 'Restore backup'}>
+                <button
+                  onClick={() => handleRestoreClick(item)}
+                  disabled={isServerRunning}
+                  className="rounded p-1 hover:bg-primary/20 disabled:opacity-50"
+                  aria-label="Restore backup"
+                >
+                  <ArrowPathIcon className="h-4 w-4" />
+                </button>
+              </Tooltip>
+              <Tooltip content="Download backup">
+                <button
+                  onClick={() => backupActions.downloadBackup(item)}
+                  disabled={backupActions.downloadingBackupName === item.name}
+                  className="rounded p-1 hover:bg-success/20 disabled:opacity-50"
+                  aria-label="Download backup"
+                >
+                  <ArrowDownTrayIcon className="h-4 w-4" />
+                </button>
+              </Tooltip>
+              <Tooltip content="Delete backup">
+                <button
+                  onClick={() => handleDeleteClick(item)}
+                  disabled={deleteBackup.deletingBackupName === item.name}
+                  className="rounded p-1 hover:bg-danger/20 disabled:opacity-50"
+                  aria-label="Delete backup"
+                >
+                  <TrashIcon className="h-4 w-4" />
+                </button>
+              </Tooltip>
+            </div>
+          );
+        default:
+          return null;
+      }
+    },
+    [
+      backupActions,
+      deleteBackup.deletingBackupName,
+      handleDeleteClick,
+      handleOpenDetails,
+      handleRestoreClick,
+      isServerRunning,
+      renderVerificationIcon,
+    ]
+  );
+
   // ========================================================================
   // RENDER - Pure JSX, no business logic
   // ========================================================================
@@ -247,35 +359,26 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
     bodyContent = (
       <>
         <Table aria-label="Backups table" isStriped className="min-h-[400px]">
-          <TableHeader>
-            {columns.map((column) => (
-              <BackupsTableHeader
+          <TableHeader columns={columns}>
+            {(column) => (
+              <TableColumn
                 key={column.key}
-                column={column}
-                sortColumn={sort.sortColumn}
-                sortDirection={sort.sortDirection}
-                onSort={() => sort.toggleSort(column.key as any)}
-              />
-            ))}
+                className={column.sortable ? 'cursor-pointer' : ''}
+                onClick={() => column.sortable && sort.toggleSort(column.key as any)}
+              >
+                {column.label}
+                {column.sortable &&
+                  sort.sortColumn === column.key &&
+                  (sort.sortDirection === 'asc' ? ' ↑' : ' ↓')}
+              </TableColumn>
+            )}
           </TableHeader>
-          <TableBody>
-            {pagination.paginatedBackups.map((item: Backup) => (
-              <BackupTableRow
-                key={item.name}
-                backup={item}
-                isServerRunning={isServerRunning}
-                isVerifying={backupActions.verifyingBackupName === item.name}
-                isDownloading={backupActions.downloadingBackupName === item.name}
-                isDeleting={deleteBackup.deletingBackupName === item.name}
-                renderVerificationIcon={renderVerificationIcon}
-                onOpenDetails={handleOpenDetails}
-                onCopyName={backupActions.copyBackupName}
-                onVerify={backupActions.verifyBackup}
-                onRestore={handleRestoreClick}
-                onDownload={backupActions.downloadBackup}
-                onDelete={handleDeleteClick}
-              />
-            ))}
+          <TableBody items={pagination.paginatedBackups} emptyContent="No backups found">
+            {(item: Backup) => (
+              <TableRow key={item.name}>
+                {(columnKey) => <TableCell>{renderCell(item, columnKey as string)}</TableCell>}
+              </TableRow>
+            )}
           </TableBody>
         </Table>
         {pagination.totalPages > 1 && (

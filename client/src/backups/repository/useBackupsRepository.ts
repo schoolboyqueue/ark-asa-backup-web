@@ -7,7 +7,7 @@
  * - Provides loading/error state and optimistic helpers for UI
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { Backup, SaveInfo } from '../domain/backup';
 import { useUnifiedStream } from '../../shared/api/useUnifiedStream';
 import { backupApiAdapter } from '../adapters/backupApiAdapter';
@@ -114,6 +114,30 @@ export function useBackupsRepository(): UseBackupsRepositoryReturn {
 
   useUnifiedStream<BackupMetadataApi[]>('backups', handleBackupsUpdate);
   useUnifiedStream<{ ok: boolean; error?: string }>('backups-error', handleBackupsError);
+
+  // Fallback: if stream doesn't respond within 5 seconds, try direct fetch
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (isLoading && backups.length === 0) {
+        console.warn('[useBackupsRepository] Stream timeout, falling back to direct fetch');
+        backupApiAdapter
+          .getBackups()
+          .then((apiBackups) => {
+            const sorted = sortBackups(apiBackups);
+            setBackups(sorted);
+            setError(null);
+            setIsLoading(false);
+          })
+          .catch((err) => {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to load backups';
+            setError(errorMessage);
+            setIsLoading(false);
+          });
+      }
+    }, 5000);
+
+    return () => clearTimeout(timeout);
+  }, [isLoading, backups.length, sortBackups]);
 
   const refreshBackups = useCallback(() => {
     setIsLoading(true);
