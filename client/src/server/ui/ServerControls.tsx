@@ -5,26 +5,26 @@
  * Clean Architecture: View Layer
  */
 
-import { useEffect } from 'react';
-import {
-  Button,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  Input,
-  ButtonGroup,
-  Divider,
-  Switch,
-} from '@heroui/react';
 import { Cog6ToothIcon, PlayCircleIcon, StopCircleIcon } from '@heroicons/react/24/solid';
 import {
-  useServerControl,
-  useUpdateSettings,
-  useSettingsRepository,
-  MIN_BACKUP_INTERVAL_SECONDS,
+  Button,
+  ButtonGroup,
+  Divider,
+  Input,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  Switch,
+} from '@heroui/react';
+import { useEffect } from 'react';
+import {
   MAX_BACKUP_INTERVAL_SECONDS,
-  MIN_BACKUPS_TO_KEEP,
   MAX_BACKUPS_TO_KEEP,
+  MIN_BACKUP_INTERVAL_SECONDS,
+  MIN_BACKUPS_TO_KEEP,
+  useServerControl,
+  useSettingsRepository,
+  useUpdateSettings,
 } from '..';
 import type { Server } from '../domain/server';
 

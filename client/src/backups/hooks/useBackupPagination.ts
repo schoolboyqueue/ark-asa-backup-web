@@ -7,7 +7,7 @@
  * Clean Architecture: UI Helper (not domain logic, just UI state management)
  */
 
-import { useState, useMemo, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { Backup } from '../domain/backup';
 
 /**

@@ -10,12 +10,12 @@
  * **Design:** Module-level state tracks scheduler status for health monitoring.
  */
 
-import type { BackupSettings } from '../backup/types.js';
+import { Logger } from '../../utils/logger.js';
 import type { BackupConfig } from '../backup/service.js';
 import * as backupService from '../backup/service.js';
-import * as settingsService from '../settings/service.js';
+import type { BackupSettings } from '../backup/types.js';
 import type { SettingsConfig } from '../settings/service.js';
-import { Logger } from '../../utils/logger.js';
+import * as settingsService from '../settings/service.js';
 
 const MINIMUM_LOOP_WAIT_MS = 60000;
 

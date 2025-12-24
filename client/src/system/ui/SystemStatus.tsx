@@ -8,19 +8,19 @@
  * - No business logic
  */
 
-import { useState } from 'react';
-import { Button, Popover, PopoverTrigger, PopoverContent, Progress, Chip } from '@heroui/react';
 import {
   ChartBarIcon,
-  RocketLaunchIcon,
   CheckCircleIcon,
-  ExclamationCircleIcon,
   ClockIcon,
+  ExclamationCircleIcon,
+  RocketLaunchIcon,
 } from '@heroicons/react/24/solid';
-// Clean Architecture: Domain type imports
-import type { DiskSpace, BackupHealth, VersionInfo } from '../domain/system';
-import type { Server } from '../../server/domain/server';
+import { Button, Chip, Popover, PopoverContent, PopoverTrigger, Progress } from '@heroui/react';
+import { useState } from 'react';
 import { formatRelativeTime } from '../../backups';
+import type { Server } from '../../server/domain/server';
+// Clean Architecture: Domain type imports
+import type { BackupHealth, DiskSpace, VersionInfo } from '../domain/system';
 
 /** Client version injected by Vite at build time */
 const CLIENT_VERSION = __APP_VERSION__;

@@ -7,7 +7,7 @@
  * - Returns a tick counter that changes to trigger re-renders
  */
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 /** Default refresh interval in milliseconds (30 seconds) */
 const DEFAULT_REFRESH_INTERVAL_MS = 30_000;

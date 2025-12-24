@@ -32,18 +32,18 @@
     "format:all": "pnpm run format:client && pnpm run format:server"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.3.10",
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
     "@commitlint/config-workspace-scopes": "^20.0.0",
     "@commitlint/cz-commitlint": "^20.1.0",
     "commitizen": "^4.3.1",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
-    "prettier": "^3.7.1"
+    "lint-staged": "^16.2.7"
   },
   "lint-staged": {
-    "client/src/**/*.{ts,tsx,js,jsx,json,css}": "prettier --write",
-    "server/src/**/*.{ts,js,json}": "prettier --write"
+    "client/src/**/*.{ts,tsx,js,jsx,json,css}": "biome check --write",
+    "server/src/**/*.{ts,js,json}": "biome check --write"
   },
   "packageManager": "pnpm@9.12.0"
 }

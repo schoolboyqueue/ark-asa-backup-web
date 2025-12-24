@@ -3,8 +3,8 @@
  * Centralized configuration values for paths, limits, and environment variables.
  */
 
-import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { BackupSettings } from '../types/index.js';
 
 // ES Module __dirname equivalent

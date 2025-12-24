@@ -11,17 +11,17 @@
  * - Manages loading states and errors
  */
 
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import { toast } from '../../shared/services/toast';
 import { backupApiAdapter } from '../adapters/backupApiAdapter';
+import type { CreateBackupDto } from '../domain/backup';
+import { suggestBackupTags } from '../services/backupPriorityService';
 import {
-  validateBackupNotes,
-  validateBackupTags,
   sanitizeBackupNotes,
   sanitizeTags,
+  validateBackupNotes,
+  validateBackupTags,
 } from '../services/backupValidationService';
-import { suggestBackupTags } from '../services/backupPriorityService';
-import { toast } from '../../shared/services/toast';
-import type { CreateBackupDto } from '../domain/backup';
 
 /**
  * Return type for useCreateBackup hook.

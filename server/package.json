@@ -8,8 +8,8 @@
     "build": "tsc",
     "dev": "nodemon --watch src --exec 'tsc && node dist/server.js'",
     "start": "node dist/server.js",
-    "format": "prettier --ignore-path ../.prettierignore --write \"src/**/*.{ts,js,json}\"",
-    "format:check": "prettier --ignore-path ../.prettierignore --check \"src/**/*.{ts,js,json}\""
+    "format": "biome check --write src",
+    "format:check": "biome check src"
   },
   "devDependencies": {
     "@types/dockerode": "^3.3.47",

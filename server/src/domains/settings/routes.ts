@@ -8,12 +8,12 @@
  * **Used By:** Express application
  */
 
-import { Router, Request, Response } from 'express';
-import type { SettingsConfig } from './service.js';
-import type { BackupConfig } from '../backup/service.js';
-import * as settingsService from './service.js';
-import * as backupService from '../backup/service.js';
+import { Request, Response, Router } from 'express';
 import { asyncHandler } from '../../utils/errorHandler.js';
+import type { BackupConfig } from '../backup/service.js';
+import * as backupService from '../backup/service.js';
+import type { SettingsConfig } from './service.js';
+import * as settingsService from './service.js';
 
 /**
  * Creates settings routes with injected dependencies.

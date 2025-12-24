@@ -9,16 +9,16 @@
  * - Provides user feedback
  */
 
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import { toast } from '../../shared/services/toast';
 import { backupApiAdapter } from '../adapters/backupApiAdapter';
+import type { Backup, UpdateBackupMetadataDto } from '../domain/backup';
 import {
-  validateBackupNotes,
-  validateBackupTags,
   sanitizeBackupNotes,
   sanitizeTags,
+  validateBackupNotes,
+  validateBackupTags,
 } from '../services/backupValidationService';
-import { toast } from '../../shared/services/toast';
-import type { Backup, UpdateBackupMetadataDto } from '../domain/backup';
 
 /**
  * Return type for useUpdateBackupMetadata hook.

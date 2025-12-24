@@ -7,8 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "format": "prettier --ignore-path ../.prettierignore --write \"src/**/*.{ts,tsx,js,jsx,json,css}\"",
-    "format:check": "prettier --ignore-path ../.prettierignore --check \"src/**/*.{ts,tsx,js,jsx,json,css}\""
+    "format": "biome check --write src",
+    "format:check": "biome check src"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",

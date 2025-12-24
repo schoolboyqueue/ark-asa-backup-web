@@ -8,9 +8,9 @@
  * **Used By:** Express application
  */
 
-import { Router, Request, Response } from 'express';
-import * as healthService from './service.js';
+import { Request, Response, Router } from 'express';
 import { asyncHandler } from '../../utils/errorHandler.js';
+import * as healthService from './service.js';
 
 /**
  * Creates health routes with injected dependencies.

@@ -8,14 +8,14 @@
  * **Used By:** Express application
  */
 
-import { Router, Response } from 'express';
 import Dockerode from 'dockerode';
-import type { BackupConfig } from '../backup/service.js';
-import * as streamingService from './service.js';
-import * as systemService from '../system/service.js';
-import * as schedulerService from '../scheduler/service.js';
+import { Response, Router } from 'express';
 import { initializeStream, setupStreamCleanup } from '../../utils/httpStream.js';
 import { Logger } from '../../utils/logger.js';
+import type { BackupConfig } from '../backup/service.js';
+import * as schedulerService from '../scheduler/service.js';
+import * as systemService from '../system/service.js';
+import * as streamingService from './service.js';
 
 /**
  * Creates unified streaming route that multiplexes all data sources.

@@ -11,10 +11,10 @@
  */
 
 import Dockerode from 'dockerode';
+import { Logger } from '../../utils/logger.js';
+import * as arkServerService from '../arkServer/service.js';
 import type { BackupConfig } from '../backup/service.js';
 import * as backupService from '../backup/service.js';
-import * as arkServerService from '../arkServer/service.js';
-import { Logger } from '../../utils/logger.js';
 
 /**
  * Polls server status and yields updates when status changes.

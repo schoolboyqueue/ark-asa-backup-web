@@ -4,10 +4,9 @@
  */
 
 // Domain exports
-export type { DiskSpace, BackupHealth, SystemHealth } from './domain/system';
-
+export type { BackupHealth, DiskSpace, SystemHealth } from './domain/system';
+export type { UseSystemRepositoryReturn } from './repository/useSystemRepository';
 // Repository exports
 export { useSystemRepository } from './repository/useSystemRepository';
-export type { UseSystemRepositoryReturn } from './repository/useSystemRepository';
 
 // Adapter is NOT exported - internal implementation detail

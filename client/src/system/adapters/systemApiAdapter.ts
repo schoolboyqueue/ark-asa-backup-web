@@ -4,11 +4,11 @@
  */
 
 import type {
-  DiskSpace,
   BackupHealth,
-  VersionInfo,
-  DiskSpaceApi,
   BackupHealthApi,
+  DiskSpace,
+  DiskSpaceApi,
+  VersionInfo,
   VersionInfoApi,
 } from '../domain/system';
 

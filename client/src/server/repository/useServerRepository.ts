@@ -8,10 +8,10 @@
  * - Handles loading/error state for the server domain
  */
 
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import { useUnifiedStream } from '../../shared/api/useUnifiedStream';
 import type { Server, ServerStatus } from '../domain/server';
 import { createServerFromStatus } from '../domain/server';
-import { useUnifiedStream } from '../../shared/api/useUnifiedStream';
 
 /**
  * Return type for useServerRepository.

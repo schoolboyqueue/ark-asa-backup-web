@@ -5,11 +5,11 @@
  * Clean Architecture: UseCase Layer
  */
 
-import { useState, useCallback } from 'react';
-import { serverApiAdapter } from '../adapters/serverApiAdapter';
-import { validateBackupSettings } from '../services/settingsValidationService';
+import { useCallback, useState } from 'react';
 import { toast } from '../../shared/services/toast';
+import { serverApiAdapter } from '../adapters/serverApiAdapter';
 import type { BackupSettings, UpdateSettingsDto } from '../domain/server';
+import { validateBackupSettings } from '../services/settingsValidationService';
 
 /**
  * Props for useUpdateSettings.

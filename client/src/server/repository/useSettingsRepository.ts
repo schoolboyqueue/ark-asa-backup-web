@@ -8,7 +8,7 @@
  * - Provides stable, intention-revealing API in domain language
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { serverApiAdapter } from '../adapters/serverApiAdapter';
 import type { BackupSettings } from '../domain/server';
 

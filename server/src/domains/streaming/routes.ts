@@ -12,12 +12,12 @@
  * should be migrated here with proper dependency injection.
  */
 
-import { Router, Response } from 'express';
 import Dockerode from 'dockerode';
-import type { BackupConfig } from '../backup/service.js';
-import * as streamingService from './service.js';
+import { Response, Router } from 'express';
 import { initializeStream, setupStreamCleanup } from '../../utils/httpStream.js';
 import { Logger } from '../../utils/logger.js';
+import type { BackupConfig } from '../backup/service.js';
+import * as streamingService from './service.js';
 
 /**
  * Creates streaming routes with injected dependencies.

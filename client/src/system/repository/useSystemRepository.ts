@@ -8,21 +8,21 @@
  * - Tracks loading/error state for disk space and backup health
  */
 
-import { useState, useCallback } from 'react';
-import type {
-  DiskSpace,
-  BackupHealth,
-  VersionInfo,
-  DiskSpaceApi,
-  BackupHealthApi,
-  VersionInfoApi,
-} from '../domain/system';
+import { useCallback, useState } from 'react';
+import { useUnifiedStream } from '../../shared/api/useUnifiedStream';
 import {
-  transformApiDiskSpaceToDomain,
   transformApiBackupHealthToDomain,
+  transformApiDiskSpaceToDomain,
   transformApiVersionInfoToDomain,
 } from '../adapters/systemApiAdapter';
-import { useUnifiedStream } from '../../shared/api/useUnifiedStream';
+import type {
+  BackupHealth,
+  BackupHealthApi,
+  DiskSpace,
+  DiskSpaceApi,
+  VersionInfo,
+  VersionInfoApi,
+} from '../domain/system';
 
 /**
  * Return type for useSystemRepository.

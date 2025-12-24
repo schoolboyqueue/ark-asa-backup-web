@@ -16,43 +16,33 @@
  * ```
  */
 
-import { useState, useMemo, useCallback } from 'react';
 import {
-  Card,
-  CardHeader,
-  CardBody,
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  Spinner,
-  Pagination,
-  Tooltip,
-} from '@heroui/react';
-import {
-  ShieldCheckIcon,
-  ClipboardDocumentIcon,
-  ArrowPathIcon,
   ArrowDownTrayIcon,
+  ArrowPathIcon,
+  ClipboardDocumentIcon,
+  ShieldCheckIcon,
   TrashIcon,
 } from '@heroicons/react/24/solid';
-
-// Clean Architecture imports - organized by layer
-import type { Backup } from '../domain/backup';
-import type { Server } from '../../server/domain/server';
-
-// UI helper hooks (Clean Architecture: UI layer utilities)
-import { useBackupSort, useBackupFilters, useBackupPagination, useRestoreProgress } from '../hooks';
-import BackupDetailsDrawer from './BackupDetailsDrawer';
-import BackupsCardHeader from './BackupsCardHeader';
-import BackupsSearchBar from './BackupsSearchBar';
-import BackupsModals from './BackupsModals';
 import {
-  parseFileSize,
-  formatTimestamp,
+  Card,
+  CardBody,
+  CardHeader,
+  Pagination,
+  Spinner,
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
+  Tooltip,
+} from '@heroui/react';
+import { useCallback, useMemo, useState } from 'react';
+import type { Server } from '../../server/domain/server';
+import {
   formatRelativeTime,
+  formatTimestamp,
+  parseFileSize,
   useBackupActions,
   useBackupsRepository,
   useCreateBackup,
@@ -60,6 +50,14 @@ import {
   useRelativeTimeRefresh,
   useUpdateBackupMetadata,
 } from '..';
+// Clean Architecture imports - organized by layer
+import type { Backup } from '../domain/backup';
+// UI helper hooks (Clean Architecture: UI layer utilities)
+import { useBackupFilters, useBackupPagination, useBackupSort, useRestoreProgress } from '../hooks';
+import BackupDetailsDrawer from './BackupDetailsDrawer';
+import BackupsCardHeader from './BackupsCardHeader';
+import BackupsModals from './BackupsModals';
+import BackupsSearchBar from './BackupsSearchBar';
 
 /**
  * Props for BackupsList component.

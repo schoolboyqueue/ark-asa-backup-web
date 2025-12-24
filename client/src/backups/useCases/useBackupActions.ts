@@ -9,9 +9,9 @@
  * - Provides user feedback via toast notifications
  */
 
-import { useState, useCallback } from 'react';
-import { backupApiAdapter } from '../adapters/backupApiAdapter';
+import { useCallback, useState } from 'react';
 import { toast } from '../../shared/services/toast';
+import { backupApiAdapter } from '../adapters/backupApiAdapter';
 import type { Backup } from '../domain/backup';
 
 /** Delay for verify loading state */

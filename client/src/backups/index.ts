@@ -15,71 +15,62 @@
 // ============================================================================
 export type {
   Backup,
-  SaveInfo,
-  VerificationStatus,
+  BackupFilters,
+  BackupSortColumn,
   CreateBackupDto,
+  SaveInfo,
+  SortDirection,
   UpdateBackupMetadataDto,
   ValidationResult,
   VerificationResult,
-  BackupSortColumn,
-  SortDirection,
-  BackupFilters,
+  VerificationStatus,
 } from './domain/backup';
 
 export { BackupPriority } from './domain/backup';
-
-// ============================================================================
-// Service Layer - Pure business logic functions
-// ============================================================================
-export {
-  validateBackupNotes,
-  validateBackupTags,
-  canDeleteBackup,
-  canRestoreBackup,
-  sanitizeBackupNotes,
-  sanitizeTags,
-} from './services/backupValidationService';
-
-export {
-  calculateBackupPriority,
-  getBackupsToDelete,
-  isBackupProtected,
-  getBackupAgeDays,
-  suggestBackupTags,
-} from './services/backupPriorityService';
-
-export {
-  formatFileSize,
-  parseFileSize,
-  formatTimestamp,
-  formatRelativeTime,
-  getBackupShortName,
-} from './services/backupFormatService';
-
-export type { ParsedFileSize, FileSizeUnit } from './services/backupFormatService';
-
-// ============================================================================
-// Repository Layer - State management
-// ============================================================================
-export { useBackupsRepository } from './repository/useBackupsRepository';
-export type { UseBackupsRepositoryReturn } from './repository/useBackupsRepository';
-
-// ============================================================================
-// UseCase Layer - Orchestration hooks
-// ============================================================================
-export { useCreateBackup } from './useCases/useCreateBackup';
-export type { UseCreateBackupReturn } from './useCases/useCreateBackup';
-
-export { useDeleteBackup } from './useCases/useDeleteBackup';
-export type { UseDeleteBackupReturn } from './useCases/useDeleteBackup';
-
-export { useBackupActions } from './useCases/useBackupActions';
-export type { UseBackupActionsReturn } from './useCases/useBackupActions';
-
-export { useUpdateBackupMetadata } from './useCases/useUpdateBackupMetadata';
-export type { UseUpdateBackupMetadataReturn } from './useCases/useUpdateBackupMetadata';
-
 // ============================================================================
 // UI Helper Hooks
 // ============================================================================
 export { useRelativeTimeRefresh } from './hooks/useRelativeTimeRefresh';
+export type { UseBackupsRepositoryReturn } from './repository/useBackupsRepository';
+// ============================================================================
+// Repository Layer - State management
+// ============================================================================
+export { useBackupsRepository } from './repository/useBackupsRepository';
+
+export type { FileSizeUnit, ParsedFileSize } from './services/backupFormatService';
+export {
+  formatFileSize,
+  formatRelativeTime,
+  formatTimestamp,
+  getBackupShortName,
+  parseFileSize,
+} from './services/backupFormatService';
+export {
+  calculateBackupPriority,
+  getBackupAgeDays,
+  getBackupsToDelete,
+  isBackupProtected,
+  suggestBackupTags,
+} from './services/backupPriorityService';
+// ============================================================================
+// Service Layer - Pure business logic functions
+// ============================================================================
+export {
+  canDeleteBackup,
+  canRestoreBackup,
+  sanitizeBackupNotes,
+  sanitizeTags,
+  validateBackupNotes,
+  validateBackupTags,
+} from './services/backupValidationService';
+export type { UseBackupActionsReturn } from './useCases/useBackupActions';
+export { useBackupActions } from './useCases/useBackupActions';
+export type { UseCreateBackupReturn } from './useCases/useCreateBackup';
+// ============================================================================
+// UseCase Layer - Orchestration hooks
+// ============================================================================
+export { useCreateBackup } from './useCases/useCreateBackup';
+export type { UseDeleteBackupReturn } from './useCases/useDeleteBackup';
+export { useDeleteBackup } from './useCases/useDeleteBackup';
+export type { UseUpdateBackupMetadataReturn } from './useCases/useUpdateBackupMetadata';
+export { useUpdateBackupMetadata } from './useCases/useUpdateBackupMetadata';

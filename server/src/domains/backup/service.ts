@@ -12,10 +12,10 @@
  */
 
 import { promises as fs } from 'node:fs';
-import type { BackupMetadata, VerificationResult, SaveInfo } from './types.js';
-import * as repository from './repository.js';
-import { extractSaveInfo } from '../saveInfo/service.js';
 import { Logger } from '../../utils/logger.js';
+import { extractSaveInfo } from '../saveInfo/service.js';
+import * as repository from './repository.js';
+import type { BackupMetadata, SaveInfo, VerificationResult } from './types.js';
 
 /**
  * Configuration for backup operations.

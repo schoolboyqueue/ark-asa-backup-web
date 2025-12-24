@@ -11,7 +11,7 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import tar from 'tar';
-import type { VerificationResult, SaveInfo, BackupFileEntry } from './types.js';
+import type { BackupFileEntry, SaveInfo, VerificationResult } from './types.js';
 
 /**
  * Saves backup metadata to a .meta.json file.

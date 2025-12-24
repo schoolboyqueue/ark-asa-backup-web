@@ -8,7 +8,7 @@
  * - Isolates domain from API implementation details
  */
 
-import type { Server, ServerStatus, BackupSettings, UpdateSettingsDto } from '../domain/server';
+import type { BackupSettings, Server, ServerStatus, UpdateSettingsDto } from '../domain/server';
 import { createServerFromStatus } from '../domain/server';
 
 /**

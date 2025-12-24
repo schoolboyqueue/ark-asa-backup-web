@@ -3,8 +3,8 @@
  * Handles column rendering and sorting UI.
  */
 
+import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/solid';
 import { TableColumn } from '@heroui/react';
-import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 
 interface Column {
   key: string;

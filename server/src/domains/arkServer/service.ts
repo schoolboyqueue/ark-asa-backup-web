@@ -12,9 +12,9 @@
  */
 
 import Dockerode from 'dockerode';
+import { Logger } from '../../utils/logger.js';
 import type { DockerConfig } from './repository.js';
 import * as repository from './repository.js';
-import { Logger } from '../../utils/logger.js';
 
 // ============================================================================
 // Transitional State Management

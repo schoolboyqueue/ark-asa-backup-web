@@ -4,43 +4,43 @@
  * Uses Hero UI Modal configured as a right-sliding drawer for better UX.
  */
 
-import { useState, useEffect } from 'react';
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerBody,
-  DrawerFooter,
-  Button,
-  Chip,
-  Textarea,
-  Input,
-  Divider,
-  Tooltip,
-} from '@heroui/react';
-import {
-  ArrowPathIcon,
-  TrashIcon,
   ArrowDownTrayIcon,
-  ShieldCheckIcon,
-  PencilIcon,
+  ArrowPathIcon,
   CheckIcon,
   ClipboardDocumentIcon,
-  TagIcon,
+  DocumentDuplicateIcon,
   MapIcon,
+  PencilIcon,
+  ShieldCheckIcon,
+  SparklesIcon,
+  TagIcon,
+  TrashIcon,
   UserGroupIcon,
   UsersIcon,
-  DocumentDuplicateIcon,
-  SparklesIcon,
 } from '@heroicons/react/24/solid';
+import {
+  Button,
+  Chip,
+  Divider,
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  Input,
+  Textarea,
+  Tooltip,
+} from '@heroui/react';
 import NumberFlow from '@number-flow/react';
+import { useEffect, useState } from 'react';
 
 // Clean Architecture: Domain type imports
 import type { Server } from '../../server/domain/server';
-import type { Backup } from '../domain/backup';
-import { parseFileSize, formatTimestamp, formatRelativeTime, useRelativeTimeRefresh } from '..';
-import { backupApiAdapter } from '../adapters/backupApiAdapter';
 import { toast } from '../../shared/services/toast';
+import { formatRelativeTime, formatTimestamp, parseFileSize, useRelativeTimeRefresh } from '..';
+import { backupApiAdapter } from '../adapters/backupApiAdapter';
+import type { Backup } from '../domain/backup';
 
 /**
  * Props interface for BackupDetailsDrawer component.

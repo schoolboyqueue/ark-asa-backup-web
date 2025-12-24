@@ -3,14 +3,11 @@
  * Clean Architecture: UI Helper Layer
  */
 
-export { useBackupSort } from './useBackupSort';
-export type { UseBackupSortReturn, SortColumn, SortDirection } from './useBackupSort';
-
-export { useBackupFilters } from './useBackupFilters';
 export type { UseBackupFiltersReturn } from './useBackupFilters';
-
-export { useBackupPagination } from './useBackupPagination';
+export { useBackupFilters } from './useBackupFilters';
 export type { UseBackupPaginationReturn } from './useBackupPagination';
-
+export { useBackupPagination } from './useBackupPagination';
+export type { SortColumn, SortDirection, UseBackupSortReturn } from './useBackupSort';
+export { useBackupSort } from './useBackupSort';
+export type { RestoreProgressEvent, UseRestoreProgressReturn } from './useRestoreProgress';
 export { useRestoreProgress } from './useRestoreProgress';
-export type { UseRestoreProgressReturn, RestoreProgressEvent } from './useRestoreProgress';

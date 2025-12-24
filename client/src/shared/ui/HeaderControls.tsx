@@ -8,14 +8,13 @@
  * - Pure presentation - no business logic
  */
 
+import { ComputerDesktopIcon, MoonIcon, SunIcon } from '@heroicons/react/24/solid';
 import { Button, ButtonGroup } from '@heroui/react';
-import { SunIcon, MoonIcon, ComputerDesktopIcon } from '@heroicons/react/24/solid';
-
+import type { Server } from '../../server/domain/server';
+import ServerControls from '../../server/ui/ServerControls';
+import type { BackupHealth, DiskSpace, VersionInfo } from '../../system/domain/system';
 // Clean Architecture imports - organized by domain
 import SystemStatus from '../../system/ui/SystemStatus';
-import ServerControls from '../../server/ui/ServerControls';
-import type { DiskSpace, BackupHealth, VersionInfo } from '../../system/domain/system';
-import type { Server } from '../../server/domain/server';
 
 /**
  * Props interface for the HeaderControls component.

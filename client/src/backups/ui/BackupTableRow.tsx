@@ -3,18 +3,17 @@
  * Displays backup information and action buttons.
  */
 
-import { TableRow, TableCell, Tooltip } from '@heroui/react';
 import {
+  ArrowDownTrayIcon,
+  ArrowPathIcon,
   ClipboardDocumentIcon,
   ShieldCheckIcon,
-  ArrowPathIcon,
-  ArrowDownTrayIcon,
   TrashIcon,
 } from '@heroicons/react/24/solid';
+import { TableCell, TableRow, Tooltip } from '@heroui/react';
 import NumberFlow from '@number-flow/react';
-
+import { formatRelativeTime, formatTimestamp, parseFileSize } from '..';
 import type { Backup } from '../domain/backup';
-import { parseFileSize, formatTimestamp, formatRelativeTime } from '..';
 
 interface BackupTableRowProps {
   readonly backup: Backup;

@@ -3,8 +3,8 @@
  * Handles search input and filter popover.
  */
 
-import { Input, Button, Popover, PopoverTrigger, PopoverContent } from '@heroui/react';
-import { MagnifyingGlassIcon, XMarkIcon, FunnelIcon } from '@heroicons/react/24/solid';
+import { FunnelIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { Button, Input, Popover, PopoverContent, PopoverTrigger } from '@heroui/react';
 
 interface BackupsSearchBarProps {
   readonly searchQuery: string;

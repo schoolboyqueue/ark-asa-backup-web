@@ -5,9 +5,9 @@
  * Clean Architecture: UseCase Layer
  */
 
-import { useState, useCallback } from 'react';
-import { serverApiAdapter } from '../adapters/serverApiAdapter';
+import { useCallback, useState } from 'react';
 import { toast } from '../../shared/services/toast';
+import { serverApiAdapter } from '../adapters/serverApiAdapter';
 
 /**
  * Return type for useServerControl.

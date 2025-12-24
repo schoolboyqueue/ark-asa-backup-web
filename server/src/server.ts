@@ -17,45 +17,41 @@
  * - No circular dependencies
  */
 
-import express from 'express';
-import { fileURLToPath } from 'node:url';
 import path, { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import Dockerode from 'dockerode';
+import express from 'express';
 
 // Configuration
 import {
-  HTTP_SERVER_PORT,
-  BACKUP_STORAGE_DIRECTORY,
   ARK_SAVE_DIRECTORY,
-  DOCKER_DAEMON_SOCKET,
   ARK_SERVER_CONTAINER_NAME,
-  CONTAINER_STOP_TIMEOUT_SECONDS,
-  PROCESS_USER_ID,
-  PROCESS_GROUP_ID,
+  BACKUP_STORAGE_DIRECTORY,
   CONFIGURATION_FILE_PATH,
+  CONTAINER_STOP_TIMEOUT_SECONDS,
   DEFAULT_BACKUP_SETTINGS,
+  DOCKER_DAEMON_SOCKET,
+  HTTP_SERVER_PORT,
   MINIMUM_BACKUP_INTERVAL_SECONDS,
   MINIMUM_BACKUP_RETENTION_COUNT,
+  PROCESS_GROUP_ID,
+  PROCESS_USER_ID,
 } from './config/constants.js';
-
-// Utilities
-import { Logger } from './utils/logger.js';
-import { errorHandler } from './utils/errorHandler.js';
-
+import { createArkServerRoutes } from './domains/arkServer/routes.js';
 // Domain routes
 import { createBackupRoutes } from './domains/backup/routes.js';
-import { createArkServerRoutes } from './domains/arkServer/routes.js';
-import { createSettingsRoutes } from './domains/settings/routes.js';
 import { createHealthRoutes } from './domains/health/routes.js';
-import { createStreamingRoutes } from './domains/streaming/routes.js';
-import { createUnifiedStreamRoute } from './domains/streaming/unifiedStream.js';
-
 // Domain services
 import * as schedulerService from './domains/scheduler/service.js';
+import { createSettingsRoutes } from './domains/settings/routes.js';
+import { createStreamingRoutes } from './domains/streaming/routes.js';
+import { createUnifiedStreamRoute } from './domains/streaming/unifiedStream.js';
 import * as systemService from './domains/system/service.js';
-
+import { errorHandler } from './utils/errorHandler.js';
 // Utilities
 import { closeAllStreamConnections } from './utils/httpStream.js';
+// Utilities
+import { Logger } from './utils/logger.js';
 
 // ES Module __dirname equivalent
 const currentFilePath = fileURLToPath(import.meta.url);
