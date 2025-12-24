@@ -8,7 +8,7 @@
  * **Used By:** Express application
  */
 
-import { Request, Response, Router } from 'express';
+import { type Request, type Response, Router } from 'express';
 import { asyncHandler } from '../../utils/errorHandler.js';
 import type { BackupConfig } from '../backup/service.js';
 import * as backupService from '../backup/service.js';

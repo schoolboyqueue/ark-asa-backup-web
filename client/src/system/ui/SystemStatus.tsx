@@ -301,6 +301,7 @@ export default function SystemStatus({
               {/* Solid center dot */}
               <span
                 className={`relative inline-flex h-2 w-2 rounded-full ${getHealthDotClass(healthColor)}`}
+                role="img"
                 aria-label={`System health: ${healthColor}`}
               />
             </div>

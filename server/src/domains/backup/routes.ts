@@ -13,7 +13,7 @@
 
 import { createReadStream, promises as fs } from 'node:fs';
 import path from 'node:path';
-import { Request, Response, Router } from 'express';
+import { type Request, type Response, Router } from 'express';
 import { asyncHandler, NotFoundError, ValidationError } from '../../utils/errorHandler.js';
 import type { BackupConfig } from './service.js';
 import * as backupService from './service.js';

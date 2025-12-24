@@ -12,8 +12,8 @@
  * should be migrated here with proper dependency injection.
  */
 
-import Dockerode from 'dockerode';
-import { Response, Router } from 'express';
+import type Dockerode from 'dockerode';
+import { type Response, Router } from 'express';
 import { initializeStream, setupStreamCleanup } from '../../utils/httpStream.js';
 import { Logger } from '../../utils/logger.js';
 import type { BackupConfig } from '../backup/service.js';

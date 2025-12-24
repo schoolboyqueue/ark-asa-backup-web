@@ -50,11 +50,15 @@ export function setupStreamHeaders(httpResponse: Response): void {
  *
  * @param {Response} httpResponse - Express response object
  * @param {string} eventType - The event type (e.g., 'status', 'error', 'progress')
- * @param {any} eventData - The event data payload
+ * @param {unknown} eventData - The event data payload
  */
-export function sendStreamEvent(httpResponse: Response, eventType: string, eventData: any): void {
+export function sendStreamEvent(
+  httpResponse: Response,
+  eventType: string,
+  eventData: unknown
+): void {
   const event = { type: eventType, data: eventData };
-  httpResponse.write(JSON.stringify(event) + '\n');
+  httpResponse.write(`${JSON.stringify(event)}\n`);
 }
 
 /**
@@ -62,12 +66,12 @@ export function sendStreamEvent(httpResponse: Response, eventType: string, event
  * Returns a function that can be called to send events without passing the response each time.
  *
  * @param {Response} httpResponse - Express response object
- * @returns {(eventType: string, eventData: any) => void} Event sender function
+ * @returns {(eventType: string, eventData: unknown) => void} Event sender function
  */
 export function createStreamEventSender(
   httpResponse: Response
-): (eventType: string, eventData: any) => void {
-  return (eventType: string, eventData: any): void => {
+): (eventType: string, eventData: unknown) => void {
+  return (eventType: string, eventData: unknown): void => {
     sendStreamEvent(httpResponse, eventType, eventData);
   };
 }
@@ -96,11 +100,11 @@ export function setupStreamCleanup(httpResponse: Response, cleanupHandler: () =>
  * Returns a configured event sender function ready to use.
  *
  * @param {Response} httpResponse - Express response object
- * @returns {(eventType: string, eventData: any) => void} Event sender function
+ * @returns {(eventType: string, eventData: unknown) => void} Event sender function
  */
 export function initializeStream(
   httpResponse: Response
-): (eventType: string, eventData: any) => void {
+): (eventType: string, eventData: unknown) => void {
   setupStreamHeaders(httpResponse);
   return createStreamEventSender(httpResponse);
 }

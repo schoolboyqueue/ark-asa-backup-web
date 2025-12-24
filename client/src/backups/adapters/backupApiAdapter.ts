@@ -193,7 +193,7 @@ export const backupApiAdapter = {
       tags: dto.tags,
     };
 
-    let response;
+    let response: Response;
     try {
       response = await fetch(`/api/backups/trigger`, {
         method: 'POST',

@@ -6,7 +6,7 @@
  * that are caught by middleware and converted to appropriate HTTP responses.
  */
 
-import { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import { Logger } from './logger.js';
 
 /**

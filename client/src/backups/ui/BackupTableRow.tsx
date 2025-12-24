@@ -54,6 +54,7 @@ export default function BackupTableRow({
           <span className="font-semibold hover:text-primary">{backup.name}</span>
           <Tooltip content="Copy backup name to clipboard">
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onCopyName(backup);
@@ -86,6 +87,7 @@ export default function BackupTableRow({
         <div className="flex gap-1">
           <Tooltip content="Verify backup integrity">
             <button
+              type="button"
               onClick={() => onVerify(backup)}
               disabled={isVerifying}
               className="rounded p-1 hover:bg-warning/20 disabled:opacity-50"
@@ -97,6 +99,7 @@ export default function BackupTableRow({
 
           <Tooltip content={isServerRunning ? 'Stop server first' : 'Restore backup'}>
             <button
+              type="button"
               onClick={() => onRestore(backup)}
               disabled={isServerRunning}
               className="rounded p-1 hover:bg-primary/20 disabled:opacity-50"
@@ -108,6 +111,7 @@ export default function BackupTableRow({
 
           <Tooltip content="Download backup">
             <button
+              type="button"
               onClick={() => onDownload(backup)}
               disabled={isDownloading}
               className="rounded p-1 hover:bg-success/20 disabled:opacity-50"
@@ -119,6 +123,7 @@ export default function BackupTableRow({
 
           <Tooltip content="Delete backup">
             <button
+              type="button"
               onClick={() => onDelete(backup)}
               disabled={isDeleting}
               className="rounded p-1 hover:bg-danger/20 disabled:opacity-50"

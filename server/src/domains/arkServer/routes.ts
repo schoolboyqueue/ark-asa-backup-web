@@ -8,8 +8,8 @@
  * **Used By:** Express application
  */
 
-import Dockerode from 'dockerode';
-import { Request, Response, Router } from 'express';
+import type Dockerode from 'dockerode';
+import { type Request, type Response, Router } from 'express';
 import { asyncHandler, NotFoundError } from '../../utils/errorHandler.js';
 import type { DockerConfig } from './repository.js';
 import * as arkServerService from './service.js';

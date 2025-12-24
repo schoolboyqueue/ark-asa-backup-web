@@ -4,9 +4,11 @@ import { useEffect, useRef } from 'react';
  * HTTP Streaming connection manager using NDJSON/SSE format.
  * Replaces EventSource with Fetch + ReadableStream for better control and compatibility.
  */
+type EventHandler = (data: unknown) => void;
+
 class StreamConnection {
   private readonly url: string;
-  private readonly listeners: Map<string, Set<(data: any) => void>>;
+  private readonly listeners: Map<string, Set<EventHandler>>;
   private reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
   private abortController: AbortController | null = null;
   private reconnectTimeout: NodeJS.Timeout | null = null;
@@ -149,7 +151,7 @@ class StreamConnection {
     }
   }
 
-  private dispatch(eventType: string, data: any): void {
+  private dispatch(eventType: string, data: unknown): void {
     const handlers = this.listeners.get(eventType);
     if (handlers) {
       for (const handler of handlers) {
@@ -171,14 +173,14 @@ class StreamConnection {
     this.reconnectDelay = Math.min(this.reconnectDelay * 2, this.maxReconnectDelay);
   }
 
-  addListener(eventType: string, handler: (data: any) => void): void {
+  addListener(eventType: string, handler: EventHandler): void {
     if (!this.listeners.has(eventType)) {
       this.listeners.set(eventType, new Set());
     }
-    this.listeners.get(eventType)!.add(handler);
+    this.listeners.get(eventType)?.add(handler);
   }
 
-  removeListener(eventType: string, handler: (data: any) => void): void {
+  removeListener(eventType: string, handler: EventHandler): void {
     const handlers = this.listeners.get(eventType);
     if (handlers) {
       handlers.delete(handler);
@@ -231,7 +233,7 @@ export function useUnifiedStream<T>(eventType: string, onMessage: (data: T) => v
 
   useEffect(() => {
     const stream = getStreamConnection();
-    const stableHandler = (data: T) => handlerRef.current(data);
+    const stableHandler: EventHandler = (data: unknown) => handlerRef.current(data as T);
 
     stream.addListener(eventType, stableHandler);
 

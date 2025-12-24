@@ -11,7 +11,7 @@
  * Module-level state tracks transitional states for better UX.
  */
 
-import Dockerode from 'dockerode';
+import type Dockerode from 'dockerode';
 import { Logger } from '../../utils/logger.js';
 import type { DockerConfig } from './repository.js';
 import * as repository from './repository.js';

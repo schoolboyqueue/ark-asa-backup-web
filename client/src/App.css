@@ -121,7 +121,7 @@ number-flow-react::part(symbol) {
 /* New backup row - additional styles beyond animation */
 .new-backup-row {
   @apply animate-newBackupPulse;
-  border-left: 3px solid #0ea5e9 !important;
+  border-left: 3px solid #0ea5e9;
 }
 
 /* Deleting backup row - additional styles beyond animation */

@@ -53,7 +53,13 @@ import {
 // Clean Architecture imports - organized by layer
 import type { Backup } from '../domain/backup';
 // UI helper hooks (Clean Architecture: UI layer utilities)
-import { useBackupFilters, useBackupPagination, useBackupSort, useRestoreProgress } from '../hooks';
+import {
+  type SortColumn,
+  useBackupFilters,
+  useBackupPagination,
+  useBackupSort,
+  useRestoreProgress,
+} from '../hooks';
 import BackupDetailsDrawer from './BackupDetailsDrawer';
 import BackupsCardHeader from './BackupsCardHeader';
 import BackupsModals from './BackupsModals';
@@ -175,7 +181,7 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
   // RENDER HELPERS
   // ========================================================================
 
-  const renderVerificationIcon = (backup: Backup): JSX.Element => {
+  const renderVerificationIcon = useCallback((backup: Backup): JSX.Element => {
     const status = backup.verificationStatus;
     const fileCount = backup.verifiedFileCount || 0;
 
@@ -205,11 +211,11 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
           </Tooltip>
         );
     }
-  };
+  }, []);
 
   const isServerRunning = serverStatus?.status === 'running';
 
-  const columns = useMemo(
+  const columns: { key: string; label: string; sortable: boolean }[] = useMemo(
     () => [
       { key: 'name', label: 'BACKUP NAME', sortable: true },
       { key: 'size', label: 'SIZE', sortable: true },
@@ -227,14 +233,18 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
       switch (columnKey) {
         case 'name':
           return (
-            <div
-              className="flex cursor-pointer items-center gap-2"
-              onClick={() => handleOpenDetails(item)}
-            >
-              {renderVerificationIcon(item)}
-              <span className="font-semibold hover:text-primary">{item.name}</span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="flex cursor-pointer items-center gap-2 bg-transparent border-none p-0 text-left"
+                onClick={() => handleOpenDetails(item)}
+              >
+                {renderVerificationIcon(item)}
+                <span className="font-semibold hover:text-primary">{item.name}</span>
+              </button>
               <Tooltip content="Copy backup name to clipboard">
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     backupActions.copyBackupName(item);
@@ -264,9 +274,10 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
           return item.notes || '—';
         case 'actions':
           return (
-            <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+            <div className="flex gap-1">
               <Tooltip content="Verify backup integrity">
                 <button
+                  type="button"
                   onClick={() => backupActions.verifyBackup(item)}
                   disabled={backupActions.verifyingBackupName === item.name}
                   className="rounded p-1 hover:bg-warning/20 disabled:opacity-50"
@@ -277,6 +288,7 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
               </Tooltip>
               <Tooltip content={isServerRunning ? 'Stop server first' : 'Restore backup'}>
                 <button
+                  type="button"
                   onClick={() => handleRestoreClick(item)}
                   disabled={isServerRunning}
                   className="rounded p-1 hover:bg-primary/20 disabled:opacity-50"
@@ -287,6 +299,7 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
               </Tooltip>
               <Tooltip content="Download backup">
                 <button
+                  type="button"
                   onClick={() => backupActions.downloadBackup(item)}
                   disabled={backupActions.downloadingBackupName === item.name}
                   className="rounded p-1 hover:bg-success/20 disabled:opacity-50"
@@ -297,6 +310,7 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
               </Tooltip>
               <Tooltip content="Delete backup">
                 <button
+                  type="button"
                   onClick={() => handleDeleteClick(item)}
                   disabled={deleteBackup.deletingBackupName === item.name}
                   className="rounded p-1 hover:bg-danger/20 disabled:opacity-50"
@@ -362,7 +376,7 @@ export default function BackupsList({ serverStatus }: BackupsListProps): JSX.Ele
               <TableColumn
                 key={column.key}
                 className={column.sortable ? 'cursor-pointer' : ''}
-                onClick={() => column.sortable && sort.toggleSort(column.key as any)}
+                onClick={() => column.sortable && sort.toggleSort(column.key as SortColumn)}
               >
                 {column.label}
                 {column.sortable &&

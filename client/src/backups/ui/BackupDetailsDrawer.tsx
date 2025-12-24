@@ -126,16 +126,17 @@ export default function BackupDetailsDrawer({
       }, 50);
       return () => clearTimeout(timeoutId);
     }
-  }, [isOpen, backup?.name]);
+  }, [isOpen, backup]);
 
   // Update animated size when backup size changes while drawer is open
   useEffect(() => {
     if (isOpen && backup) {
       setAnimatedSizeValue(parseFileSize(backup.sizeBytes).value);
     }
-  }, [backup?.sizeBytes]);
+  }, [isOpen, backup]);
 
   if (!backup) {
+    // biome-ignore lint/complexity/noUselessFragments: Required for JSX.Element return type
     return <></>;
   }
 

@@ -35,13 +35,17 @@
     }
   },
   "linter": {
-    "enabled": false
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
   },
   "assist": {
     "actions": {
       "source": {
         "organizeImports": {
-          "level": "on"
+          "level": "on",
+          "options": {}
         }
       }
     }

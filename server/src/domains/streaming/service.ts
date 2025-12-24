@@ -10,7 +10,7 @@
  * **Design:** Provides functions to poll and stream various data sources.
  */
 
-import Dockerode from 'dockerode';
+import type Dockerode from 'dockerode';
 import { Logger } from '../../utils/logger.js';
 import * as arkServerService from '../arkServer/service.js';
 import type { BackupConfig } from '../backup/service.js';
