@@ -5,7 +5,7 @@
     "~/.claude/rules/tao-of-node.md",
     "~/.claude/rules/ui-clean-architecture.md",
     "~/.claude/rules/docker.md",
-    "~/.claude/rules/conventional-commits.md"
+    "~/.claude/rules/conventional-commits.md",
     "~/.claude/rules/no-summaries.md"
   ]
 }
