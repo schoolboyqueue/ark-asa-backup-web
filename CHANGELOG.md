@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.7](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-web-v1.0.6...ark-asa-backup-web-v1.0.7) (2025-12-25)
+
+
+### Bug Fixes
+
+* resolve biome linter issues across codebase ([1847ae0](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/1847ae09ad5de40f627bae2669abedb91c36351b))
+
+
+### Documentation
+
+* add CLAUDE.md for Claude Code guidance ([b9ed7a5](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/b9ed7a5bf81efbff3b6e1f0d50f431eacbc51044))
+
+
+### Miscellaneous
+
+* add opencode config with global rules and symlink AGENTS.md to CLAUDE.md ([d5f8a5b](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/d5f8a5ba32dac8b65ca3727217dbdbbd7b14907b))
+* added no-summaries rule ([8b9f427](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/8b9f427c94718ea39ea4431806bca92c3d6a8a3e))
+* added no-summaries rule ([37fb0f1](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/37fb0f162e7289b8a5e4f1f19ffcaee8788f0b34))
+
+
+### Refactoring
+
+* migrate from prettier to biome ([fb3bf87](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/fb3bf87c01e1d6bd300c10e98c886ab58bedace1))
+
 ## [1.0.6](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-web-v1.0.5...ark-asa-backup-web-v1.0.6) (2025-12-07)
 
 

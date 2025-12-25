@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.4](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-server-v1.0.3...ark-asa-backup-server-v1.0.4) (2025-12-25)
+
+
+### Bug Fixes
+
+* resolve biome linter issues across codebase ([1847ae0](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/1847ae09ad5de40f627bae2669abedb91c36351b))
+
+
+### Refactoring
+
+* migrate from prettier to biome ([fb3bf87](https://github.com/schoolboyqueue/ark-asa-backup-web/commit/fb3bf87c01e1d6bd300c10e98c886ab58bedace1))
+
 ## [1.0.3](https://github.com/schoolboyqueue/ark-asa-backup-web/compare/ark-asa-backup-server-v1.0.2...ark-asa-backup-server-v1.0.3) (2025-12-06)
 
 
